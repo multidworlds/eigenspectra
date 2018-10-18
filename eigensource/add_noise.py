@@ -24,6 +24,42 @@ for tInd in np.arange(exNtime):
 ## Get the SNR file
 dat = Table.read('data/instrument/snr_spec_f322w2.fits')
 
+def noise_on_input_lc(practiceVersion=True):
+    """ 
+    Add noise to the input lightcurve from this eigenspectra team
+    
+    """
+    
+    ### EXAMPLE ONLY
+    if practiceVersion == True:
+        lcDat = np.load('data/input_lightcurves/eclipse_lightcurve_test0.npz')
+    else:
+        lcDat = np.load('data/input_lightcurves/eclipse_lightcurve_test1.npz')
+    
+    nWave = len(lcDat['wl'])
+    nTime = len(lcDat['time'])
+    timeArray = lcDat['time'] * 3600. * 24.
+    
+    if practiceVersion == True:
+        waves = np.linspace(2.4,4,nWave)
+        dWaves = np.ones_like(waves) * (waves[1] - waves[0])
+        timeArray = np.linspace(0.5,0.6,nTime) * 3600. * 24.
+    else:
+        waves = lcDat['wl']
+        dWaves = lcDat['dwl']
+    
+    input3D = np.ones([Ncolumns,nTime,nWave])
+    for waveInd,oneWave in enumerate(waves):
+        input3D[waveColumn,:,waveInd] = oneWave
+        input3D[dWaveColumn,:,waveInd] = dWaves[waveInd]
+        input3D[timeColumn,:,waveInd] = timeArray
+        
+        input3D[fluxColumn,:,waveInd] = lcDat['lightcurve'][:,waveInd] * 1e6
+    
+    
+    add_noise(input3D)
+    
+
 def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
               includeSystematic=False):
     """ 
@@ -76,11 +112,13 @@ def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
             
             
             for tInd,oneTime in enumerate(timeMid):
-                inPts = (oneTime > timeStarts[tInd]) & (oneTime <= timeStarts[tInd])
+                timeArray = fluxTWave[timeColumn,:,waveInd]
+                inPts = (timeArray > timeStarts[tInd]) & (timeArray <= timeEnds[tInd])
                 binFlux = np.mean(fluxTWave[fluxColumn,inPts,waveInd])
                 
                 fluxArray.append(binFlux)
                 errFluxArr.append(combinedErr)
+                
             
             t = Table()
             t['time (days)'] = timeMid / (3600. * 24.)
@@ -89,13 +127,16 @@ def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
                 noiseVectors = 0
             else:
                 raise NotImplementedError
-        
+            
             t['flux (ppm)'] = np.array(fluxArray) + noiseVectors
             t['flux err (ppm)'] = np.array(errFluxArr) / np.sqrt(nEclipses)
-        
+            
             baseName = 'tseries_{:05.0f}_nm'.format(waveMid * 1000.)
+            
+            
+            
             t.write('data/output_lightcurves/{}.csv'.format(baseName),overwrite=True)
-        
+            
             fig, ax = plt.subplots()
             ax.errorbar(t['time (days)'],t['flux (ppm)'],fmt='o',
                         yerr=t['flux err (ppm)'])

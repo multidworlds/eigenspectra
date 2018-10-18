@@ -9,6 +9,7 @@ dependencies:
   - ipython
   - csv
   - glob
+  - os
   - pip:
     - nbsphinx
     - spiderman-package

@@ -10,3 +10,5 @@ dependencies:
   - csv
   - pip:
     - nbsphinx
+    - spiderman
+    - emcee

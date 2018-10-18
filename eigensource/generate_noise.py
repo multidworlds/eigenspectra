@@ -45,7 +45,7 @@ def make_snr_spectrum():
     tSpec['wave'] = wave
     tSpec['sigma_ppm'] = 1e6/SNRSpec
     
-    keepWave = (tSpec2['wave'] > 2.4)
+    keepWave = (tSpec['wave'] > 2.4) & (tSpec['wave'] <= 4.02)
     tSpec2 = tSpec[keepWave]
     
     tSpec2.meta = {'filter':'F322W2W','TEXP':det.time_total}

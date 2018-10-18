@@ -2,8 +2,9 @@
 """Function to do k-means clustering on Eigenspectra
 """
 
+from sklearn.cluster import KMeans
 
-def(fluxmap,k,labels=False):
+def kmeans(fluxmap,k,labels=False):
 	#Expects flux maps in the form (lam,lat,long)
 	lamdim=fluxmap.shape[0]
 	latdim=fluxmap.shape[1]

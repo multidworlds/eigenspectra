@@ -11,7 +11,7 @@
 #OUTPUTS:
 #	Coefficients for each of the spherical harmonics
 
-#def eigencurves():
+#def eigencurves(directory):
 
 from lightcurves_sh import sh_lcs
 from pca_eig import princomp
@@ -19,10 +19,15 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import emcee
 import csv
-import mpfit
+#import mpfit
 #import corner
 import spiderman as sp
 from importlib import import_module
+import glob
+from scipy.optimize import leastsq
+
+#flist=glob.glob('*.csv')
+
 
 #Import data from csv files
 file=np.loadtxt('tseries_eclipse.csv',delimiter=',')
@@ -71,18 +76,16 @@ ecoeff,escore,elatent = princomp(elc[1:,:].T)
 
 #FIGURE OUT SOME STATISTICS
 #do an initial least squares fit?
-def mpmodel(p,fjac=None,x=None,y=None,err=None):
+def mpmodel(p,x,y,z):#fjac=None,x=None,y=None,err=None):
 	model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:] 
-	return[0,(y-model)/err]
+	return y-model
+
 
 params0=np.array([1.0,1.0,1.0,1.0,1.0])
-fa={'x':eclipsetimes,'y':eclipsefluxes,'err':eclipseerrors}
-m=mpfit.mpfit(mpmodel,params0,functkw=fa)
-
-
+mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors))
 
 #format parameters for mcmc fit
-theta=m.params
+theta=mpfit[0]#m.params
 ndim=np.shape(theta)[0]	#set number of dimensions
 nwalkers=100 #number of walkers
 
@@ -115,8 +118,7 @@ pos = [theta + 1e-5*np.random.randn(ndim) for i in range(nwalkers)]
 burnin=200
 nsteps=1000
 
-for i, result in enumerate(sampler.sample(pos, iterations=nsteps)):
-	print 'step',i
+sampler.run_mcmc(pos,nsteps)
 
 samples = sampler.chain[:, burnin:, :].reshape((-1, ndim))
 #fig = corner.corner(samples)
@@ -133,8 +135,6 @@ for i in np.arange(np.shape(bestcoeffs)[0]):
 fcoeff=np.zeros_like(ecoeff)
 for i in np.arange(np.shape(bestcoeffs)[0]-2):
 	fcoeff[:,i] = bestcoeffs[i+2]*ecoeff[:,i]
-#fcoeff[:,0] = c1_best*ecoeff[:,0]
-#fcoeff[:,1] = c2_best*ecoeff[:,1]
 
 # how to go from coefficients to best fit map
 spheres=np.zeros(9)

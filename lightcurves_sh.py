@@ -1,4 +1,4 @@
-def sh_lcs(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,rp=0.155313,a=8.863,p_u1=0,p_u2=0,ntimes=500,coeff=1,sph=0):
+def sh_lcs(n_layers=20,ntimes=500,coeff=1,sph=0,system_properties):
 
     import spiderman as sp
     import numpy as np

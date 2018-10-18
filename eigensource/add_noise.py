@@ -24,7 +24,7 @@ for tInd in np.arange(exNtime):
 ## Get the SNR file
 dat = Table.read('data/instrument/snr_spec_f322w2.fits')
 
-def noise_on_input_lc(practiceVersion=True):
+def noise_on_input_lc(practiceVersion=False):
     """ 
     Add noise to the input lightcurve from this eigenspectra team
     

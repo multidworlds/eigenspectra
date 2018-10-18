@@ -41,8 +41,9 @@ for i in range(n): #try for k values from 0 to 20
     labels[i] = kmeans(fluxmap,i))
     score[i] = metrics.silhouette_score(fluxMap.reshape(), labelsForThisOne, metric='euclidean')
 
-k = np.where(np.max(score))
-
+#choose the highest score!
+k = np.where(score==np.max(score))
+labels = np.where(score==np.max(score))
 
 
 

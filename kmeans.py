@@ -33,13 +33,15 @@ def kmeans(fluxmap,k,labels=False):
 
 
 
+n = 20
+labels, score = np.zeros(n), np.zeros(n)
 
-for i in range(20): #try for k values from 0 to 20
-    
-    
-    labels.append(kmeans(fluxmap,i))
-    score.append(metrics.silhouette_score(fluxMap.reshape(), labelsForThisOne, metric='euclidean'))
+for i in range(n): #try for k values from 0 to 20
 
+    labels[i] = kmeans(fluxmap,i))
+    score[i] = metrics.silhouette_score(fluxMap.reshape(), labelsForThisOne, metric='euclidean')
+
+k = np.where(np.max(score))
 
 
 

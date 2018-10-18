@@ -61,7 +61,7 @@ def noise_on_input_lc(practiceVersion=False):
     
 
 def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
-              includeSystematic=False):
+              includeSystematic=False,renormalize=True):
     """ 
     Takes a series of light curves (one per wavelength) and
     Adds noise to them. First it bins to the integration time in the data
@@ -133,6 +133,8 @@ def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
             
             baseName = 'tseries_{:05.0f}_nm'.format(waveMid * 1000.)
             
+            if renormalize == True:
+                t['flux (ppm)'] = 1e6 * t['flux (ppm)'] / np.min(t['flux (ppm)'])
             
             
             t.write('data/output_lightcurves/{}.csv'.format(baseName),overwrite=True)

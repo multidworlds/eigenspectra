@@ -8,8 +8,9 @@ dependencies:
   - scipy
   - ipython
   - csv
+  - glob
   - pip:
     - nbsphinx
-    - spiderman
+    - spiderman-package
     - batman
     - emcee

@@ -1,2 +1,3 @@
 data/instrument/*.pdf
+data/output_lightcurves/plots/*.pdf
 *.pyc

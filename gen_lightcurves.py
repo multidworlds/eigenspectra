@@ -361,7 +361,7 @@ def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves 
     if plot_diagnostic:
 
         # Create figure
-        fig, ax = plt.subplots(figsize = (16, 8))
+        fig, ax = plt.subplots(figsize = (12, 4))
         ax.set_ylabel("Fp/Fs")
         ax.set_xlabel("Wavelength [$\mu$m]")
 
@@ -375,18 +375,20 @@ def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves 
 
         draws = 100
         # Loop over number of draws
-        for i in range(draws):
+        for k in range(draws):
             # Draw a random intensity from the planet
             i = np.random.randint(0,high=nx)
             j = np.random.randint(0,high=nx)
             # Plot it
-            if i == 0:
+            if k == 0:
                 ax.plot(lamlo, I[i,j,:], color = "C1", lw = 0.5,
                         label = "starry samples")
             else:
                 ax.plot(lamlo, I[i,j,:], color = "C1", lw = 0.5)
 
         ax.legend()
+
+        plt.show()
 
     if save_output:
         # Save generated lightcurve

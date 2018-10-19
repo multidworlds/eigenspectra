@@ -24,16 +24,14 @@ def kmeans(fluxmap,k,labels=False):
     -------
     kgroups: array of group indices (ints) from 0 to k-1 (axes: lat x lon)
     '''
-
-
 	#Expects flux maps in the form (lam,lat,long)
-	lamdim=fluxmap.shape[0]
-	latdim=fluxmap.shape[1]
-	longdim=fluxmap.shape[2]
-	kmeans = KMeans(n_clusters=k, random_state=0).fit(fluxmap.transpose(1,2,0).reshape(-1,
+    lamdim=fluxmap.shape[0]
+    latdim=fluxmap.shape[1]
+    longdim=fluxmap.shape[2]
+    kmeans = KMeans(n_clusters=k, random_state=0).fit(fluxmap.transpose(1,2,0).reshape(-1,
 		fluxmap.transpose(1,2,0).shape[2]))
     kgroups = (kmeans.labels_).reshape(latdim,longdim)
-	return kgroups
+    return kgroups
 
 
 

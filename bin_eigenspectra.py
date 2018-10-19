@@ -19,7 +19,7 @@ def bin_eigenspectra(spectra, kgroups):
     ngroups = np.max(kgroups)+1
     
     nbins = spectra.shape[0] # number of wavelength bins
-    # Flatten over latxlon
+    # Flatten over (lat x lon)
     spectra = spectra.reshape(nbins,-1)
     kgroups = kgroups.reshape(-1)
 

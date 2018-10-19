@@ -1,30 +1,18 @@
 
-"""Function to do k-means clustering on Eigenspectra
+"""Functions to do k-means clustering on Eigenspectra
 """
-
-from sklearn.cluster import KMeans
 
 import numpy as np
 import scipy
-
-import sklearn
 import matplotlib.pyplot as plt
 
-
-from sklearn import cluster, datasets, decomposition
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
-
-
 from sklearn import metrics
-from sklearn.metrics import pairwise_distances
-from sklearn import datasets
 
 
 def kmeans(fluxmap,k,labels=False):
     '''
-    Compute k-mean clustering of spectra for a given number of groups.
+    Compute k-means clustering of spectra for a given number of groups.
 
    
     Parameters
@@ -67,8 +55,9 @@ def kmeansBest(fluxmap, n=10):
     labels, score = np.zeros(n), np.zeros(n)
     
     for i in range(n): #try for k values from 0 to n
-        labels[i] = kmeans(fluxmap,i)
-        score[i] = metrics.silhouette_score(fluxMap.reshape(), labelsForThisOne, metric='euclidean')
+        label = kmeans(fluxmap,i)
+        labels[i] = label
+        score[i] = metrics.silhouette_score(fluxmap, label, metric='euclidean')
     
     #choose the highest score!
     k = np.argmax(score)

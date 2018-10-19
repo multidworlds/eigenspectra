@@ -2,11 +2,16 @@ import numpy as np
 
 def bin_eigenspectra(spectra, kgroups):
     '''
-    Input an array of spectra and weights to produce eigenspectra
-    spectra: array of Fp/Fs (wavelengths x lat x lon)
-    kgroups: array of group indices (lat x lon)
+    Converts a grid of spectra into eigenspectra defined by kgroups.
+    
+    Parameters
+    ----------
+    spectra : array of Fp/Fs (axes: wavelengths x lat x lon)
+    kgroups : array of group indices (ints) from 0 to k-1 (axes: lat x lon)
 
-    output a list of eigenspectra
+    Returns
+    -------
+    eigenspectra : list of k spectra, averaged over each group
     '''
 
     # Calculate the number of groups

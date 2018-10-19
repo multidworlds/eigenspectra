@@ -165,35 +165,35 @@ def eigencurves(dict,plot=False):
 
 		alltheoutput[counter,1:]=spheres
 		#counter+=1
-		if plot:
-			params0=sp.ModelParams(brightness_model='spherical')	#no offset model
-			params0.nlayers=20
+	if plot:
+		params0=sp.ModelParams(brightness_model='spherical')	#no offset model
+		params0.nlayers=20
 
-			params0.t0=-2.21857/2.				# Central time of PRIMARY transit [days]
-			params0.per=2.21857567			# Period [days]
-			params0.a_abs=0.0313			# The absolute value of the semi-major axis [AU]
-			params0.inc=85.71			# Inclination [degrees]
-			params0.ecc=0.0			# Eccentricity
-			params0.w=90.			# Argument of periastron
-			params0.rp=0.155313				# Planet to star radius ratio
-			params0.a=8.863				# Semi-major axis scaled by stellar radius
-			params0.p_u1=0.			# Planetary limb darkening parameter
-			params0.p_u2=0.			# Planetary limb darkening parameter
+		params0.t0=-2.21857/2.				# Central time of PRIMARY transit [days]
+		params0.per=2.21857567			# Period [days]
+		params0.a_abs=0.0313			# The absolute value of the semi-major axis [AU]
+		params0.inc=85.71			# Inclination [degrees]
+		params0.ecc=0.0			# Eccentricity
+		params0.w=90.			# Argument of periastron
+		params0.rp=0.155313				# Planet to star radius ratio
+		params0.a=8.863				# Semi-major axis scaled by stellar radius
+		params0.p_u1=0.			# Planetary limb darkening parameter
+		params0.p_u2=0.			# Planetary limb darkening parameter
 
-			params0.degree=3	#maximum harmonic degree
-			params0.la0=0.
-			params0.lo0=0.
-			params0.sph=list(spheres)
+		params0.degree=3	#maximum harmonic degree
+		params0.la0=0.
+		params0.lo0=0.
+		params0.sph=list(spheres)
 
-			times=eclipsetimes
-			templc=params0.lightcurve(times)
+		times=eclipsetimes
+		templc=params0.lightcurve(times)
 
-			# doing a test spiderman run to see if the output lightcurve is similar
-			# #PERSON CHECKING THIS: You can use this to make sure the spherical harmonics fit is doing the right thing!
+		# doing a test spiderman run to see if the output lightcurve is similar
+		# #PERSON CHECKING THIS: You can use this to make sure the spherical harmonics fit is doing the right thing!
 
-			plt.figure()
-			plt.plot(times,templc,color='k')
-			plt.errorbar(eclipsetimes,eclipsefluxes,yerr=eclipseerrors,linestyle='none',color='r')
-			plt.show()
+		plt.figure()
+		plt.plot(times,templc,color='k')
+		plt.errorbar(eclipsetimes,eclipsefluxes,yerr=eclipseerrors,linestyle='none',color='r')
+		plt.show()
 
 	return alltheoutput

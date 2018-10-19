@@ -1,5 +1,5 @@
-# The input sph array will have the last two dimensions be (harmonic
-# coefficients +1, wavelengths). The first entry in each row is assumed to be
+# The input sph array will have the last two dimensions be (wavelengths,
+# harmonic coefficients + 1). The first entry in each row is assumed to be
 # the wavelength (in nm) corresponding to the spherical harmonic coefficients
 # in that row. Note that the input array can have any dimensions prior to the
 # last two.

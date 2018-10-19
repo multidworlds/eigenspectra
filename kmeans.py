@@ -34,16 +34,19 @@ def kmeans(fluxmap,k,labels=False):
 
 
 n = 20
-labels, score = np.zeros(n), np.zeros(n)
-
-for i in range(n): #try for k values from 0 to 20
-
-    labels[i] = kmeans(fluxmap,i))
-    score[i] = metrics.silhouette_score(fluxMap.reshape(), labelsForThisOne, metric='euclidean')
-
-#choose the highest score!
-k = np.where(score==np.max(score))
-labels = np.where(score==np.max(score))
+def kmeansBest(n):
+    
+    labels, score = np.zeros(n), np.zeros(n)
+    
+    for i in range(n): #try for k values from 0 to 20
+        
+        
+        labels[i] = kmeans(fluxmap,i))
+        score[i] = metrics.silhouette_score(fluxMap.reshape(), labelsForThisOne, metric='euclidean')
+    
+    #choose the highest score!
+    k = np.where(score==np.max(score))
+    labels = np.where(score==np.max(score))
 
 
 

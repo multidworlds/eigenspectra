@@ -24,17 +24,25 @@ for tInd in np.arange(exNtime):
 ## Get the SNR file
 dat = Table.read('data/instrument/snr_spec_f322w2.fits')
 
-def noise_on_input_lc(practiceVersion=False):
+def get_lc(practiceVersion=False,
+          inputFile='data/input_lightcurves/eclipse_lightcurve_test1.npz'):
     """ 
-    Add noise to the input lightcurve from this eigenspectra team
-    
+    Get the input lightcurves from the NPZ files and put them in the format
+          that add_noise is expecting
+          
+    Inputs
+    --------
+    inputFile: str
+          path to the output NPZ file
+    practiceVersion: bool
+          Use a practice version?
     """
     
     ### EXAMPLE ONLY
     if practiceVersion == True:
         lcDat = np.load('data/input_lightcurves/eclipse_lightcurve_test0.npz')
     else:
-        lcDat = np.load('data/input_lightcurves/eclipse_lightcurve_test1.npz')
+        lcDat = np.load(inputFile)
     
     nWave = len(lcDat['wl'])
     nTime = len(lcDat['time'])
@@ -56,18 +64,22 @@ def noise_on_input_lc(practiceVersion=False):
         
         input3D[fluxColumn,:,waveInd] = lcDat['lightcurve'][:,waveInd] * 1e6
     
+    return input3D
     
+def noise_on_input_lc(practiceVersion=False):
+    input3D = get_lc(practiceVersion=False)
     add_noise(input3D)
-    
 
 def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
               includeSystematic=False,renormalize=True,
-              doPlots=False):
+              doPlots=False,writeCSVs=False):
     """ 
     Takes a series of light curves (one per wavelength) and
     Adds noise to them. First it bins to the integration time in the data
     Then it creates
     
+    Inputs
+    -------
     fluxTWave: numpy array
         A 3D array with z,y,x axes as n_columns x n_times x wavelength
         The 4 n_columns are
@@ -94,6 +106,13 @@ def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
     doPlots: bool
         Save plots of the light curves? Makes one light curve per wavelength
     
+    writeCSVs: bool
+        Save the light curves as CSVs?
+    
+    Output
+    --------
+    Dictionary of information
+    
     """
     
 
@@ -108,6 +127,10 @@ def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
     timeStarts = np.arange(minTime,maxTime - texp,texp)
     timeEnds = timeStarts + texp
     timeMid = (timeStarts + timeEnds)/2.
+    
+    outDict = {"time (days)":timeMid / (3600. * 24.),"wavelength (um)":fluxTWave[waveColumn,0,:],
+               "flux (ppm)": np.zeros([len(timeMid),nWave]),
+               "flux err (ppm)": np.zeros([len(timeMid),nWave])}
     
     for waveInd in np.arange(nWave):
         fluxArray, errFluxArr = [], []
@@ -145,8 +168,11 @@ def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
             if renormalize == True:
                 t['flux (ppm)'] = 1e6 * t['flux (ppm)'] / np.min(t['flux (ppm)'])
             
+            if writeCSVs:
+                t.write('data/output_lightcurves/{}.csv'.format(baseName),overwrite=True)
             
-            t.write('data/output_lightcurves/{}.csv'.format(baseName),overwrite=True)
+            outDict["flux (ppm)"][:,waveInd] = t['flux (ppm)']
+            outDict["flux err (ppm)"][:,waveInd] = t['flux err (ppm)']
             
             if doPlots == True:
                 fig, ax = plt.subplots()
@@ -158,7 +184,11 @@ def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
             
         else:
             print('No SNR information for wavelength {} um'.format(waveMid))
-    if doPlot == True:
+            outDict["flux (ppm)"][:,waveInd] = np.nan
+            outDict["flux err (ppm)"][:,waveInd] = np.nan
+        
+    if doPlots == True:
         plt.close('all')
     
+    return outDict
     

@@ -61,7 +61,8 @@ def noise_on_input_lc(practiceVersion=False):
     
 
 def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
-              includeSystematic=False,renormalize=True):
+              includeSystematic=False,renormalize=True,
+              doPlots=False):
     """ 
     Takes a series of light curves (one per wavelength) and
     Adds noise to them. First it bins to the integration time in the data
@@ -82,9 +83,17 @@ def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
         The rationale is that this way your posteriors should have a median close to the
         true Input. Otherwise, you'd have to run the fits multiple times to test if the 
         median posterior was centered on your true input solution
+    
     nEclipses: int
-        How many eclipses are combined together? Default is 1
-        
+        How many eclipses are combined together?
+    
+    renormalize: bool
+        Renormalize the time series so that the minimum flux is 1.0?
+        This was designed to match the Spiderman normalization
+    
+    doPlots: bool
+        Save plots of the light curves? Makes one light curve per wavelength
+    
     """
     
 
@@ -139,14 +148,17 @@ def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
             
             t.write('data/output_lightcurves/{}.csv'.format(baseName),overwrite=True)
             
-            fig, ax = plt.subplots()
-            ax.errorbar(t['time (days)'],t['flux (ppm)'],fmt='o',
-                        yerr=t['flux err (ppm)'])
+            if doPlots == True:
+                fig, ax = plt.subplots()
+                ax.errorbar(t['time (days)'],t['flux (ppm)'],fmt='o',
+                            yerr=t['flux err (ppm)'])
+                
+                fig.savefig('data/output_lightcurves/plots/{}.pdf'.format(baseName))
             
-            fig.savefig('data/output_lightcurves/plots/{}.pdf'.format(baseName))
+            
         else:
             print('No SNR information for wavelength {} um'.format(waveMid))
-            
-    plt.close('all')
-        
-        
+    if doPlot == True:
+        plt.close('all')
+    
+    

@@ -43,7 +43,7 @@ def kmeansBest(n):
     for i in range(n): #try for k values from 0 to 20
         
         
-        labels[i] = kmeans(fluxmap,i))
+        labels[i] = kmeans(fluxmap,i)
         score[i] = metrics.silhouette_score(fluxMap.reshape(), labelsForThisOne, metric='euclidean')
     
     #choose the highest score!

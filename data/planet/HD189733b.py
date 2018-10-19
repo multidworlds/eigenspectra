@@ -8,9 +8,6 @@ import astropy.units as U
 # The published properties of the system. The Astropy unit conversions will
 # automatically convert units to the appropriate ones for input to SPIDERMAN.
 
-# Central time of PRIMARY transit
-time_of_transit = 0 * U.d
-
 # Orbital period
 orbital_period = 2.21857567 * U.d
 
@@ -38,17 +35,16 @@ planet_limbdarkening = [0, 0]
 
 properties = {
 
-    't0': time_of_transit.to(U.d).value,
     'per': orbital_period.to(U.d).value,
     'a_abs': semimajor_axis.to(U.AU).value,
     'inc': orbital_inclination.to(U.deg).value,
     'ecc': orbital_eccentricity,
     'w': argument_of_periastron.to(U.deg).value,
     # Planet to star radius ratio
-    'rp': (planet_radius/stellar_radius).decompose(),
+    'rp': (planet_radius/stellar_radius).decompose().value,
     # Semi-major axis to stellar radius ratio
-    'a': (semimajor_axis/stellar_radius).decompose(),
-    'u1': planet_limbdarkening[0],
-    'u2': planet_limbdarkening[1],
+    'a': (semimajor_axis/stellar_radius).decompose().value,
+    'p_u1': planet_limbdarkening[0],
+    'p_u2': planet_limbdarkening[1],
 
 }

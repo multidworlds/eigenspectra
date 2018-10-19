@@ -18,8 +18,8 @@ import emcee
 import csv
 import spiderman as sp
 #from importlib import import_module
-import glob
-import os
+#import glob
+#import os
 from scipy.optimize import leastsq
 import pdb
 
@@ -50,20 +50,35 @@ def lnprior(theta):
 		lnpriorprob=-np.inf
 	return lnpriorprob
 
-def eigencurves(directory):
+def eigencurves(dict,plot=False):
 
-	flist=glob.glob(os.path.join(directory,'*.csv'))
-	alltheoutput=-np.ones((np.shape(flist)[0],10))	#This file is going to have wavelength in the first column, and then the spherical harmonics after that
+	#flist=glob.glob(os.path.join(directory,'*.csv'))
+	waves=dict['wavelength (um)']
+	times=dict['time (days)']
+	fluxes=dict['flux (ppm)']	#2D array times, waves
+	errors=dict['flux err (ppm)']
+	alltheoutput=-np.ones((np.shape(waves)[0],10))	#This file is going to have wavelength in the first column, and then the spherical harmonics after that
 
+	if np.shape(fluxes)[0]==np.shape(waves)[0]:
+		rows=True
+	elif np.shape(fluxes)[0]==np.shape(times)[0]:
+		rows=False
+	else:
+		assert (np.shape(fluxes)[0]==np.shape(times)[0]) | (np.shape(fluxes)[0]==np.shape(waves)[0]),"Flux array dimension must match wavelength and time arrays."
 
-	counter=0
-	for f in flist:
+	#counter=0
+	#for f in flist:
+	for counter in np.arange(np.shape(waves)[0]):
 		#Import data from csv files
-		myfile=np.loadtxt(f,delimiter=',',skiprows=1)
-		wavelength=float(os.path.basename(f)[8:13])#float('wave1.4.csv'[4:7])	#wavelength this secondary eclipse is for
-		eclipsetimes=np.array(myfile[:,0])	#in days
-		eclipsefluxes=np.array(myfile[:,1])*10.**-6.
-		eclipseerrors=np.array(myfile[:,2])*10.**-6.
+		#myfile=np.loadtxt(f,delimiter=',',skiprows=1)
+		wavelength=waves[counter] #wavelength this secondary eclipse is for
+		eclipsetimes=times	#in days
+		if rows:
+			eclipsefluxes=fluxes[counter,:]*10.**-6.
+			eclipseerrors=errors[counter,:]*10.**-6.
+		else:
+			eclipsefluxes=fluxes[:,counter]*10.**-6.
+			eclipseerrors=errors[:,counter]*10.**-6.
 
 		alltheoutput[counter,0]=wavelength 	#I need to determine how to read wavelengths from the csv file names
 
@@ -149,36 +164,36 @@ def eigencurves(directory):
 			spheres[0] = bestcoeffs[0]#c0_best
 
 		alltheoutput[counter,1:]=spheres
-		counter+=1
+		#counter+=1
+		if plot:
+			params0=sp.ModelParams(brightness_model='spherical')	#no offset model
+			params0.nlayers=20
 
-		params0=sp.ModelParams(brightness_model='spherical')	#no offset model
-		params0.nlayers=20
+			params0.t0=-2.21857/2.				# Central time of PRIMARY transit [days]
+			params0.per=2.21857567			# Period [days]
+			params0.a_abs=0.0313			# The absolute value of the semi-major axis [AU]
+			params0.inc=85.71			# Inclination [degrees]
+			params0.ecc=0.0			# Eccentricity
+			params0.w=90.			# Argument of periastron
+			params0.rp=0.155313				# Planet to star radius ratio
+			params0.a=8.863				# Semi-major axis scaled by stellar radius
+			params0.p_u1=0.			# Planetary limb darkening parameter
+			params0.p_u2=0.			# Planetary limb darkening parameter
 
-		params0.t0=-2.21857/2.				# Central time of PRIMARY transit [days]
-		params0.per=2.21857567			# Period [days]
-		params0.a_abs=0.0313			# The absolute value of the semi-major axis [AU]
-		params0.inc=85.71			# Inclination [degrees]
-		params0.ecc=0.0			# Eccentricity
-		params0.w=90.			# Argument of periastron
-		params0.rp=0.155313				# Planet to star radius ratio
-		params0.a=8.863				# Semi-major axis scaled by stellar radius
-		params0.p_u1=0.			# Planetary limb darkening parameter
-		params0.p_u2=0.			# Planetary limb darkening parameter
+			params0.degree=3	#maximum harmonic degree
+			params0.la0=0.
+			params0.lo0=0.
+			params0.sph=list(spheres)
 
-		params0.degree=3	#maximum harmonic degree
-		params0.la0=0.
-		params0.lo0=0.
-		params0.sph=list(spheres)
+			times=eclipsetimes
+			templc=params0.lightcurve(times)
 
-		times=eclipsetimes
-		templc=params0.lightcurve(times)
+			# doing a test spiderman run to see if the output lightcurve is similar
+			# #PERSON CHECKING THIS: You can use this to make sure the spherical harmonics fit is doing the right thing!
 
-		# doing a test spiderman run to see if the output lightcurve is similar
-		# #PERSON CHECKING THIS: You can use this to make sure the spherical harmonics fit is doing the right thing!
-
-		#plt.figure()
-		#plt.plot(times,templc,color='k')
-		#plt.errorbar(eclipsetimes,eclipsefluxes,yerr=eclipseerrors,linestyle='none',color='r')
-		#plt.show()
+			plt.figure()
+			plt.plot(times,templc,color='k')
+			plt.errorbar(eclipsetimes,eclipsefluxes,yerr=eclipseerrors,linestyle='none',color='r')
+			plt.show()
 
 	return alltheoutput

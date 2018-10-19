@@ -4,7 +4,7 @@
 # in that row. Note that the input array can have any dimensions prior to the
 # last two.
 
-# The returned array has dimensions (..., wavelengths, longitudes, latitudes),
+# The returned array has dimensions (..., wavelengths, latitudes, longitudes),
 # where the ellipses denote any extra dimensions from the input array.
 
 
@@ -28,7 +28,7 @@ def generate_maps(sph, N_lon, N_lat):
                               *np.meshgrid(los, las))
 
     fluxes = np.sum([
-                np.einsum('m...wvu,m->...wuv', np.array(
+                np.einsum('m...wvu,m->...wvu', np.array(
                         [np.einsum('...wx,xvu->...wvu',
                                    harmonics[..., l*(l+1)+np.array([m, -m])],
                                    np.array([base_harmonics[l*(l+1)//2+m].real,
@@ -41,6 +41,6 @@ def generate_maps(sph, N_lon, N_lat):
     # Here we convert to (-pi, pi) in longitude, and (-pi/2, pi/2) in latitude,
     # and multiply by the factor that normalizes the harmonics.
     fluxes = 2*np.sqrt(np.pi) * \
-        np.flip(np.roll(fluxes, N_lon//2, axis=-2), axis=-1)
+        np.flip(np.roll(fluxes, N_lon//2, axis=-1), axis=-2)
 
     return wavelengths, fluxes

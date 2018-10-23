@@ -169,11 +169,92 @@ def construct_lam(lammin, lammax, Res=None, dlam=None):
 
     return lam, dlam
 
-def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves = True,
-                                   plot_points_on_map_spec = True, plot_diagnostic = True,
+def expand_hp(healpix_map, lmax):
+    """
+    Expand a Healpix ring-ordered map in spherical harmonics up to degree `lmax`.
+    """
+
+    # Only this function should import starry so it doesn't
+    # break if you don't have it
+    import starry
+
+    # Get the complex spherical harmonic coefficients
+    alm = hp.sphtfunc.map2alm(healpix_map, lmax=lmax)
+
+    # Convert them to real coefficients
+    ylm = np.zeros(lmax ** 2 + 2 * lmax + 1, dtype='float')
+    i = 0
+    for l in range(0, lmax + 1):
+        for m in range(-l, l + 1):
+            j = hp.sphtfunc.Alm.getidx(lmax, l, np.abs(m))
+            if m < 0:
+                ylm[i] = np.sqrt(2) * (-1) ** m * alm[j].imag
+            elif m == 0:
+                ylm[i] = alm[j].real
+            else:
+                ylm[i] = np.sqrt(2) * (-1) ** m * alm[j].real
+            i += 1
+
+    # Instantiate a starry map so we can rotate it to the
+    # correct orientation
+    map = starry.Map(lmax=lmax)
+    map[:, :] = ylm
+    map.axis = [1, 0, 0]
+    map.rotate(90.0);
+    map.axis = [0, 0, 1]
+    map.rotate(180.0);
+    map.axis = [0, 1, 0]
+    map.rotate(90.0);
+    norm = 2 / np.sqrt(np.pi)
+    return np.array(map.y / norm)
+
+def prep_map1():
+    """
+    Prepare toy map #1
+    """
+
+    # Load in 3D data from Kat
+    file = np.load("data/maps/mystery_map1.npz")  # Same file but w/wl included
+    spaxels = file["spaxels"]
+    lam = file["wl"]
+
+    return lam, spaxels
+
+def prep_map2():
+    """
+    Prepare toy map #2
+    """
+
+    # Load in 3D data from Kat
+    file = np.load("data/maps/mystery_map2.npz")  # Same file but w/wl included
+    spaxels = file["spaxels"]
+    lam = file["wl"]
+
+    return lam, spaxels
+
+def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
+                                   dlam = 0.18,
+                                   plot_input_hp_maps = False,
+                                   plot_lightcurves = False,
+                                   plot_points_on_map_spec = False,
+                                   plot_diagnostic = True,
                                    save_output = False):
     """
     Creates toy multi-wavelength secondary eclipse lightcurves of HD189733 b
+
+    Parameters
+    ----------
+    lam : numpy.array
+        High-res model wavelength grid [microns]
+    spaxels : numpy.ndarray
+        2D array of HealPix number vs wavelength
+    lammin : float
+        Minimum wavelength
+    lammax : float
+        Maximum wavelength
+    dlam : float
+        Wavelength bin width
+
 
     Returns
     -------
@@ -192,34 +273,23 @@ def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves 
     # break if you don't have it
     import starry
 
-    # Load in 3D data from Kat
-    """
-    data = np.load("data/maps/mystery_map.npy")
-    data = data[:,1:][:,::-1]
-    wldata = np.load("data/maps/wavelength.npy")
-    wldata = wldata[::-1]
-    """
-    file = np.load("data/maps/mystery_map1.npz")  # Same file but w/wl included
-    data = file["spaxels"]
-    wldata = file["wl"]
-
     # Construct low res wavelength grid
-    lammin = 2.41
-    lammax = 3.98
-    dlami = 0.18   # This gives 10 wavelengths
-    lamlo, dlamlo = construct_lam(lammin, lammax, dlam=dlami)
+    lamlo, dlamlo = construct_lam(lammin, lammax, dlam=dlam)
     Nlamlo = len(lamlo)
 
     # Set HealPy pixel numbers
-    Nside = 8
-    Npix = hp.nside2npix(Nside)
+    #Nside = 8
+    #Npix = hp.nside2npix(Nside)
+    Npix = spaxels.shape[0]
 
     # Define empty 2d array for spaxels
     spec2d = np.zeros((Npix, Nlamlo))
 
-    # Loop over pixels filling with blackbody
-    for i in range(hp.nside2npix(Nside)):
-        spec2d[i,:] = downbin_spec(data[i, :], wldata, lamlo, dlam = dlamlo)
+    # Loop over pixels filling with spectra
+    for i in range(Npix):
+
+        # Degrade the spectra to lower resolution
+        spec2d[i,:] = downbin_spec(spaxels[i, :], lam, lamlo, dlam = dlamlo)
 
     # Make diagnostic plots
     if plot_input_hp_maps:
@@ -248,6 +318,26 @@ def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves 
     # but it must be consistent with the individual map fluxes
     FpFslr = np.mean(spec2d, axis=0)
 
+    """
+    # Rodrigo's fix for starry spectral map normalization:
+    """
+    # Create map in starry
+    map = starry.Map(lmax=lmax, nwav=Nlamlo)
+    # Create empty 2d array of spherical harmonic coefficients
+    y = np.zeros_like(map.y)
+    # Loop over lightcurve wavelengths
+    for n in range(Nlamlo):
+        # Fill coeffs at this wavelength
+        y[:, n] = expand_hp(spec2d[:,n], lmax=map.lmax)
+    # Apply new map to starry planet object
+    planet[:, :] = y
+    # Exchange the y_{0,0} with the luminosity
+    planet.L = planet[0,:]
+    # Set y_{0,0} to unity to make starry happy
+    planet[0,:] = np.ones(Nlamlo)
+
+    # Old map instantiation and scaling
+    """
     # Loop over wavelengths loading map into starry
     for i in range(Nlamlo):
         planet.load_healpix(spec2d[:, i], lmax = lmax, nwav = i)
@@ -274,12 +364,13 @@ def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves 
         plt.xlabel("Wavelength [um]")
         plt.ylabel("Fp/Fs")
         plt.show()
+    """
 
     # Get the map intensity across the planet
     nx, ny = 300, 300
-    x = np.linspace(-1, 1, nx)
-    y = np.linspace(-1, 1, ny)
-    X, Y = np.meshgrid(x, y)
+    x0 = np.linspace(-1, 1, nx)
+    y0 = np.linspace(-1, 1, ny)
+    X, Y = np.meshgrid(x0, y0)
     I = np.zeros((nx, ny, Nlamlo))
     for i in range(nx):
         I[i] = planet(x=X[i], y=Y[i])
@@ -312,7 +403,7 @@ def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves 
 
     # THIS IS A HACK TO GET REASONABLE DEPTHS WHILE STARRY IS MESSING UP
     # NEEDS TO BE FIXED
-    lightcurve = (lightcurve / 200.0)
+    #lightcurve = (lightcurve / 200.0)
     lightcurve = lightcurve + (1 - np.max(lightcurve))
 
     if plot_lightcurves:
@@ -320,7 +411,7 @@ def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves 
         fig, ax = plt.subplots(1, figsize=(14, 5))
         ax.set_xlabel('Time [days]')
         ax.set_ylabel('Relative Flux')
-        for i in range(len(lamlo)):
+        for i in range(Nlamlo):
             # Subtract off minimum (which is the bottom of the eclipse) to look
             # like traditional form
             lc = lightcurve[:,i] - np.min(lightcurve[:,i])
@@ -365,14 +456,6 @@ def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves 
         ax.set_ylabel("Fp/Fs")
         ax.set_xlabel("Wavelength [$\mu$m]")
 
-        # Loop over input spaxels plotting each spectrum (creates thick lines as
-        # they overplot)
-        for i in range(Npix):
-            if i == 0:
-                ax.plot(lamlo, spec2d[i,:], color = "k", label = "Inputs")
-            else:
-                ax.plot(lamlo, spec2d[i,:], color = "k")
-
         draws = 100
         # Loop over number of draws
         for k in range(draws):
@@ -385,6 +468,14 @@ def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves 
                         label = "starry samples")
             else:
                 ax.plot(lamlo, I[i,j,:], color = "C1", lw = 0.5)
+
+        # Loop over input spaxels plotting each spectrum (creates thick lines as
+        # they overplot)
+        for i in range(Npix):
+            if i == 0:
+                ax.plot(lamlo, spec2d[i,:], color = "k", label = "Inputs")
+            else:
+                ax.plot(lamlo, spec2d[i,:], color = "k")
 
         ax.legend()
 

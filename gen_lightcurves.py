@@ -233,7 +233,7 @@ def prep_map2():
     return lam, spaxels
 
 def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
-                                   dlam = 0.18,
+                                   dlam = 0.18, lmax = 18,
                                    plot_input_hp_maps = False,
                                    plot_lightcurves = False,
                                    plot_points_on_map_spec = False,
@@ -254,7 +254,8 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
         Maximum wavelength
     dlam : float
         Wavelength bin width
-
+    lmax : int
+        Largest spherical harmonic degree in the surface map
 
     Returns
     -------
@@ -298,8 +299,7 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
             hp.mollview(spec2d[:,i], title=r"%0.2f $\mu$m" %lamlo[i])
             plt.show()
 
-    # Set starry params
-    lmax = 18
+    # Create starry planet
     planet = starry.kepler.Secondary(lmax=lmax, nwav=Nlamlo)
 
     # HD189 parameters
@@ -334,7 +334,11 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
     # Exchange the y_{0,0} with the luminosity
     planet.L = planet[0,:]
     # Set y_{0,0} to unity to make starry happy
-    planet[0,:] = np.ones(Nlamlo)
+    #planet[0,:] = np.ones(Nlamlo)
+    planet[:, :] = planet[:, :] / planet[0, :]
+
+    # Hack to demonstrate that starry renorm works
+    #map[:,:] = y
 
     # Old map instantiation and scaling
     """
@@ -488,3 +492,11 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
 
 
     return time, lamlo, dlamlo, lightcurve
+
+if __name__ == "__main__":
+
+    # Get wavelength-dependent healpix map
+    lam, spaxels = prep_map1()
+
+    # Create mock lightcurves
+    time, lam, dlam, lcurves = create_lightcurves_with_starry(lam, spaxels)

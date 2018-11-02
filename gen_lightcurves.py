@@ -6,8 +6,9 @@ secondary eclipse lightcurves
 
 Example
 -------
->>> from gen_lightcurves import create_lightcurves_with_starry
->>> time, lamlo, dlamlo, lightcurve = create_lightcurves_with_starry()
+>>> from gen_lightcurves import prep_map1, create_lightcurves_with_starry
+>>> lam, spaxels = prep_map1()
+>>> time, lam, dlam, lcurves = create_lightcurves_with_starry(lam, spaxels)
 
 """
 
@@ -234,7 +235,7 @@ def prep_map2():
 def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
                                    dlam = 0.18, lmax = 18,
                                    plot_input_hp_maps = False,
-                                   plot_lightcurves = False,
+                                   plot_lightcurves = True,
                                    plot_points_on_map_spec = False,
                                    plot_diagnostic = True,
                                    save_output = False):

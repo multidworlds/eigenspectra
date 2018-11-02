@@ -7,10 +7,26 @@
 # The returned array has dimensions (..., wavelengths, latitudes, longitudes),
 # where the ellipses denote any extra dimensions from the input array.
 
+import numpy as np
+from scipy.special import sph_harm
 
 def generate_maps(sph, N_lon, N_lat):
-    import numpy as np
-    from scipy.special import sph_harm
+    '''
+    Compute brightness map on a grid using spherical harmonic coefficients.
+
+    Parameters
+    ----------
+    sph : array of spherical harmonic coefficients (axes: ..., wavelengths, SH coeffs)
+    N_lon : int, number of gridpoints in longitude
+    N_lat : int, number of gridpoints in latitude
+
+    Returns
+    -------
+    wavelengths : array containing wavelength of each map
+    lats : array of latitudes (radians)
+    lons : array of longitudes (radians)
+    fluxes : array of brightness maps at each wavelength, computed on grid
+    '''
 
     wavelengths = sph[..., 0]
     harmonics = sph[..., 1:]

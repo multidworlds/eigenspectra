@@ -16,6 +16,40 @@ import numpy as np
 from scipy.stats import binned_statistic
 import healpy as hp
 import matplotlib.pyplot as plt
+import starry
+
+def expand_hp(healpix_map, lmax):
+    """Expand a Healpix ring-ordered map in spherical harmonics up to degree `lmax`."""
+    # Get the complex spherical harmonic coefficients
+    alm = hp.sphtfunc.map2alm(healpix_map, lmax=lmax)
+
+    # Convert them to real coefficients
+    ylm = np.zeros(lmax ** 2 + 2 * lmax + 1, dtype='float')
+    i = 0
+    for l in range(0, lmax + 1):
+        for m in range(-l, l + 1):
+            j = hp.sphtfunc.Alm.getidx(lmax, l, np.abs(m))
+            if m < 0:
+                ylm[i] = np.sqrt(2) * (-1) ** m * alm[j].imag
+            elif m == 0:
+                ylm[i] = alm[j].real
+            else:
+                ylm[i] = np.sqrt(2) * (-1) ** m * alm[j].real
+            i += 1
+    
+    # Instantiate a starry map so we can rotate it to the
+    # correct orientation
+    map = starry.Map(lmax=lmax)
+    map[:, :] = ylm
+    map.axis = [1, 0, 0]
+    map.rotate(90.0);
+    map.axis = [0, 0, 1]
+    map.rotate(180.0);
+    map.axis = [0, 1, 0]
+    map.rotate(90.0);
+    norm = 2 / np.sqrt(np.pi)
+    return np.array(map.y / norm)
+
 
 def downbin_spec(specHR, lamHR, lamLR, dlam=None):
     """
@@ -249,23 +283,12 @@ def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves 
     FpFslr = np.mean(spec2d, axis=0)
 
     # Loop over wavelengths loading map into starry
+    y = np.zeros_like(planet.y)
     for i in range(Nlamlo):
-        planet.load_healpix(spec2d[:, i], lmax = lmax, nwav = i)
+        y[:, i] = expand_hp(spec2d[:, i], lmax=lmax)
+    planet[:, :] = y / y[0]
+    planet.L = y[0]
 
-    # Get planet the spherical harmonic map vector. This is a vector of the
-    # coefficients of the spherical harmonics
-    y = np.array(planet.y)
-
-    # Get the total flux received by the observer from the map.
-    f = np.array(planet.flux())
-
-    # Scale the planet luminosoty by factors derived from the original map
-    # WARNING: THIS IS PART OF THE HACK B/C OF STARRY ISSUE
-    planet[:, :] = y
-    fac1 = planet(0, -0.5).transpose()[0] / spec2d[0]
-    fac2 = planet(0, 0.5).transpose()[0] / spec2d[-1]
-    fac = np.mean((fac1, fac2), axis=0)
-    planet.L = 1 / fac
     if True:
         plt.plot(lamlo, spec2d[0])
         plt.plot(lamlo, spec2d[-1])
@@ -381,10 +404,11 @@ def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves 
             j = np.random.randint(0,high=nx)
             # Plot it
             if k == 0:
-                ax.plot(lamlo, I[i,j,:], color = "C1", lw = 0.5,
-                        label = "starry samples")
+                ax.plot(lamlo, I[i,j,:] * planet.L, color = "C1", lw = 0.5,
+                        label = "starry samples", zorder=-1)
             else:
-                ax.plot(lamlo, I[i,j,:], color = "C1", lw = 0.5)
+                ax.plot(lamlo, I[i,j,:] * planet.L, color = "C1", lw = 0.5,
+                        zorder=-1)
 
         ax.legend()
 
@@ -397,3 +421,7 @@ def create_lightcurves_with_starry(plot_input_hp_maps = False, plot_lightcurves 
 
 
     return time, lamlo, dlamlo, lightcurve
+
+
+if __name__ == "__main__":
+    time, lamlo, dlamlo, lightcurve = create_lightcurves_with_starry()

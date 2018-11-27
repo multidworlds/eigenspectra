@@ -170,7 +170,7 @@ def sh_lcs(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,r
                 lc = np.append(lc,tlc,axis=0)
                 spider_params.sph[i]= 0    
 
-        elif degree==15:
+    elif degree==15:
         spider_params.degree= 15                 # Maximum degree of harmonic (-1): 3 means 0th +8 components (x2 for negatives)
         spider_params.la0= 0                    # Offset of co-ordinte centre from the substellar point in latitude (Degrees)
         spider_params.lo0= 0                    # Offset of co-ordinte centre from the substellar point in longitude (Degrees)

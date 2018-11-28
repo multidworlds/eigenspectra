@@ -50,7 +50,7 @@ def lnprior(theta):
 		lnpriorprob=-np.inf
 	return lnpriorprob
 
-def eigencurves(dict,plot=False):
+def eigencurves(dict,plot=False,sph_harm_degree=3):
 
 	#flist=glob.glob(os.path.join(directory,'*.csv'))
 	waves=dict['wavelength (um)']
@@ -88,7 +88,7 @@ def eigencurves(dict,plot=False):
 		#system=import_module('data.planet.{}'.format(planet_name))
 
 		#lc,t = sh_lcs(t0=-2.21857/2.)	#times in days, and fp/fs - model at higher time resolution (default is ntimes=500)
-		lc,t = sh_lcs(t0=-2.21857/2.,ntimes=eclipsetimes)	#model it for the times of the observations
+		lc,t = sh_lcs(t0=-2.21857/2.,ntimes=eclipsetimes,degree=sph_harm_degree)	#model it for the times of the observations
 		#lc,t = sh_lcs(system.properties,t0=-2.21857//2.,ntimes=eclipsetimes)
 
 		#Optional add-on above: test whether we want to include higher-order spherical harmonics when making our eigencurves?

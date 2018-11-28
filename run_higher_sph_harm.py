@@ -7,7 +7,7 @@
 # Import functions
 import numpy as np
 import matplotlib.pyplot as p
-get_ipython().run_line_magic('matplotlib', 'inline')
+#get_ipython().run_line_magic('matplotlib', 'inline')
 
 import eigensource.add_noise as add_noise
 import eigencurves
@@ -63,6 +63,8 @@ importlib.reload(eigencurves)
 
 # In[ ]:
 norder=15
+
+print("Fitting eigencurves now for order {}".format(norder))
 
 spherearray = eigencurves.eigencurves(noiseDict,plot=True)
 # spherearray is an array of wavelength x SH coefficents

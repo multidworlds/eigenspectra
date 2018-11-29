@@ -24,7 +24,9 @@ from scipy.optimize import leastsq
 import pdb
 
 def mpmodel(p,x,y,z,elc,escore):#fjac=None,x=None,y=None,err=None):
-	model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:] + p[5]*escore[3,:] + p[6]*escore[4,:] + p[7]*escore[5,:]
+	model = p[0]*elc[0,:] + p[1]
+	for ind in range(2,len(p)):
+		model = model + p[ind] * escore[ind-2,:]
 	return np.array(y-model)
 
 def lnprob(theta,x,y,yerr,elc,escore):
@@ -123,7 +125,7 @@ def eigencurves(dict,plot=False,sph_harm_degree=3):
 		#do an initial least squares fit?
 		escore=np.real(escore)
 
-		params0=np.array([1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0])
+		params0=np.array(2 * sph_harm_degree**2)
 		#pdb.set_trace()
 		mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore)))
 
@@ -157,9 +159,9 @@ def eigencurves(dict,plot=False,sph_harm_degree=3):
 			fcoeff[:,i] = bestcoeffs[i+2]*ecoeff[:,i]
 
 		# how to go from coefficients to best fit map
-		spheres=np.zeros(9)
+		spheres=np.zeros(sph_harm_degree**2)
 		for j in range(0,len(fcoeff)):
-			for i in range(1,9):
+			for i in range(1,sph_harm_degree**2):
 				spheres[i] += fcoeff.T[j,2*i-1]-fcoeff.T[j,2*(i-1)]
 			spheres[0] = bestcoeffs[0]#c0_best
 

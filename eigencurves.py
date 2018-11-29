@@ -34,8 +34,10 @@ def lnprob(theta,x,y,yerr,elc,escore):
 	return lp+lnlike(theta,x,y,yerr,elc,escore)
 
 def lnlike(theta,x,y,yerr,elc,escore):
-	c0,fstar,c1,c2,c3,c4,c5,c6=theta
-	model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:] + c3*escore[2,:] + c4*escore[3,:] + c5*escore[4,:] + c6*escore[5,:]
+	model = theta[0] * elc[0,:] + theta[1]
+	for ind in range(2,len(theta)):
+		model = model + theta[ind] * escore[ind-2,:]
+	
 	resid=y-model
 	chi2=np.sum((resid/yerr)**2)
 	dof=np.shape(y)[0]-1.
@@ -45,7 +47,8 @@ def lnlike(theta,x,y,yerr,elc,escore):
 
 def lnprior(theta):
 	lnpriorprob=0.
-	c0,fstar,c1,c2,c3,c4,c5,c6=theta
+	c0 = theta[0]
+	fstar = theta[1]
 	if fstar<0.:
 		lnpriorprob=-np.inf
 	elif c0<0.:
@@ -125,14 +128,14 @@ def eigencurves(dict,plot=False,sph_harm_degree=3):
 		#do an initial least squares fit?
 		escore=np.real(escore)
 
-		params0=np.ones(2 * sph_harm_degree**2)
+		params0=np.ones(sph_harm_degree**2 -1) ## 2 + half PC since +/- on each sph harmonic
 		
 		mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore)))
 
 		#format parameters for mcmc fit
 		theta=mpfit[0]
 		ndim=np.shape(theta)[0]	#set number of dimensions
-		nwalkers=16 #number of walkers	
+		nwalkers=2 * len(params0) #number of walkers	
 
 		sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,escore),threads=6)
 		pos = [theta + 1e-5*np.random.randn(ndim) for i in range(nwalkers)]
@@ -140,6 +143,7 @@ def eigencurves(dict,plot=False,sph_harm_degree=3):
 		burnin=200
 		nsteps=1000
 
+		print("Running MCMC at {} um".format(waves[counter]))
 		sampler.run_mcmc(pos,nsteps)
 
 		samples = sampler.chain[:, burnin:, :].reshape((-1, ndim))
@@ -182,7 +186,7 @@ def eigencurves(dict,plot=False,sph_harm_degree=3):
 		params0.p_u1=0.			# Planetary limb darkening parameter
 		params0.p_u2=0.			# Planetary limb darkening parameter
 
-		params0.degree=3	#maximum harmonic degree
+		params0.degree=sph_harm_degree	#maximum harmonic degree
 		params0.la0=0.
 		params0.lo0=0.
 		params0.sph=list(spheres)

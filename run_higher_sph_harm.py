@@ -68,7 +68,7 @@ else:
 
 print("Fitting eigencurves now for order {}".format(norder))
 
-spherearray = eigencurves.eigencurves(noiseDict,plot=True)
+spherearray = eigencurves.eigencurves(noiseDict,plot=True,sph_harm_degree=norder)
 # spherearray is an array of wavelength x SH coefficents
 
 

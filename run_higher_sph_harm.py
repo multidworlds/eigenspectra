@@ -13,6 +13,7 @@ import eigensource.add_noise as add_noise
 import eigencurves
 import eigenmaps
 import kmeans
+from sys import argv
 #import mapPCA
 import bin_eigenspectra
 
@@ -62,7 +63,11 @@ importlib.reload(eigencurves)
 
 
 # In[ ]:
-norder=15
+if len(argv) < 2:
+    norder=6
+    print("No order specified, using {}".format(norder))
+else:
+    norder = int(argv[1])
 
 print("Fitting eigencurves now for order {}".format(norder))
 
@@ -73,5 +78,5 @@ spherearray = eigencurves.eigencurves(noiseDict,plot=True)
 # In[60]:
 
 
-np.savez('spherearray_{}.npz'.format(norder),spherearray)
+np.savez('data/sph_harmonic_coefficients/spherearray_{}.npz'.format(norder),spherearray)
 

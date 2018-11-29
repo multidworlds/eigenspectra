@@ -61,7 +61,7 @@ noiseDict = add_noise.add_noise(inputLC3D)
 
 # In[ ]:
 if len(argv) < 2:
-    norder=6
+    norder=3
     print("No order specified, using {}".format(norder))
 else:
     norder = int(argv[1])

@@ -26,8 +26,8 @@ def sh_lcs(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,r
     # in Veenu's work we used lmax=4 (=49 components, incl. negative SHs)
     #   our best fit was 0th + 4 eigen-components
     #   but our information content didn't drop to noise until after the 25th component (implies degree=4)
-    if degree==2:
-        spider_params.degree= 2                 # Maximum degree of harmonic (-1): 3 means 0th +8 components (x2 for negatives)
+    if degree<=5:
+        spider_params.degree= degree            # Maximum degree of harmonic (-1): 3 means 0th +8 components (x2 for negatives)
         spider_params.la0= 0                    # Offset of co-ordinte centre from the substellar point in latitude (Degrees)
         spider_params.lo0= 0                    # Offset of co-ordinte centre from the substellar point in longitude (Degrees)
         #spider_params.sph= [0,0,0,0,0,1,0,0,0]  # A list of the co-efficients for the harmonic terms: 
@@ -41,12 +41,14 @@ def sh_lcs(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,r
             ntimes = t.size
 
         if np.size(sph) == 1:
-            spider_params.sph= [1,0,0,0]*coeff   # this is l0, so don't need a negative version
+            allLterms = [0] * degree**2
+            allLterms[0] = 1
+            spider_params.sph= allLterms * coeff   # this is l0, so don't need a negative version
             lc = spider_params.lightcurve(t)
             # set up size of lc to be able to append full set of LCs
             lc = np.resize(lc,(1,ntimes))
 
-            spider_params.sph= [0,0,0,0]
+            spider_params.sph= [0] * degree**2
             # set up 2-d array of LCs for all SHs
             for i in range(1,len(spider_params.sph)):
                 spider_params.sph[i]= -1*coeff
@@ -63,191 +65,6 @@ def sh_lcs(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,r
             spider_params.sph= sph   # spherical harmonic coefficients
             lc = spider_params.lightcurve(t)
 
-    elif degree==3:
-        spider_params.degree= 3                 # Maximum degree of harmonic (-1): 3 means 0th +8 components (x2 for negatives)
-        spider_params.la0= 0                    # Offset of co-ordinte centre from the substellar point in latitude (Degrees)
-        spider_params.lo0= 0                    # Offset of co-ordinte centre from the substellar point in longitude (Degrees)
-        #spider_params.sph= [0,0,0,0,0,1,0,0,0]  # A list of the co-efficients for the harmonic terms: 
-                                            # [l0, l1 m-1, l1 m0, l1 m1, l2 m-2, l2 m-1, l2 m0, l2 m1, l2 m2..... etc]
-                                            # scaled to stellar flux, so typically of order 1e-3 - 1e-4.
-
-        if np.size(ntimes) == 1:
-            t= spider_params.t0 + np.linspace(0, spider_params.per,ntimes)  # TEST TIME RESOLUTION
-        else:
-            t= ntimes
-            ntimes = t.size
-
-        if np.size(sph) == 1:
-            spider_params.sph= [1,0,0,0,0,0,0,0,0]*coeff   # this is l0, so don't need a negative version
-            lc = spider_params.lightcurve(t)
-            # set up size of lc to be able to append full set of LCs
-            lc = np.resize(lc,(1,ntimes))
-
-            spider_params.sph= [0,0,0,0,0,0,0,0,0]
-            # set up 2-d array of LCs for all SHs
-            for i in range(1,len(spider_params.sph)):
-                spider_params.sph[i]= -1*coeff
-                tlc = spider_params.lightcurve(t)
-                tlc = np.resize(tlc,(1,ntimes))
-                lc = np.append(lc,tlc,axis=0)
-                spider_params.sph[i]= 1*coeff
-                tlc = spider_params.lightcurve(t)
-                tlc = np.resize(tlc,(1,ntimes))
-                lc = np.append(lc,tlc,axis=0)
-                spider_params.sph[i]= 0    
-        else:        
-        # calcualte single lightcurve for single set of spherical harmonic coefficients
-            spider_params.sph= sph   # spherical harmonic coefficients
-            lc = spider_params.lightcurve(t)
-
-    elif degree==4:
-        spider_params.degree= 4                 # Maximum degree of harmonic (-1): 3 means 0th +8 components (x2 for negatives)
-        spider_params.la0= 0                    # Offset of co-ordinte centre from the substellar point in latitude (Degrees)
-        spider_params.lo0= 0                    # Offset of co-ordinte centre from the substellar point in longitude (Degrees)
-        #spider_params.sph= [0,0,0,0,0,1,0,0,0]  # A list of the co-efficients for the harmonic terms: 
-                                            # [l0, l1 m-1, l1 m0, l1 m1, l2 m-2, l2 m-1, l2 m0, l2 m1, l2 m2..... etc]
-                                            # scaled to stellar flux, so typically of order 1e-3 - 1e-4.
-
-        if np.size(ntimes) == 1:
-            t= spider_params.t0 + np.linspace(0, spider_params.per,ntimes)  # TEST TIME RESOLUTION
-        else:
-            t= ntimes
-            ntimes = t.size
-
-        if np.size(sph) == 1:
-            spider_params.sph= [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]*coeff   # this is l0, so don't need a negative version
-            lc = spider_params.lightcurve(t)
-            # set up size of lc to be able to append full set of LCs
-            lc = np.resize(lc,(1,ntimes))
-
-            spider_params.sph= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-            # set up 2-d array of LCs for all SHs
-            for i in range(1,len(spider_params.sph)):
-                spider_params.sph[i]= -1*coeff
-                tlc = spider_params.lightcurve(t)
-                tlc = np.resize(tlc,(1,ntimes))
-                lc = np.append(lc,tlc,axis=0)
-                spider_params.sph[i]= 1*coeff
-                tlc = spider_params.lightcurve(t)
-                tlc = np.resize(tlc,(1,ntimes))
-                lc = np.append(lc,tlc,axis=0)
-                spider_params.sph[i]= 0    
-        else:        
-        # calcualte single lightcurve for single set of spherical harmonic coefficients
-            spider_params.sph= sph   # spherical harmonic coefficients
-            lc = spider_params.lightcurve(t)
-
-    elif degree==5:
-        spider_params.degree= 5                 # Maximum degree of harmonic (-1): 3 means 0th +8 components (x2 for negatives)
-        spider_params.la0= 0                    # Offset of co-ordinte centre from the substellar point in latitude (Degrees)
-        spider_params.lo0= 0                    # Offset of co-ordinte centre from the substellar point in longitude (Degrees)
-        #spider_params.sph= [0,0,0,0,0,1,0,0,0]  # A list of the co-efficients for the harmonic terms: 
-                                            # [l0, l1 m-1, l1 m0, l1 m1, l2 m-2, l2 m-1, l2 m0, l2 m1, l2 m2..... etc]
-                                            # scaled to stellar flux, so typically of order 1e-3 - 1e-4.
-
-        if np.size(ntimes) == 1:
-            t= spider_params.t0 + np.linspace(0, spider_params.per,ntimes)  # TEST TIME RESOLUTION
-        else:
-            t= ntimes
-            ntimes = t.size
-
-        if np.size(sph) == 1:
-            spider_params.sph= [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]*coeff   # this is l0, so don't need a negative version
-            lc = spider_params.lightcurve(t)
-            # set up size of lc to be able to append full set of LCs
-            lc = np.resize(lc,(1,ntimes))
-
-            spider_params.sph= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-            # set up 2-d array of LCs for all SHs
-            for i in range(1,len(spider_params.sph)):
-                spider_params.sph[i]= -1*coeff
-                tlc = spider_params.lightcurve(t)
-                tlc = np.resize(tlc,(1,ntimes))
-                lc = np.append(lc,tlc,axis=0)
-                spider_params.sph[i]= 1*coeff
-                tlc = spider_params.lightcurve(t)
-                tlc = np.resize(tlc,(1,ntimes))
-                lc = np.append(lc,tlc,axis=0)
-                spider_params.sph[i]= 0    
-
-    elif degree==6:
-        spider_params.degree= 6                 # Maximum degree of harmonic (-1): 3 means 0th +8 components (x2 for negatives)
-        spider_params.la0= 0                    # Offset of co-ordinte centre from the substellar point in latitude (Degrees)
-        spider_params.lo0= 0                    # Offset of co-ordinte centre from the substellar point in longitude (Degrees)
-        #spider_params.sph= [0,0,0,0,0,1,0,0,0]  # A list of the co-efficients for the harmonic terms: 
-                                            # [l0, l1 m-1, l1 m0, l1 m1, l2 m-2, l2 m-1, l2 m0, l2 m1, l2 m2..... etc]
-                                            # scaled to stellar flux, so typically of order 1e-3 - 1e-4.
-
-        if np.size(ntimes) == 1:
-            t= spider_params.t0 + np.linspace(0, spider_params.per,ntimes)  # TEST TIME RESOLUTION
-        else:
-            t= ntimes
-            ntimes = t.size
-
-        if np.size(sph) == 1:
-            temp=np.zeros(int(spider_params.degree**2.)).tolist()
-            temp[0]=1
-            #pdb.set_trace()
-            spider_params.sph= temp*coeff
-            lc = spider_params.lightcurve(t)
-            # set up size of lc to be able to append full set of LCs
-            lc = np.resize(lc,(1,ntimes))
-
-            spider_params.sph= np.zeros(int(spider_params.degree**2.)).tolist()
-            # set up 2-d array of LCs for all SHs
-            for i in range(1,len(spider_params.sph)):
-                spider_params.sph[i]= -1*coeff
-                tlc = spider_params.lightcurve(t)
-                tlc = np.resize(tlc,(1,ntimes))
-                lc = np.append(lc,tlc,axis=0)
-                spider_params.sph[i]= 1*coeff
-                tlc = spider_params.lightcurve(t)
-                tlc = np.resize(tlc,(1,ntimes))
-                lc = np.append(lc,tlc,axis=0)
-                spider_params.sph[i]= 0  
-
-        else:        
-        # calcualte single lightcurve for single set of spherical harmonic coefficients
-            spider_params.sph= sph   # spherical harmonic coefficients
-            lc = spider_params.lightcurve(t)                
-
-    elif degree==15:
-        spider_params.degree= 15                 # Maximum degree of harmonic (-1): 3 means 0th +8 components (x2 for negatives)
-        spider_params.la0= 0                    # Offset of co-ordinte centre from the substellar point in latitude (Degrees)
-        spider_params.lo0= 0                    # Offset of co-ordinte centre from the substellar point in longitude (Degrees)
-        #spider_params.sph= [0,0,0,0,0,1,0,0,0]  # A list of the co-efficients for the harmonic terms: 
-                                            # [l0, l1 m-1, l1 m0, l1 m1, l2 m-2, l2 m-1, l2 m0, l2 m1, l2 m2..... etc]
-                                            # scaled to stellar flux, so typically of order 1e-3 - 1e-4.
-
-        if np.size(ntimes) == 1:
-            t= spider_params.t0 + np.linspace(0, spider_params.per,ntimes)  # TEST TIME RESOLUTION
-        else:
-            t= ntimes
-            ntimes = t.size
-
-        if np.size(sph) == 1:
-            spider_params.sph= [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]*coeff   # this is l0, so don't need a negative version
-            lc = spider_params.lightcurve(t)
-            # set up size of lc to be able to append full set of LCs
-            lc = np.resize(lc,(1,ntimes))
-
-            spider_params.sph= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-            # set up 2-d array of LCs for all SHs
-            for i in range(1,len(spider_params.sph)):
-                spider_params.sph[i]= -1*coeff
-                tlc = spider_params.lightcurve(t)
-                tlc = np.resize(tlc,(1,ntimes))
-                lc = np.append(lc,tlc,axis=0)
-                spider_params.sph[i]= 1*coeff
-                tlc = spider_params.lightcurve(t)
-                tlc = np.resize(tlc,(1,ntimes))
-                lc = np.append(lc,tlc,axis=0)
-                spider_params.sph[i]= 0  
-
-        else:        
-        # calcualte single lightcurve for single set of spherical harmonic coefficients
-            spider_params.sph= sph   # spherical harmonic coefficients
-            lc = spider_params.lightcurve(t)
     else:
         assert (degree>5),"Can't handle this high of a spherical harmonic degree!"
 

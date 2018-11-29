@@ -58,9 +58,6 @@ noiseDict = add_noise.add_noise(inputLC3D)
 # In[28]:
 
 
-import importlib
-importlib.reload(eigencurves)
-
 
 # In[ ]:
 if len(argv) < 2:

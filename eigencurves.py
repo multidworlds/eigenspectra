@@ -59,7 +59,7 @@ def eigencurves(dict,plot=False,sph_harm_degree=3):
 	times=dict['time (days)']
 	fluxes=dict['flux (ppm)']	#2D array times, waves
 	errors=dict['flux err (ppm)']
-	alltheoutput=-np.ones((np.shape(waves)[0],10))	#This file is going to have wavelength in the first column, and then the spherical harmonics after that
+	alltheoutput=-np.ones((np.shape(waves)[0],1+sph_harm_degree**2))	#This file is going to have wavelength in the first column, and then the spherical harmonics after that
 
 	if np.shape(fluxes)[0]==np.shape(waves)[0]:
 		rows=True
@@ -125,8 +125,8 @@ def eigencurves(dict,plot=False,sph_harm_degree=3):
 		#do an initial least squares fit?
 		escore=np.real(escore)
 
-		params0=np.array(2 * sph_harm_degree**2)
-		#pdb.set_trace()
+		params0=np.ones(2 * sph_harm_degree**2)
+		
 		mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore)))
 
 		#format parameters for mcmc fit
@@ -164,7 +164,7 @@ def eigencurves(dict,plot=False,sph_harm_degree=3):
 			for i in range(1,sph_harm_degree**2):
 				spheres[i] += fcoeff.T[j,2*i-1]-fcoeff.T[j,2*(i-1)]
 			spheres[0] = bestcoeffs[0]#c0_best
-
+		
 		alltheoutput[counter,1:]=spheres
 		#counter+=1
 	if plot:

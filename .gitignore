@@ -3,3 +3,4 @@ data/output_lightcurves/plots/*.pdf
 *.pyc
 .ipynb_checkpoints/
 *.DS_Store
+plots/eigenmap_and_spec/*.pdf

@@ -1,5 +1,6 @@
 data/instrument/*.pdf
 data/output_lightcurves/plots/*.pdf
+data/sph_harmonic_coefficients/old_before_generalization/
 *.pyc
 .ipynb_checkpoints/
 *.DS_Store

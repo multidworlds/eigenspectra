@@ -21,6 +21,9 @@ def spider_model(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,
     spider_params.p_u1= p_u1        # Planetary limb darkening parameter
     spider_params.p_u2= p_u2        # Planetary limb darkening parameter
     spider_params.degree= degree            # Maximum degree of harmonic (-1): 3 means 0th +8 components (x2 for negatives)
+    spider_params.la0= 0                    # Offset of co-ordinte centre from the substellar point in latitude (Degrees)
+    spider_params.lo0= 0                    # Offset of co-ordinte centre from the substellar point in longitude (Degrees)
+    
     
     return spider_params
     
@@ -28,15 +31,13 @@ def spider_model(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,
 def sh_lcs(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,rp=0.155313,a=8.863,p_u1=0,p_u2=0,ntimes=500,coeff=1,sph=0,degree=3):
 
     spider_params = spider_model(n_layers=n_layers,t0=t0,per=per,a_abs=a_abs,inc=inc,ecc=ecc,w=w,rp=rp,
-                                 a=a,p_u1=p_u1,p_u2=p_u2,ntimes=ntimes,coeff=coeff,sph=sph)
+                                 a=a,p_u1=p_u1,p_u2=p_u2,ntimes=ntimes,coeff=coeff,sph=sph,degree=degree)
     # brightness model parameters
     # and we'll want to calculate lightcurves for each individual component, so that they can be fed into PCA
     # in Veenu's work we used lmax=4 (=49 components, incl. negative SHs)
     #   our best fit was 0th + 4 eigen-components
     #   but our information content didn't drop to noise until after the 25th component (implies degree=4)
     if degree<=6:
-        spider_params.la0= 0                    # Offset of co-ordinte centre from the substellar point in latitude (Degrees)
-        spider_params.lo0= 0                    # Offset of co-ordinte centre from the substellar point in longitude (Degrees)
         #spider_params.sph= [0,0,0,0,0,1,0,0,0]  # A list of the co-efficients for the harmonic terms: 
                                             # [l0, l1 m-1, l1 m0, l1 m1, l2 m-2, l2 m-1, l2 m0, l2 m1, l2 m2..... etc]
                                             # scaled to stellar flux, so typically of order 1e-3 - 1e-4.

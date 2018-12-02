@@ -20,6 +20,7 @@ def spider_model(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,
     spider_params.a= a              # Semi-major axis scaled by stellar radius
     spider_params.p_u1= p_u1        # Planetary limb darkening parameter
     spider_params.p_u2= p_u2        # Planetary limb darkening parameter
+    spider_params.degree= degree            # Maximum degree of harmonic (-1): 3 means 0th +8 components (x2 for negatives)
     
     return spider_params
     
@@ -34,7 +35,6 @@ def sh_lcs(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,r
     #   our best fit was 0th + 4 eigen-components
     #   but our information content didn't drop to noise until after the 25th component (implies degree=4)
     if degree<=6:
-        spider_params.degree= degree            # Maximum degree of harmonic (-1): 3 means 0th +8 components (x2 for negatives)
         spider_params.la0= 0                    # Offset of co-ordinte centre from the substellar point in latitude (Degrees)
         spider_params.lo0= 0                    # Offset of co-ordinte centre from the substellar point in longitude (Degrees)
         #spider_params.sph= [0,0,0,0,0,1,0,0,0]  # A list of the co-efficients for the harmonic terms: 

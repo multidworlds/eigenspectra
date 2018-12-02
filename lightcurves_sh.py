@@ -1,8 +1,8 @@
-def sh_lcs(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,rp=0.155313,a=8.863,p_u1=0,p_u2=0,ntimes=500,coeff=1,sph=0,degree=3):
+import spiderman as sp
+import numpy as np
 
-    import spiderman as sp
-    import numpy as np
-
+def spider_model(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,rp=0.155313,a=8.863,p_u1=0,p_u2=0,ntimes=500,coeff=1,sph=0,degree=3):
+    """ Create initial spiderman model """
     # spherical harmonics and 20 layers (WILL NEED TO TEST # OF LAYERS EVENTUALLY)
     spider_params = sp.ModelParams(brightness_model='spherical')
     spider_params.n_layers= n_layers  # (default)
@@ -20,7 +20,14 @@ def sh_lcs(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,r
     spider_params.a= a              # Semi-major axis scaled by stellar radius
     spider_params.p_u1= p_u1        # Planetary limb darkening parameter
     spider_params.p_u2= p_u2        # Planetary limb darkening parameter
+    
+    return spider_params
+    
 
+def sh_lcs(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,rp=0.155313,a=8.863,p_u1=0,p_u2=0,ntimes=500,coeff=1,sph=0,degree=3):
+
+    spider_params = spider_model(n_layers=n_layers,t0=t0,per=per,a_abs=a_abs,inc=inc,ecc=ecc,w=w,rp=rp,
+                                 a=a,p_u1=p_u1,p_u2=p_u2,ntimes=ntimes,coeff=coeff,sph=sph)
     # brightness model parameters
     # and we'll want to calculate lightcurves for each individual component, so that they can be fed into PCA
     # in Veenu's work we used lmax=4 (=49 components, incl. negative SHs)

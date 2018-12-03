@@ -128,7 +128,7 @@ def eigencurves(dict,plot=False,sph_harm_degree=3):
 		#do an initial least squares fit?
 		escore=np.real(escore)
 
-		params0=np.ones(sph_harm_degree**2 -1) ## 2 + half PC since +/- on each sph harmonic
+		params0=np.ones(sph_harm_degree**2 +1) ## 2 + half PC since +/- on each sph harmonic
 		
 		mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore)))
 

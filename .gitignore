@@ -5,3 +5,4 @@ data/sph_harmonic_coefficients/old_before_generalization/
 .ipynb_checkpoints/
 *.DS_Store
 plots/eigenmap_and_spec/*.pdf
+plots/original_maps/*.pdf

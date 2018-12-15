@@ -38,24 +38,21 @@ def sh_lcs(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,r
     #   our best fit was 0th + 4 eigen-components
     #   but our information content didn't drop to noise until after the 25th component (implies degree=4)
     if degree<=6:
-        #spider_params.sph= [0,0,0,0,0,1,0,0,0]  # A list of the co-efficients for the harmonic terms: 
-                                            # [l0, l1 m-1, l1 m0, l1 m1, l2 m-2, l2 m-1, l2 m0, l2 m1, l2 m2..... etc]
-                                            # scaled to stellar flux, so typically of order 1e-3 - 1e-4.
-
         if np.size(ntimes) == 1:
             t= spider_params.t0 + np.linspace(0, spider_params.per,ntimes)  # TEST TIME RESOLUTION
         else:
             t= ntimes
             ntimes = t.size
-
+        
         if np.size(sph) == 1:
+        
             allLterms = [0] * degree**2
             allLterms[0] = 1
             spider_params.sph= allLterms * coeff   # this is l0, so don't need a negative version
             lc = spider_params.lightcurve(t)
             # set up size of lc to be able to append full set of LCs
             lc = np.resize(lc,(1,ntimes))
-
+        
             spider_params.sph= [0] * degree**2
             # set up 2-d array of LCs for all SHs
             for i in range(1,len(spider_params.sph)):
@@ -72,10 +69,10 @@ def sh_lcs(n_layers=20,t0=0,per=2.21857567,a_abs=0.0313,inc=85.71,ecc=0.0,w=90,r
         # calcualte single lightcurve for single set of spherical harmonic coefficients
             spider_params.sph= sph   # spherical harmonic coefficients
             lc = spider_params.lightcurve(t)
-
+    
     else:
         assert (degree>6),"Can't handle this high of a spherical harmonic degree!"
-
+    
     #sestart= np.int(ntimes*.475)
     #seend= np.int(ntimes*.525)
     #et = t[sestart:seend]

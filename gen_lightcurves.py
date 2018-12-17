@@ -6,9 +6,9 @@ secondary eclipse lightcurves
 
 Example
 -------
->>> from gen_lightcurves import prep_map1, create_lightcurves_with_starry
->>> lam, spaxels = prep_map1()
->>> time, lam, dlam, lcurves = create_lightcurves_with_starry(lam, spaxels)
+>>> from gen_lightcurves import *
+>>> lamhr, spaxels = prep_spectral_hotspot_map()
+>>> time, lam, dlam, lcurves = create_lightcurves_with_starry(lamhr, spaxels)
 
 """
 
@@ -231,6 +231,158 @@ def prep_map2():
     lam = file["wl"]
 
     return lam, spaxels
+
+def prep_blackbody_hotspot_map(phi0 = np.pi, theta0 = 0.0, ds = 25.0,
+                               Tp1 = 900., Tp2 = 1200., Ts = 2550., RpRs = 0.155313,
+                               lammin = 1.0, lammax = 5.0,
+                               Nlam = 1000, Nside = 16):
+    """
+    Generate a toy spaxel map with a hotspot
+
+    Parameters
+    ----------
+    phi0 : float
+        Latitude of hot spot center [radians]
+    theta0 : float
+        Longitude of hot spot center [radians]
+    ds : float
+        Angular radius of hotspot [degrees]
+    Tp1 : float
+        Temperature outside hotspot [K]
+    Tp2 : float
+        Temperature inside hotspot [K]
+    Ts : float
+        Stellar effective temperature [K]
+    RpRs : float
+        Planet radius relative to stellar radius
+
+    Returns
+    -------
+    lamhr : numpy.array
+        Wavelength grid [microns]
+    spaxels : numpy.ndarray
+        Pixel spectra (2d)
+
+    Example
+    -------
+    >>> lam, spaxels = prep_blackbody_hotspot_map()
+    """
+
+    # Create hi-res wavelength grid
+    lamhr = np.linspace(lammin - 0.5, lammax + 0.5, Nlam)
+
+    # Create blackbody spectra at two temperatures
+    Bp1 = planck(Tp1, lamhr)     # Blackbody 1
+    Bp2 = planck(Tp2, lamhr)     # Blackbody 2
+    Bs = planck(Ts, lamhr)       # Stellar blackbody
+
+    # Calculate the planet-star flux ratio for both "surfaces"
+    FpFs1 = (RpRs**2) * (Bp1 / Bs)
+    FpFs2 = (RpRs**2) * (Bp2 / Bs)
+
+    # Get number of pixels/spaxels
+    Npix = hp.nside2npix(Nside)
+
+    # Calc the latitude and longitude of each hpix
+    thetas, phis = hp.pix2ang(Nside, np.arange(Npix))
+    thetas = thetas - np.pi / 2
+    phis = phis - np.pi
+
+    # Define empty 2d array for spaxels
+    spaxels = np.zeros((Npix, Nlam))
+
+    # Loop over pixels filling with blackbody
+    for i in range(hp.nside2npix(Nside)):
+
+        # Relabel variables for below equation
+        phi1, theta1 =  thetas[i], phis[i]
+        dtheta = theta0 - theta1
+
+        # Calculate the angular distance between two points on sphere
+        ang = np.arccos(np.sin(phi1) * np.sin(phi0) + np.cos(phi1) * np.cos(phi0) * np.cos(dtheta)) * 180 / np.pi
+
+        # Use a different spectrum inside and outside of the great circle defined by dang
+        if ang > ds:
+            # Outside hotspot
+            spaxels[i,:] = FpFs1
+        else:
+            # Within hotspot
+            spaxels[i,:] = FpFs2
+
+    return lamhr, spaxels
+
+def prep_spectral_hotspot_map(phi0 = np.pi, theta0 = 0.0, ds = 25.0,
+                              Nside = 16):
+    """
+    Generate a toy spaxel map with a hotspot
+
+    Parameters
+    ----------
+    phi0 : float
+        Latitude of hot spot center [radians]
+    theta0 : float
+        Longitude of hot spot center [radians]
+    ds : float
+        Angular radius of hotspot [degrees]
+
+    Returns
+    -------
+    lamhr : numpy.array
+        Wavelength grid [microns]
+    spaxels : numpy.ndarray
+        Pixel spectra (2d)
+
+    Example
+    -------
+    >>> lam, spaxels = prep_spectral_hotspot_map()
+    """
+
+    # Start with toy map 2, which has modeled FpFs's for HD189
+    lamhr, spaxin = prep_map2()
+
+    # Parse into the 4 different FpFs
+    FpFsA = spaxin[0,:]
+    FpFsB = spaxin[100,:]
+    FpFsC = spaxin[150,:]
+    FpFsD = spaxin[450,:]
+
+    # Outside hotspot
+    FpFs1 = FpFsD
+
+    # Inside hotspot
+    FpFs2 = FpFsC
+
+    # Get number of pixels/spaxels
+    Npix = hp.nside2npix(Nside)
+
+    # Calc the latitude and longitude of each hpix
+    thetas, phis = hp.pix2ang(Nside, np.arange(Npix))
+    thetas = thetas - np.pi / 2
+    phis = phis - np.pi
+
+    # Define empty 2d array for spaxels
+    Nlam = len(lamhr)
+    spaxels = np.zeros((Npix, Nlam))
+
+    # Loop over pixels filling with blackbody
+    for i in range(hp.nside2npix(Nside)):
+
+        # Relabel variables for below equation
+        phi1, theta1 =  thetas[i], phis[i]
+        dtheta = theta0 - theta1
+
+        # Calculate the angular distance between two points on sphere
+        ang = np.arccos(np.sin(phi1) * np.sin(phi0) + np.cos(phi1) * np.cos(phi0) * np.cos(dtheta)) * 180 / np.pi
+
+        # Use a different spectrum inside and outside of the great circle defined by dang
+        if ang > ds:
+            # Outside hotspot
+            spaxels[i,:] = FpFs1
+        else:
+            # Within hotspot
+            spaxels[i,:] = FpFs2
+
+    return lamhr, spaxels
 
 def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
                                    dlam = 0.18, lmax = 18,

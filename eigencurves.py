@@ -22,33 +22,10 @@ import pdb
 from scipy import stats
 from scipy import special
 
-def mpmodel(p,x,y,z,elc,escore,nparams):
-	if nparams==3:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:]
-	elif nparams==4:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:]
-	elif nparams==5:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:]
-	elif nparams==6:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:] + p[5]*escore[3,:]
-	elif nparams==7:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:] + p[5]*escore[3,:] + p[6]*escore[4,:]
-	elif nparams==8:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:] + p[5]*escore[3,:] + p[6]*escore[4,:] + p[7]*escore[5,:]
-	elif nparams==9:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:] + p[5]*escore[3,:] + p[6]*escore[4,:] + p[7]*escore[5,:] + p[8]*escore[6,:]
-	elif nparams==10:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:] + p[5]*escore[3,:] + p[6]*escore[4,:] + p[7]*escore[5,:] + p[8]*escore[6,:] + p[9]*escore[7,:]
-	elif nparams==11:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:] + p[5]*escore[3,:] + p[6]*escore[4,:] + p[7]*escore[5,:] + p[8]*escore[6,:] + p[9]*escore[7,:] + p[10]*escore[8,:]
-	elif nparams==12:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:] + p[5]*escore[3,:] + p[6]*escore[4,:] + p[7]*escore[5,:] + p[8]*escore[6,:] + p[9]*escore[7,:] + p[10]*escore[8,:] + p[11]*escore[9,:]
-	elif nparams==13:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:] + p[5]*escore[3,:] + p[6]*escore[4,:] + p[7]*escore[5,:] + p[8]*escore[6,:] + p[9]*escore[7,:] + p[10]*escore[8,:] + p[11]*escore[9,:] + p[12]*escore[10,:]
-	elif nparams==14:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:] + p[5]*escore[3,:] + p[6]*escore[4,:] + p[7]*escore[5,:] + p[8]*escore[6,:] + p[9]*escore[7,:] + p[10]*escore[8,:] + p[11]*escore[9,:] + p[12]*escore[10,:] + p[13]*escore[11,:]
-	elif nparams==15:
-		model = p[0]*elc[0,:] + p[1] + p[2]*escore[0,:] + p[3]*escore[1,:] + p[4]*escore[2,:] + p[5]*escore[3,:] + p[6]*escore[4,:] + p[7]*escore[5,:] + p[8]*escore[6,:] + p[9]*escore[7,:] + p[10]*escore[8,:] + p[11]*escore[9,:] + p[12]*escore[10,:] + p[13]*escore[11,:] + p[14]*escore[12,:]
+def mpmodel(p,x,y,z,elc,escore,nparams):#fjac=None,x=None,y=None,err=None):
+	model = p[0]*elc[0,:] + p[1]
+	for ind in range(2,nparams):
+		model = model + p[ind] * escore[ind-2,:]
 	return np.array(y-model)
 
 def lnprob(theta,x,y,yerr,elc,escore,nparams):
@@ -56,45 +33,9 @@ def lnprob(theta,x,y,yerr,elc,escore,nparams):
 	return lp+lnlike(theta,x,y,yerr,elc,escore,nparams)
 
 def lnlike(theta,x,y,yerr,elc,escore,nparams):
-	if nparams==3:
-		c0,fstar,c1=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:]
-	elif nparams==4:
-		c0,fstar,c1,c2=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:]
-	elif nparams==5:
-		c0,fstar,c1,c2,c3=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:] + c3*escore[2,:]
-	elif nparams==6:
-		c0,fstar,c1,c2,c3,c4=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:] + c3*escore[2,:] + c4*escore[3,:]
-	elif nparams==7:
-		c0,fstar,c1,c2,c3,c4,c5=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:] + c3*escore[2,:] + c4*escore[3,:] + c5*escore[4,:]
-	elif nparams==8:
-		c0,fstar,c1,c2,c3,c4,c5,c6=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:] + c3*escore[2,:] + c4*escore[3,:] + c5*escore[4,:] + c6*escore[5,:]
-	elif nparams==9:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:] + c3*escore[2,:] + c4*escore[3,:] + c5*escore[4,:] + c6*escore[5,:] + c7*escore[6,:]
-	elif nparams==10:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7,c8=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:] + c3*escore[2,:] + c4*escore[3,:] + c5*escore[4,:] + c6*escore[5,:] + c7*escore[6,:] + c8*escore[7,:]
-	elif nparams==11:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7,c8,c9=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:] + c3*escore[2,:] + c4*escore[3,:] + c5*escore[4,:] + c6*escore[5,:] + c7*escore[6,:] + c8*escore[7,:] + c9*escore[8,:]
-	elif nparams==12:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:] + c3*escore[2,:] + c4*escore[3,:] + c5*escore[4,:] + c6*escore[5,:] + c7*escore[6,:] + c8*escore[7,:] + c9*escore[8,:] + c10*escore[9,:]
-	elif nparams==13:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:] + c3*escore[2,:] + c4*escore[3,:] + c5*escore[4,:] + c6*escore[5,:] + c7*escore[6,:] + c8*escore[7,:] + c9*escore[8,:] + c10*escore[9,:] + c11*escore[10,:]
-	elif nparams==14:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:] + c3*escore[2,:] + c4*escore[3,:] + c5*escore[4,:] + c6*escore[5,:] + c7*escore[6,:] + c8*escore[7,:] + c9*escore[8,:] + c10*escore[9,:] + c11*escore[10,:] + c12*escore[11,:]
-	elif nparams==15:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13=theta
-		model = c0*elc[0,:] + fstar + c1*escore[0,:] + c2*escore[1,:] + c3*escore[2,:] + c4*escore[3,:] + c5*escore[4,:] + c6*escore[5,:] + c7*escore[6,:] + c8*escore[7,:] + c9*escore[8,:] + c10*escore[9,:] + c11*escore[10,:] + c12*escore[11,:] + c13*escore[12,:]
+	model = theta[0] * elc[0,:] + theta[1]
+	for ind in range(2,nparams):
+		model = model + theta[ind] * escore[ind-2,:]
 	resid=y-model
 	chi2=np.sum((resid/yerr)**2)
 	dof=np.shape(y)[0]-1.
@@ -104,32 +45,8 @@ def lnlike(theta,x,y,yerr,elc,escore,nparams):
 
 def lnprior(theta,nparams):
 	lnpriorprob=0.
-	if nparams==3:
-		c0,fstar,c1=theta
-	elif nparams==4:
-		c0,fstar,c1,c2=theta
-	elif nparams==5:
-		c0,fstar,c1,c2,c3=theta
-	elif nparams==6:
-		c0,fstar,c1,c2,c3,c4=theta
-	elif nparams==7:
-		c0,fstar,c1,c2,c3,c4,c5=theta
-	elif nparams==8:
-		c0,fstar,c1,c2,c3,c4,c5,c6=theta
-	elif nparams==9:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7=theta
-	elif nparams==10:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7,c8=theta
-	elif nparams==11:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7,c8,c9=theta
-	elif nparams==12:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10=theta
-	elif nparams==13:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11=theta
-	elif nparams==14:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12=theta
-	elif nparams==15:
-		c0,fstar,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13=theta
+	c0 = theta[0]
+	fstar = theta[1]
 	if fstar<0.:
 		lnpriorprob=-np.inf
 	elif c0<0.:
@@ -137,14 +54,24 @@ def lnprior(theta,nparams):
 	return lnpriorprob
 
 def eigencurves(dict,plot=False,degree=3):
-
 	waves=dict['wavelength (um)']
 	times=dict['time (days)']
 	fluxes=dict['flux (ppm)']	#2D array times, waves
 	errors=dict['flux err (ppm)']
-	#alltheoutput=-np.ones((np.shape(waves)[0],(int(degree**2.)+1)))	#This file is going to have wavelength in the first column, and then the spherical harmonics after that
-	alltheoutput=np.zeros((25600,int(degree**2.),np.shape(waves)[0]))
-
+	
+	burnin=200
+	nsteps=1000
+	nwalkers=32 #number of walkers	
+	
+	
+	#This file is going to be a 3D numpy array 
+	## The shape is (nsamples,n parameters,n waves)
+	## where nsamples is the number of posterior MCMC samples
+	## n parameters is the number of parameters
+	## and n waves is the number of wavelengths looped over
+	
+	alltheoutput=np.zeros(((nsteps-burnin)*nwalkers,int(degree**2.),np.shape(waves)[0]))
+	
 	if np.shape(fluxes)[0]==np.shape(waves)[0]:
 		rows=True
 	elif np.shape(fluxes)[0]==np.shape(times)[0]:
@@ -165,11 +92,9 @@ def eigencurves(dict,plot=False,degree=3):
 		#alltheoutput[counter,0]=wavelength
 
 		#	Calculate spherical harmonic maps using SPIDERMAN
-
-		#lc,t = sh_lcs(t0=-2.21857/2.)	#times in days, and fp/fs - model at higher time resolution (default is ntimes=500)
+		
 		lc,t = sh_lcs(t0=-2.21857/2.,ntimes=eclipsetimes,degree=degree)	#model it for the times of the observations
-		#lc,t = sh_lcs(system.properties,t0=-2.21857//2.,ntimes=eclipsetimes)
-
+		
 		#Optional add-on above: test whether we want to include higher-order spherical harmonics when making our eigencurves?
 
 		# subtract off stellar flux
@@ -228,22 +153,17 @@ def eigencurves(dict,plot=False,degree=3):
 		nparams-=1
 		#print nparams
 		params0=np.ones(nparams)
-
+		
 		#pdb.set_trace()
 		mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
-
-		#pdb.set_trace()
 		#format parameters for mcmc fit
 		theta=mpfit[0]
 		ndim=np.shape(theta)[0]	#set number of dimensions
-		nwalkers=32 #number of walkers	
-
+		
 		sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,escore,nparams),threads=6)
 		pos = [theta + 1e-5*np.random.randn(ndim) for i in range(nwalkers)]
-
-		burnin=200
-		nsteps=1000
-
+		
+		print("Running MCMC at {} um".format(waves[counter]))
 		sampler.run_mcmc(pos,nsteps)
 
 		samples = sampler.chain[:, burnin:, :].reshape((-1, ndim))
@@ -278,7 +198,7 @@ def eigencurves(dict,plot=False,degree=3):
 				for i in range(1,int(degree**2.)):
 					spheres[i] += fcoeff.T[j,2*i-1]-fcoeff.T[j,2*(i-1)]
 				spheres[0] = samples[sampnum,0]#bestcoeffs[0]#c0_best	
-			pdb.set_trace()
+			
 			alltheoutput[sampnum,:,counter]=spheres
 		#pdb.set_trace()
 		#Translate all the coefficients for all of the posterior samples

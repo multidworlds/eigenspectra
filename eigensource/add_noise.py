@@ -174,6 +174,7 @@ def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
             outDict["flux (ppm)"][:,waveInd] = t['flux (ppm)']
             outDict["flux err (ppm)"][:,waveInd] = t['flux err (ppm)']
             
+            
             if doPlots == True:
                 fig, ax = plt.subplots()
                 ax.errorbar(t['time (days)'],t['flux (ppm)'],fmt='o',
@@ -186,6 +187,7 @@ def add_noise(fluxTWave,preserveInput=True,nEclipses=5,
             print('No SNR information for wavelength {} um'.format(waveMid))
             outDict["flux (ppm)"][:,waveInd] = np.nan
             outDict["flux err (ppm)"][:,waveInd] = np.nan
+    
         
     if doPlots == True:
         plt.close('all')

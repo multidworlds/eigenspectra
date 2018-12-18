@@ -17,6 +17,7 @@ import numpy as np
 from scipy.stats import binned_statistic
 import healpy as hp
 import matplotlib.pyplot as plt
+import os, sys
 import starry
 
 def expand_hp(healpix_map, lmax):
@@ -390,7 +391,8 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
                                    plot_lightcurves = True,
                                    plot_points_on_map_spec = False,
                                    plot_diagnostic = True,
-                                   save_output = False):
+                                   save_output = False,
+                                   save_tag = "eclipse_lightcurve_test2"):
     """
     Creates toy multi-wavelength secondary eclipse lightcurves of HD189733 b
 
@@ -595,8 +597,10 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
         plt.show()
 
     if save_output:
+        pre = "data/input_lightcurves"
+        fname = os.path.join(pre, save_tag+".npz")
         # Save generated lightcurve
-        np.savez("data/input_lightcurves/eclipse_lightcurve_test1.npz", time = time, wl = lamlo,
+        np.savez(fname, time = time, wl = lamlo,
                                     dwl = dlamlo, lightcurve = lightcurve)
 
 
@@ -605,7 +609,7 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
 if __name__ == "__main__":
 
     # Get wavelength-dependent healpix map
-    lam, spaxels = prep_map1()
+    lamhr, spaxels = prep_spectral_hotspot_map()
 
     # Create mock lightcurves
-    time, lam, dlam, lcurves = create_lightcurves_with_starry(lam, spaxels)
+    time, lam, dlam, lcurves = create_lightcurves_with_starry(lamhr, spaxels)

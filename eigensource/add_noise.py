@@ -25,7 +25,7 @@ for tInd in np.arange(exNtime):
 dat = Table.read('data/instrument/snr_spec_f322w2.fits')
 
 def get_lc(practiceVersion=False,
-          inputFile='data/input_lightcurves/eclipse_lightcurve_test1.npz'):
+          inputFile='data/input_lightcurves/eclipse_lightcurve_test2.npz'):
     """ 
     Get the input lightcurves from the NPZ files and put them in the format
           that add_noise is expecting

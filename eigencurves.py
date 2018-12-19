@@ -145,14 +145,16 @@ def eigencurves(dict,plot=False,degree=3):
 				loglike=-0.5*(np.sum((resid//eclipseerrors)**2 + np.log(2.0*np.pi*(eclipseerrors)**2)))
 				bicf=-2.*loglike + nparams*np.log(np.shape(eclipseerrors)[0])
 				delbic=bici-bicf
-				#print nparams,chi2f,bici,bicf,delbic
+				#pdb.set_trace()
+				#print(np.sum((resid//eclipseerrors)**2),loglike)
+				#print(nparams,chi2f,bici,bicf,delbic)
 				chi2i=chi2f
 				bici=bicf
 
 		#pdb.set_trace()
 		nparams-=1
 		#print nparams
-		params0=np.ones(nparams)
+		params0=10.**-4.*np.ones(nparams)
 		
 		#pdb.set_trace()
 		mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
@@ -185,7 +187,7 @@ def eigencurves(dict,plot=False,degree=3):
 		for j in range(0,len(fcoeffbest)):
 			for i in range(1,int(degree**2.)):
 				spheresbest[i] += fcoeffbest.T[j,2*i-1]-fcoeffbest.T[j,2*(i-1)]
-			spheresbest[0] = bestcoeffs[0]#c0_best
+		spheresbest[0] = bestcoeffs[0]#c0_best
 		#pdb.set_trace()
 		for sampnum in np.arange(np.shape(samples)[0]):
 			fcoeff=np.zeros_like(ecoeff)
@@ -197,12 +199,13 @@ def eigencurves(dict,plot=False,degree=3):
 			for j in range(0,len(fcoeff)):
 				for i in range(1,int(degree**2.)):
 					spheres[i] += fcoeff.T[j,2*i-1]-fcoeff.T[j,2*(i-1)]
-				spheres[0] = samples[sampnum,0]#bestcoeffs[0]#c0_best	
+			spheres[0] = samples[sampnum,0]#bestcoeffs[0]#c0_best	
 			
 			alltheoutput[sampnum,:,counter]=spheres
 		#pdb.set_trace()
 		#Translate all the coefficients for all of the posterior samples
 		#alltheoutput[counter,1:]=spheres
+		#print(spheresbest)
 
 		if plot:
 			params0=sp.ModelParams(brightness_model='spherical')	#no offset model
@@ -226,6 +229,8 @@ def eigencurves(dict,plot=False,degree=3):
 
 			times=eclipsetimes
 			templc=params0.lightcurve(times)
+
+			params0.plot_square()
 
 			# doing a test spiderman run to see if the output lightcurve is similar
 			# #PERSON CHECKING THIS: You can use this to make sure the spherical harmonics fit is doing the right thing!

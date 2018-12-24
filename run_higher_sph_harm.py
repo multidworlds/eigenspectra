@@ -1,4 +1,6 @@
+"""
 
+"""
 # coding: utf-8
 
 # In[7]:
@@ -24,8 +26,14 @@ system = import_module('data.planet.{}'.format(planet_name))
 
 # ### Import spectra and generate map
 
+if len(argv) < 3:
+    usePath = "data/input_lightcurves/eclipse_lightcurve_test1.npz"
+    print("No lightcurve specified, using {}".format(usePath))
+else:
+    usePath = int(argv[2])
+
 # Load lightcurve
-stuff = np.load("data/input_lightcurves/eclipse_lightcurve_test1.npz")
+stuff = np.load(usePath)
 
 # Parse File
 lightcurve = stuff["lightcurve"]

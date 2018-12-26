@@ -31,7 +31,7 @@ if len(argv) < 3:
     usePath = "data/input_lightcurves/eclipse_lightcurve_test1.npz"
     print("No lightcurve specified, using {}".format(usePath))
 else:
-    usePath = int(argv[2])
+    usePath = argv[2]
 
 lcName = os.path.splitext(os.path.basename(usePath))[0]
 

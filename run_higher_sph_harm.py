@@ -1,4 +1,6 @@
+"""
 
+"""
 # coding: utf-8
 
 # In[7]:
@@ -14,6 +16,7 @@ import eigencurves
 import eigenmaps
 import kmeans
 from sys import argv
+import os
 #import mapPCA
 import bin_eigenspectra
 
@@ -24,8 +27,16 @@ system = import_module('data.planet.{}'.format(planet_name))
 
 # ### Import spectra and generate map
 
+if len(argv) < 3:
+    usePath = "data/input_lightcurves/eclipse_lightcurve_test1.npz"
+    print("No lightcurve specified, using {}".format(usePath))
+else:
+    usePath = int(argv[2])
+
+lcName = os.path.splitext(os.path.basename(usePath))[0]
+
 # Load lightcurve
-stuff = np.load("data/input_lightcurves/eclipse_lightcurve_test1.npz")
+stuff = np.load(usePath)
 
 # Parse File
 lightcurve = stuff["lightcurve"]
@@ -74,6 +85,8 @@ spherearray = eigencurves.eigencurves(noiseDict,plot=False,degree=norder)
 
 # In[60]:
 
-
-np.savez('data/sph_harmonic_coefficients_full_samples/spherearray_deg_{}.npz'.format(norder),spherearray)
+saveDir = "data/sph_harmonic_coefficients_full_samples/" + lcName
+if os.path.exists(saveDir) == False:
+    os.mkdir(saveDir)
+np.savez('{}/spherearray_deg_{}.npz'.format(saveDir,norder),spherearray)
 

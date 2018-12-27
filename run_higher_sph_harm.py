@@ -44,48 +44,56 @@ def run_lc_noise_and_fit(norder=3,
     -----------
     None: all data are saved to data/sph_harmonic_coefficients_full_samples
     """
-    # ### Import spectra and generate map
-    lcName = os.path.splitext(os.path.basename(usePath))[0]
-
-    # Load lightcurve
-    stuff = np.load(usePath)
-
-    # Parse File
-    lightcurve = stuff["lightcurve"]
-    wl = stuff["wl"]
-    dwl = stuff["dwl"]
-    time = stuff["time"]
-
-    # Make Plot
-    fig, ax = p.subplots(1, figsize=(14, 5))
-    ax.set_xlabel('Time [days]')
-    ax.set_ylabel('Relative Flux')
-    for i in range(len(wl)):
-        lc = lightcurve[:,i] - np.min(lightcurve[:,i])
-        ax.plot(time, lc+1, c = "C%i" %(i%9), label = r"%.2f $\mu$m" %(wl[i]))
-    ax.legend(fontsize = 16, ncol = 2)
-    #p.show()
-
-    # ### Add Noise
-
-    # In[12]:
-    inputLC3D = add_noise.get_lc()
-    noiseDict = add_noise.add_noise(inputLC3D)
-
-
-    # ### Fit eigencurves to lightcurve
-    print("Fitting eigencurves now for order {}".format(norder))
-
-    spherearray = eigencurves.eigencurves(noiseDict,plot=False,degree=norder)
-    # spherearray is an array of wavelength x SH coefficents
-
-
     # In[60]:
-
+    ## Grab the name of the lightcurve
+    lcName = os.path.splitext(os.path.basename(usePath))[0]
+    
     saveDir = "data/sph_harmonic_coefficients_full_samples/" + lcName
     if os.path.exists(saveDir) == False:
         os.mkdir(saveDir)
-    np.savez('{}/spherearray_deg_{}.npz'.format(saveDir,norder),spherearray)
+    outputNPZ = '{}/spherearray_deg_{}.npz'.format(saveDir,norder)
+    
+    if os.path.exists(outputNPZ):
+        print("Found the previously-run file {}. Now exiting".format(outputNPZ))
+        return
+    else:
+        print("No previous run found, so running MCMC.")
+        print("This can take a long time, especially for higher spherical harmonic orders")
+        
+        # ### Import spectra and generate map
+        # Load lightcurve
+        stuff = np.load(usePath)
+
+        # Parse File
+        lightcurve = stuff["lightcurve"]
+        wl = stuff["wl"]
+        dwl = stuff["dwl"]
+        time = stuff["time"]
+
+        # Make Plot
+        fig, ax = p.subplots(1, figsize=(14, 5))
+        ax.set_xlabel('Time [days]')
+        ax.set_ylabel('Relative Flux')
+        for i in range(len(wl)):
+            lc = lightcurve[:,i] - np.min(lightcurve[:,i])
+            ax.plot(time, lc+1, c = "C%i" %(i%9), label = r"%.2f $\mu$m" %(wl[i]))
+        ax.legend(fontsize = 16, ncol = 2)
+        #p.show()
+
+        # ### Add Noise
+
+        # In[12]:
+        inputLC3D = add_noise.get_lc()
+        noiseDict = add_noise.add_noise(inputLC3D)
+
+
+        # ### Fit eigencurves to lightcurve
+        print("Fitting eigencurves now for order {}".format(norder))
+
+        spherearray = eigencurves.eigencurves(noiseDict,plot=False,degree=norder)
+        # spherearray is an array of wavelength x SH coefficents
+    
+        np.savez(outputNPZ,spherearray)
 
 if __name__ == "__main__":
     """ If running on the command line, set the norder and usePath parameters

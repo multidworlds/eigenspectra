@@ -21,72 +21,85 @@ import os
 import bin_eigenspectra
 
 from importlib import import_module
+
+## Set the planet parameters
+
 planet_name = 'HD189733b'
 system = import_module('data.planet.{}'.format(planet_name))
 
 
-# ### Import spectra and generate map
+def run_lc_noise_and_fit(norder=3,
+                         usePath="data/input_lightcurves/eclipse_lightcurve_test1.npz"):
+    """
+    Add error bars to a forward model and then run eigencurves fitting to retrieve the map
+    
+    Parameters:
+    -----------
+    norder: int
+        Number of the spherical harmonic to fit
+    usePath: str
+        Path to the npz file for light curves
+    
+    Outputs:
+    -----------
+    None: all data are saved to data/sph_harmonic_coefficients_full_samples
+    """
+    # ### Import spectra and generate map
+    lcName = os.path.splitext(os.path.basename(usePath))[0]
 
-if len(argv) < 3:
-    usePath = "data/input_lightcurves/eclipse_lightcurve_test1.npz"
-    print("No lightcurve specified, using {}".format(usePath))
-else:
-    usePath = int(argv[2])
+    # Load lightcurve
+    stuff = np.load(usePath)
 
-lcName = os.path.splitext(os.path.basename(usePath))[0]
+    # Parse File
+    lightcurve = stuff["lightcurve"]
+    wl = stuff["wl"]
+    dwl = stuff["dwl"]
+    time = stuff["time"]
 
-# Load lightcurve
-stuff = np.load(usePath)
+    # Make Plot
+    fig, ax = p.subplots(1, figsize=(14, 5))
+    ax.set_xlabel('Time [days]')
+    ax.set_ylabel('Relative Flux')
+    for i in range(len(wl)):
+        lc = lightcurve[:,i] - np.min(lightcurve[:,i])
+        ax.plot(time, lc+1, c = "C%i" %(i%9), label = r"%.2f $\mu$m" %(wl[i]))
+    ax.legend(fontsize = 16, ncol = 2)
+    #p.show()
 
-# Parse File
-lightcurve = stuff["lightcurve"]
-wl = stuff["wl"]
-dwl = stuff["dwl"]
-time = stuff["time"]
+    # ### Add Noise
 
-# Make Plot
-fig, ax = p.subplots(1, figsize=(14, 5))
-ax.set_xlabel('Time [days]')
-ax.set_ylabel('Relative Flux')
-for i in range(len(wl)):
-    lc = lightcurve[:,i] - np.min(lightcurve[:,i])
-    ax.plot(time, lc+1, c = "C%i" %(i%9), label = r"%.2f $\mu$m" %(wl[i]))
-ax.legend(fontsize = 16, ncol = 2)
-#p.show()
-
-
-# ### Add Noise
-
-# In[12]:
-
-
-inputLC3D = add_noise.get_lc()
-noiseDict = add_noise.add_noise(inputLC3D)
-
-
-# ### Fit eigencurves to lightcurve
-
-# In[28]:
-
-
-
-# In[ ]:
-if len(argv) < 2:
-    norder=3
-    print("No order specified, using {}".format(norder))
-else:
-    norder = int(argv[1])
-
-print("Fitting eigencurves now for order {}".format(norder))
-
-spherearray = eigencurves.eigencurves(noiseDict,plot=False,degree=norder)
-# spherearray is an array of wavelength x SH coefficents
+    # In[12]:
+    inputLC3D = add_noise.get_lc()
+    noiseDict = add_noise.add_noise(inputLC3D)
 
 
-# In[60]:
+    # ### Fit eigencurves to lightcurve
+    print("Fitting eigencurves now for order {}".format(norder))
 
-saveDir = "data/sph_harmonic_coefficients_full_samples/" + lcName
-if os.path.exists(saveDir) == False:
-    os.mkdir(saveDir)
-np.savez('{}/spherearray_deg_{}.npz'.format(saveDir,norder),spherearray)
+    spherearray = eigencurves.eigencurves(noiseDict,plot=False,degree=norder)
+    # spherearray is an array of wavelength x SH coefficents
 
+
+    # In[60]:
+
+    saveDir = "data/sph_harmonic_coefficients_full_samples/" + lcName
+    if os.path.exists(saveDir) == False:
+        os.mkdir(saveDir)
+    np.savez('{}/spherearray_deg_{}.npz'.format(saveDir,norder),spherearray)
+
+if __name__ == "__main__":
+    """ If running on the command line, set the norder and usePath parameters
+    """
+    if len(argv) < 3:
+        usePath = "data/input_lightcurves/eclipse_lightcurve_test1.npz"
+        print("No lightcurve specified, using {}".format(usePath))
+    else:
+        usePath = int(argv[2])
+
+    if len(argv) < 2:
+        norder=3
+        print("No order specified, using {}".format(norder))
+    else:
+        norder = int(argv[1])
+
+    run_lc_noise_and_fit(norder=norder,usePath=usePath)

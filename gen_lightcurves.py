@@ -20,6 +20,8 @@ import matplotlib.pyplot as plt
 import os, sys
 import starry
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+
 def expand_hp(healpix_map, lmax):
     """
     Expand a Healpix ring-ordered map in spherical harmonics up to degree `lmax`.
@@ -215,7 +217,8 @@ def prep_map1():
     """
 
     # Load in 3D data from Kat
-    file = np.load("data/maps/mystery_map1.npz")  # Same file but w/wl included
+    path = os.path.join(HERE, "data/maps/mystery_map1.npz")
+    file = np.load(path)  # Same file but w/wl included
     spaxels = file["spaxels"]
     lam = file["wl"]
 
@@ -227,7 +230,8 @@ def prep_map2():
     """
 
     # Load in 3D data from Kat
-    file = np.load("data/maps/mystery_map2.npz")  # Same file but w/wl included
+    path = os.path.join(HERE, "data/maps/mystery_map2.npz")
+    file = np.load(path)  # Same file but w/wl included
     spaxels = file["spaxels"]
     lam = file["wl"]
 

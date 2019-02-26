@@ -26,7 +26,6 @@ def expand_hp(healpix_map, lmax):
     """
     Expand a Healpix ring-ordered map in spherical harmonics up to degree `lmax`.
 
-
     """
     # Get the complex spherical harmonic coefficients
     alm = hp.sphtfunc.map2alm(healpix_map, lmax=lmax)
@@ -475,12 +474,15 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
     FpFslr = np.mean(spec2d, axis=0)
 
     """
-    # Rodrigo's fix for starry spectral map normalization:
+    # Rodrigo Luger's fix for starry spectral map normalization:
     """
     # Loop over wavelengths loading map into starry
     y = np.zeros_like(planet.y)
     for i in range(Nlamlo):
+        # Expand a Healpix ring-ordered map in spherical harmonics
+        # up to degree `lmax`
         y[:, i] = expand_hp(spec2d[:, i], lmax=lmax)
+    # Renormalize planet map and luminosity accordingly
     planet[:, :] = y / y[0]
     planet.L = y[0]
 
@@ -519,10 +521,8 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
     system.compute(time)
     lightcurve = system.lightcurve / system.lightcurve[0]
 
-    # THIS IS A HACK TO GET REASONABLE DEPTHS WHILE STARRY IS MESSING UP
-    # NEEDS TO BE FIXED
-    #lightcurve = (lightcurve / 200.0)
-    lightcurve = lightcurve + (1 - np.max(lightcurve))
+    # Apply vertical shift so the bottom of the eclipse is at 0.0
+    lightcurve = lightcurve + (1.0 - np.max(lightcurve))
 
     if plot_lightcurves:
         # Make Plot

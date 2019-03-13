@@ -12,6 +12,7 @@ from astropy.table import Table, vstack
 
 import pynrc
 from copy import deepcopy
+import pysynphot as S
 
 
 def sum_spectrum(img,ap=4,center=None):

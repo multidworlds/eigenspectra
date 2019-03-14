@@ -12,7 +12,9 @@ from astropy.table import Table, vstack
 
 import pynrc
 from copy import deepcopy
+import pysynphot as S
 
+from data.planet import HD189733b as planet
 
 def sum_spectrum(img,ap=4,center=None):
     " Simply sums the spectrum along spatial direction"
@@ -23,11 +25,21 @@ def sum_spectrum(img,ap=4,center=None):
     return np.sum(subImg,axis=0)
 
 
+def pynrc_spectrum():
+    '''
+    Take stellar-specific inputs and returns the appropriate spectral object.
+    '''
+    bp = S.ObsBandpass(planet.stellar_bandpass)
+    return pynrc.stellar_spectrum(planet.spectral_type,
+                                  *(planet.stellar_magnitude),
+                                  bp)
+
 def make_snr_spectrum():
     ### 
 
     bp_k = S.ObsBandpass('johnson,k')
-    sp = pynrc.stellar_spectrum('K0V',5.541,'vegamag',bp_k,)
+    # sp = pynrc.stellar_spectrum('K0V',5.541,'vegamag',bp_k,)
+    sp = pynrc_spectrum()
 
     nrc = pynrc.NIRCam('F322W2', pupil='GRISM0', ngroup=3, nint=100, read_mode='RAPID',
                       wind_mode='STRIPE',xpix=2048,ypix=64)

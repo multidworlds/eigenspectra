@@ -35,16 +35,27 @@ planet_limbdarkening = [0, 0]
 
 properties = {
 
-    'per': orbital_period.to(U.d).value,
-    'a_abs': semimajor_axis.to(U.AU).value,
-    'inc': orbital_inclination.to(U.deg).value,
-    'ecc': orbital_eccentricity,
-    'w': argument_of_periastron.to(U.deg).value,
+    "per": orbital_period.to(U.d).value,
+    "a_abs": semimajor_axis.to(U.AU).value,
+    "inc": orbital_inclination.to(U.deg).value,
+    "ecc": orbital_eccentricity,
+    "w": argument_of_periastron.to(U.deg).value,
     # Planet to star radius ratio
-    'rp': (planet_radius/stellar_radius).decompose().value,
+    "rp": (planet_radius/stellar_radius).decompose().value,
     # Semi-major axis to stellar radius ratio
-    'a': (semimajor_axis/stellar_radius).decompose().value,
-    'p_u1': planet_limbdarkening[0],
-    'p_u2': planet_limbdarkening[1],
+    "a": (semimajor_axis/stellar_radius).decompose().value,
+    "p_u1": planet_limbdarkening[0],
+    "p_u2": planet_limbdarkening[1],
 
 }
+
+# (PYNRC ONLY) For error generation with pynrc, provide the spectral type,
+# magnitude, including Astropy-compatible unit (default "vegamag"), and the
+# corresponding bandpass (using pysynphot syntax).
+
+# Spectral type
+spectral_type = "K0V"
+
+# Magnitude, including units and bandpass.
+stellar_magnitude = ["5.541", "vegamag"]
+stellar_bandpass = "johnson,k"

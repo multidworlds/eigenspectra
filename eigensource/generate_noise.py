@@ -25,7 +25,7 @@ def sum_spectrum(img,ap=4,center=None):
     return np.sum(subImg,axis=0)
 
 
-def pynrc_spectrum():
+def pynrc_spectrum(planet):
     '''
     Take stellar-specific inputs and returns the appropriate spectral object.
     '''
@@ -34,12 +34,12 @@ def pynrc_spectrum():
                                   *(planet.stellar_magnitude),
                                   bp)
 
+
 def make_snr_spectrum():
-    ### 
+    ###
 
     bp_k = S.ObsBandpass('johnson,k')
-    # sp = pynrc.stellar_spectrum('K0V',5.541,'vegamag',bp_k,)
-    sp = pynrc_spectrum()
+    sp = pynrc.stellar_spectrum('K0V',5.541,'vegamag',bp_k,)
 
     nrc = pynrc.NIRCam('F322W2', pupil='GRISM0', ngroup=3, nint=100, read_mode='RAPID',
                       wind_mode='STRIPE',xpix=2048,ypix=64)

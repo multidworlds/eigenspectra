@@ -6,7 +6,8 @@ import astropy.constants as C
 import astropy.units as U
 
 # The published properties of the system. The Astropy unit conversions will
-# automatically convert units to the appropriate ones for input to SPIDERMAN.
+# automatically convert units to the appropriate ones for input to SPIDERMAN
+# and the error generating routine.
 
 # Orbital period
 orbital_period = 2.21857567 * U.d
@@ -30,10 +31,19 @@ planet_radius = 1.216 * C.R_jup
 # Stellar radius
 stellar_radius = 0.805 * C.R_sun
 
+# Stellar effective temperature
+stellar_temperature = 5052 * U.K
+
+# Stellar metallicity
+stellar_FeH = -0.02
+
+# Stellar surface gravity
+stellar_logg = 4.49
+
 # Planetary limb-darkening parameters (u1, u2)
 planet_limbdarkening = [0, 0]
 
-properties = {
+SPIDERMAN_parameters = {
 
     "per": orbital_period.to(U.d).value,
     "a_abs": semimajor_axis.to(U.AU).value,
@@ -54,8 +64,38 @@ properties = {
 # corresponding bandpass (using pysynphot syntax).
 
 # Spectral type
-spectral_type = "K0V"
+stellar_type = "K0V"
 
 # Magnitude, including units and bandpass.
 stellar_magnitude = ["5.541", "vegamag"]
 stellar_bandpass = "johnson,k"
+
+# (PANDEXO ONLY) For error generation with PandExo, assemble the most system-
+# specific parameters to pass to the appropriate PandExo dictionary. Here we
+# will start with the constant transit depth/temperature option, though this
+# could be changed.
+
+PandExo_planet = {
+
+    "type": "constant",
+    "transit_duration": 2.0*60.0*60.0,
+    "td_unit": "s",
+    "radius": planet_radius.value,
+    "r_unit": str(planet_radius.unit),
+    # Since we're doing eclipse mapping, we want to use flux.
+    "f_unit": "fp/f*",
+    "temp": 1000
+
+}
+
+PandExo_star = {
+
+    "type": "phoenix",
+    "mag": 5.541,
+    "ref_wave": 2.22,
+    "temp": stellar_temperature.to(U.K).value,
+    "metal": stellar_FeH,
+    "logg": stellar_logg,
+    "radius": stellar_radius.value,
+    "r_unit": str(stellar_radius.unit)
+}

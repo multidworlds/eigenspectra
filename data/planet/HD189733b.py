@@ -84,6 +84,7 @@ PandExo_planet = {
     "r_unit": str(planet_radius.unit),
     # Since we're doing eclipse mapping, we want to use flux.
     "f_unit": "fp/f*",
+    "w_unit": None,
     "temp": 1000
 
 }

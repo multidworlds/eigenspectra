@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from copy import deepcopy
-from pandexo.engine.justdoit import run_pandexo
+from pandexo.engine.justdoit import load_exo_dict, run_pandexo
 from pandeia.engine.perform_calculation import perform_calculation
 
 
@@ -41,7 +41,8 @@ def make_snr_spectrum(planet):
     '''
     Run PandExo, extract a single integration, and return the noise.
     '''
-    exo_dict = pandexo_dict(planet)
+    exo_dict = load_exo_dict()
+    exo_dict = {**exo_dict, **pandexo_dict(planet)}
     result = run_pandexo(exo_dict, ['NIRCam F322W2'])
     texp = result['timing']['Time/Integration incl reset (sec)']
     newDictInput = deepcopy(result['PandeiaOutTrans']['input'])

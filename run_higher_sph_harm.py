@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as p
 #get_ipython().run_line_magic('matplotlib', 'inline')
 
-import eigensource.add_noise as add_noise
+import eigensource.add_noise_PandExo as add_noise
 import eigencurves
 import eigenmaps
 import kmeans

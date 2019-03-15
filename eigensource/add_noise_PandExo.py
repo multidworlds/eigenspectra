@@ -1,7 +1,7 @@
 import numpy as np
 from astropy.table import Table
 import matplotlib.pyplot as plt
-import data.eigensource.generate_noise as gn
+import eigensource.generate_noise_PandExo as gn
 import data.planet.HD189733b as planet
 
 # Constants in data structure

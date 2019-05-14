@@ -96,7 +96,7 @@ def sort_draws(eigenspectra_draws,kgroup_draws,method='avg'):
     
     sortArg = sortValue.argsort(axis=1)
     ## An ascending order array
-    ascendingOrder = np.arange(sortArg.shape[0])
+    ascendingOrder = np.arange(sortArg.shape[1])
     
     sortedDraws = np.zeros_like(eDraws)
     sortedKgroups = np.zeros_like(kGroup)
@@ -106,7 +106,7 @@ def sort_draws(eigenspectra_draws,kgroup_draws,method='avg'):
         sortedDraws[ind] = oneDraw[sortArg[ind]]
         for oneGroup in ascendingOrder:
             pts = kGroup[ind] == oneGroup
-            sortedKgroups[ind][pts] == sortArg[ind][oneGroup]
+            sortedKgroups[ind][pts] = sortArg[ind][oneGroup]
     
     return sortedDraws, sortedKgroups
     

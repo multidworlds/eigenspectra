@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.cluster import KMeans
 from sklearn import metrics
-
+import pdb
 
 def kmeans(fluxmap, k, labels=False):
     '''
@@ -60,3 +60,53 @@ def kmeansBest(fluxmap, n=10):
     k = np.argmax(score)
     return k
 
+def sort_draws(eigenspectra_draws,kgroup_draws,method='avg'):
+    '''
+    Take the many different draws and sort the groups so that we avoid
+    the sorting problem where the groups are all mixed up from one 
+    noise instance to another
+    
+    Parameters
+    ----------
+    eigenspectra_draws: list or np.array
+        A 3D array (or list of 2D arrays) that contain the spectra of each group
+    
+    method: str
+        The name of the method to sort the eigenspectra draws
+        `avg` - the average of each spectrum
+        `middle` - the middle value of each spectrum
+    
+    Returns
+    --------
+    sortedDraws: a 3D array of spectra for each draw and group
+        these will be sorted according to the `method` keyword
+    '''
+    eDraws = np.array(eigenspectra_draws)
+    kGroup = np.array(kgroup_draws)
+    
+    if method == 'avg':
+        sortValue = np.mean(eDraws,axis=2)
+    elif method == 'middle':
+        midWaveInd = eDraws.shape[2]/2
+        middleSpec = eDraws[:,:,midWaveInd]
+        sortValue = middleSpec
+    else:
+        print("Unrecognized sorting method")
+        return 0
+    
+    sortArg = sortValue.argsort(axis=1)
+    ## An ascending order array
+    ascendingOrder = np.arange(sortArg.shape[1])
+    
+    sortedDraws = np.zeros_like(eDraws)
+    sortedKgroups = np.zeros_like(kGroup)
+    
+    
+    for ind,oneDraw in enumerate(eDraws):
+        sortedDraws[ind] = oneDraw[sortArg[ind]]
+        for oneGroup in ascendingOrder:
+            pts = kGroup[ind] == oneGroup
+            sortedKgroups[ind][pts] = sortArg[ind][oneGroup]
+    
+    return sortedDraws, sortedKgroups
+    

@@ -15,6 +15,7 @@ Example
 
 import numpy as np
 from scipy.stats import binned_statistic
+from scipy import signal
 import healpy as hp
 import matplotlib.pyplot as plt
 import os, sys
@@ -65,7 +66,7 @@ def downbin_spec(specHR, lamHR, lamLR, dlam=None):
 
     Note
     ----
-    This function is from `coronagraph` (https://coronagraph.readthedocs.io/en/latest/index.html),
+    This function is from `coronagraph` (https://jlustigy.github.io/coronagraph/),
     developed by J. Lustig-Yaeger.
 
     Parameters
@@ -387,6 +388,124 @@ def prep_spectral_hotspot_map(phi0 = np.pi, theta0 = 0.0, ds = 25.0,
             spaxels[i,:] = FpFs2
 
     return lamhr, spaxels
+
+
+
+def create_quadrant_map(f1, f2, f3, f4, lat0 = 0.0, lon0 = 0.0, Nside = 16):
+    """
+    Return a quadrant map with different spectra 'painted on the surface'.
+
+    Parameters
+    ----------
+    f1 : array
+        Planet-star flux ratio 1 (upper/north left/west)
+    f2 : array
+        Planet-star flux ratio 2 (lower/south left/west)
+    f3 : array
+        Planet-star flux ratio 3 (upper/north right/east)
+    f4 : array
+        Planet-star flux ratio 4 (lower/south right/east)
+    lat0 : float
+        Latitude demarcation between north and south
+    lon0 : float
+        Longitude demarcation between east and west
+    Nside : int
+        Healpix NSIDE paramater
+
+    Returns
+    -------
+    spaxels : numpy.ndarray
+        Two-dimensional array of pixels by wavelengths
+
+    """
+
+    # Fluxes must be on same wavelength grid
+    assert len(f1) == len(f2) == len(f3) == len(f4)
+
+    # Get number of pixels/spaxels
+    Npix = hp.nside2npix(Nside)
+
+    # Calc the latitude and longitude of each hpix
+    thetas, phis = hp.pix2ang(Nside, np.arange(Npix))
+    lat = (thetas - np.pi / 2) * 180 / np.pi
+    lon = (phis - np.pi) * 180 / np.pi
+
+    # Define empty 2d array for spaxels
+    Nlam = len(f1)
+    spaxels = np.zeros((Npix, Nlam))
+
+    # Loop over pixels filling with blackbody
+    for i in range(Npix):
+
+        # Latitudes greater than demarcation
+        if (lat[i] > lat0):
+
+            # Longitudes greater than demarcation
+            if (lon[i] > lon0):
+
+                # Set flux 1
+                spaxels[i,:] = f1
+
+            # Longitudes less than demarcation
+            else:
+
+                # Set flux 2
+                spaxels[i,:] = f2
+
+        # Latitudes less than demarcation
+        else:
+
+            # Longitudes greater than demarcation
+            if (lon[i] > lon0):
+
+                # Set flux 3
+                spaxels[i,:] = f3
+
+            # Longitudes less than demarcation
+            else:
+
+                # Set flux 4
+                spaxels[i,:] = f4
+
+    return spaxels
+
+def spec_flat_with_gaussian(lamhr, A = 0.1, B = 0.1, std = 0.01, xroll = 0.0):
+    """
+    Create a toy flat spectrum with a Gaussian spike.
+
+    Parameters
+    ----------
+    lamhr : array
+        Wavelength array
+    A : float
+        Flat line continuum value
+    B : float
+        Amplitude of Gaussian spike (added to continuum)
+    std : float
+        Standard deviation of Gaussian relative to the wavelength range
+    xroll : float
+        Fractional amount to shift location of Gaussian spike left (negative)
+        or right (positive) from the central wavelength relative to the
+        wavelength bounds (e.g. `xroll = 0.0` places Gaussian spike at the center,
+        while `xroll = -0.25` shifts the spike halfway to the left bound).
+
+    Returns
+    -------
+    FpFs : array
+        Mock planet-to-star flux ratio with flat continuum and Gaussian spike
+    """
+
+    # Flat continuum
+    y = A*np.ones(len(lamhr))
+
+    # Gaussian spike
+    g = signal.gaussian(len(lamhr), std*len(lamhr))
+    g = np.roll(g, int(xroll*len(lamhr)))
+
+    # Add spike to continuum
+    FpFs = y + B*g
+
+    return FpFs
 
 def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
                                    dlam = 0.18, lmax = 18,

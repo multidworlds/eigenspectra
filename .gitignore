@@ -3,6 +3,8 @@ data/output_lightcurves/plots/*.pdf
 data/sph_harmonic_coefficients/old_before_generalization/
 data/sph_harmonic_coefficients_full_samples/eclipse_lightcurve_test?/
 data/sph_harmonic_coefficients_full_samples/old_spiderman_0p9p2/
+data/sph_harmonic_coefficients_full_samples/*
+data/input_lightcurves/*
 *.pyc
 .ipynb_checkpoints/
 *.DS_Store

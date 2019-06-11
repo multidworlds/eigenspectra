@@ -83,7 +83,7 @@ def run_lc_noise_and_fit(norder=3,
         # ### Add Noise
 
         # In[12]:
-        inputLC3D = add_noise.get_lc()
+        inputLC3D = add_noise.get_lc(inputFile=usePath)
         noiseDict = add_noise.add_noise(inputLC3D)
 
 

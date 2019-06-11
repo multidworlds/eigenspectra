@@ -17,3 +17,5 @@ dependencies:
     - emcee
     - starry
     - healpy
+    - fitsio
+    - colorcet

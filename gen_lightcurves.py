@@ -427,7 +427,7 @@ def create_quadrant_map(f1, f2, f3, f4, lat0 = 0.0, lon0 = 0.0, Nside = 16):
 
     # Calc the latitude and longitude of each hpix
     thetas, phis = hp.pix2ang(Nside, np.arange(Npix), lonlat=True)
-    # Latitudes are the phis 
+    # Latitudes are the phis
     lat = phis
     # Convert to west (0 to -180) and east (0 to +180) longitudes
     lon = (thetas - 180.0)
@@ -435,8 +435,6 @@ def create_quadrant_map(f1, f2, f3, f4, lat0 = 0.0, lon0 = 0.0, Nside = 16):
     # Define empty 2d array for spaxels
     Nlam = len(f1)
     spaxels = np.zeros((Npix, Nlam))
-
-    import pdb; pdb.set_trace()
 
     # Loop over pixels filling with spectra
     for i in range(Npix):

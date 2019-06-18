@@ -426,42 +426,44 @@ def create_quadrant_map(f1, f2, f3, f4, lat0 = 0.0, lon0 = 0.0, Nside = 16):
     Npix = hp.nside2npix(Nside)
 
     # Calc the latitude and longitude of each hpix
-    thetas, phis = hp.pix2ang(Nside, np.arange(Npix))
-    lat = (thetas - np.pi / 2) * 180 / np.pi
-    lon = (phis - np.pi) * 180 / np.pi
+    thetas, phis = hp.pix2ang(Nside, np.arange(Npix), lonlat=True)
+    # Latitudes are the phis
+    lat = phis
+    # Convert to west (0 to -180) and east (0 to +180) longitudes
+    lon = (thetas - 180.0)
 
     # Define empty 2d array for spaxels
     Nlam = len(f1)
     spaxels = np.zeros((Npix, Nlam))
 
-    # Loop over pixels filling with blackbody
+    # Loop over pixels filling with spectra
     for i in range(Npix):
 
-        # Latitudes greater than demarcation
+        # Latitudes north of demarcation
         if (lat[i] > lat0):
 
-            # Longitudes greater than demarcation
-            if (lon[i] > lon0):
+            # Longitudes west of demarcation
+            if (lon[i] < lon0):
 
                 # Set flux 1
                 spaxels[i,:] = f1
 
-            # Longitudes less than demarcation
+            # Longitudes east of demarcation
             else:
 
                 # Set flux 2
                 spaxels[i,:] = f2
 
-        # Latitudes less than demarcation
+        # Latitudes south of demarcation
         else:
 
-            # Longitudes greater than demarcation
-            if (lon[i] > lon0):
+            # Longitudes west of demarcation
+            if (lon[i] < lon0):
 
                 # Set flux 3
                 spaxels[i,:] = f3
 
-            # Longitudes less than demarcation
+            # Longitudes east of demarcation
             else:
 
                 # Set flux 4

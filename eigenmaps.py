@@ -9,6 +9,8 @@
 
 import numpy as np
 from scipy.special import sph_harm
+import matplotlib.pyplot as p
+import pdb
 
 def generate_maps(sph, N_lon, N_lat):
     '''
@@ -62,3 +64,66 @@ def generate_maps(sph, N_lon, N_lat):
     lons, lats = np.meshgrid(los-np.pi, las-np.pi/2)
 
     return wavelengths, lats, lons, fluxes
+
+def show_group_histos(global_map,lons,lats,kgroup_draws,
+                      xLons=[-0.5,-0.5,0.5, 0.5],
+                      xLats=[-0.5, 0.5,0.5,-0.5],
+                      global_map_units='Mean Group',
+                      saveName=None):
+    """
+    Show histograms of the groups for specific regions of the map
+    
+    Parameters
+    ----------
+    global_map: 2D numpy array
+        Global map of brightness or another quantity
+        Latitudes? x Longitudes ?
+    lats: 2D numpy array
+        Latitudes for the global_map grid in radians
+    lons: 2D numpy array
+        Longitudes for the global_map grid in radians
+    kgroup_draws: 3D numpy array
+        Kgroup draws from k Means Nsamples x Latitudes? x Longitudes?
+    
+    xLons: 4 element list or numpy array
+        longitudes of points to show histograms in radians
+    xLats: 4 element list or numpy array
+        latitudes of points to show histograms in radians
+    global_map_units: str
+        Label for the global map units
+    saveName: str or None
+        Name of plot to save
+    """
+    
+    
+    londim = global_map.shape[1]
+    
+    fig, ax = p.subplots()
+    map_day = global_map[:,londim//4:-londim//4]
+    plotData = ax.imshow(map_day, extent=[-90,90,-90,90])
+    cbar = fig.colorbar(plotData,ax=ax)
+    cbar.set_label(global_map_units)
+    ax.set_ylabel('Latitude')
+    ax.set_xlabel('Longitude')
+    
+    windowLocationsX = [-0.16,-0.16, 1.0, 1.0]
+    windowLocationsY = [ 0.1,  0.6 , 0.6, 0.1]
+    windowLabels = ['A','B','C','D']
+    for ind in np.arange(len(xLons)):
+        xLon, xLat = xLons[ind], xLats[ind]
+        left, bottom, width, height = [windowLocationsX[ind], windowLocationsY[ind], 0.2, 0.2]
+        ax2 = fig.add_axes([left, bottom, width, height])
+        iLon, iLat = np.argmin(np.abs(lons[0,:] - xLon)), np.argmin(np.abs(lats[:,0] - xLat))
+        ax.text(lons[0,iLon]* 180./np.pi,lats[iLat,0]* 180./np.pi,windowLabels[ind],
+                color='red')
+        
+        ax2.set_title(windowLabels[ind])
+        ax2.set_xlabel('Grp')
+        
+        ax2.hist(kgroup_draws[:,iLat,iLon])
+        
+    if saveName is not None:
+        fig.savefig(saveName,bbox_inches='tight')
+    #fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
+
+    

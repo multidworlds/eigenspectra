@@ -68,7 +68,8 @@ def generate_maps(sph, N_lon, N_lat):
 def show_group_histos(global_map,lons,lats,kgroup_draws,
                       xLons=[-0.5,-0.5,0.5, 0.5],
                       xLats=[-0.5, 0.5,0.5,-0.5],
-                      global_map_units='Mean Group'):
+                      global_map_units='Mean Group',
+                      saveName=None):
     """
     Show histograms of the groups for specific regions of the map
     
@@ -90,6 +91,8 @@ def show_group_histos(global_map,lons,lats,kgroup_draws,
         latitudes of points to show histograms in radians
     global_map_units: str
         Label for the global map units
+    saveName: str or None
+        Name of plot to save
     """
     
     
@@ -119,7 +122,8 @@ def show_group_histos(global_map,lons,lats,kgroup_draws,
         
         ax2.hist(kgroup_draws[:,iLat,iLon])
         
-    
+    if saveName is not None:
+        fig.savefig(saveName,bbox_inches='tight')
     #fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
 
     

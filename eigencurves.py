@@ -116,18 +116,20 @@ def eigencurves(dict,plot=False,degree=3):
 		#sf=0.1
 		delbic=20.
 		nparams=4
-		params0=np.ones(nparams)
+		params0=10.**-4.*np.ones(nparams)
 		mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
 		resid=mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
 		chi2i=np.sum((resid//eclipseerrors)**2.)
 		loglike=-0.5*(np.sum((resid//eclipseerrors)**2 + np.log(2.0*np.pi*(eclipseerrors)**2)))
 		bici=-2.*loglike + nparams*np.log(np.shape(eclipseerrors)[0])
+		#print(nparams,chi2i,bici,mpfit[0])
+		tempparams=mpfit[0]
 
 		#pdb.set_trace()
 		while delbic>10.:#sf>0.00001:
 			nparams+=1
 			if nparams==15:
-				params0=np.ones(nparams)
+				params0=10.**-4.*np.ones(nparams)
 				mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
 				chi2f=np.sum((mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)//eclipseerrors)**2.)
 				#dof=np.shape(eclipseerrors)[0]-nparams
@@ -135,7 +137,7 @@ def eigencurves(dict,plot=False,degree=3):
 				#sf=0.00000001
 				delbic=5.
 			else:
-				params0=np.ones(nparams)
+				params0=10.**-4.*np.ones(nparams)
 				mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
 				resid=mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
 				chi2f=np.sum((resid//eclipseerrors)**2.)
@@ -147,13 +149,18 @@ def eigencurves(dict,plot=False,degree=3):
 				delbic=bici-bicf
 				#pdb.set_trace()
 				#print(np.sum((resid//eclipseerrors)**2),loglike)
-				#print(nparams,chi2f,bici,bicf,delbic)
+				#print(chi2i,chi2f,bici,bicf)
+				print(nparams,chi2f-chi2i,bicf-bici)
+				print(mpfit[0])
+				print(mpfit[0][:-1]-tempparams)
 				chi2i=chi2f
 				bici=bicf
+				tempparams=mpfit[0]
 
 		#pdb.set_trace()
-		nparams-=1
-		#print nparams
+		nparams-=1	#need this line back when I change back again
+		#nparams=5
+		#print(nparams)
 		params0=10.**-4.*np.ones(nparams)
 		
 		#pdb.set_trace()
@@ -161,7 +168,7 @@ def eigencurves(dict,plot=False,degree=3):
 		#format parameters for mcmc fit
 		theta=mpfit[0]
 		ndim=np.shape(theta)[0]	#set number of dimensions
-		
+		print(mpfit[0])
 		sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,escore,nparams),threads=6)
 		pos = [theta + 1e-5*np.random.randn(ndim) for i in range(nwalkers)]
 		
@@ -176,6 +183,13 @@ def eigencurves(dict,plot=False,degree=3):
 		bestcoeffs=np.zeros(np.shape(samples)[1])
 		for i in np.arange(np.shape(bestcoeffs)[0]):
 			bestcoeffs[i]=quantile(samples[:,i],[0.5])
+
+		# plt.figure()
+		# plt.plot(eclipsetimes,bestcoeffs[2]*escore[0,:])
+		# plt.plot(eclipsetimes,bestcoeffs[3]*escore[1,:])
+		# plt.plot(eclipsetimes,bestcoeffs[4]*escore[2,:])
+		# plt.show()
+		#print(bestcoeffs)
 		#pdb.set_trace()
 		# translate coefficients
 		fcoeffbest=np.zeros_like(ecoeff)

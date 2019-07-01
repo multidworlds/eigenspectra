@@ -90,7 +90,7 @@ def run_lc_noise_and_fit(norder=3,
         # ### Fit eigencurves to lightcurve
         print("Fitting eigencurves now for order {}".format(norder))
 
-        spherearray = eigencurves.eigencurves(noiseDict,plot=False,degree=norder)
+        spherearray = eigencurves.eigencurves(noiseDict,system.SPIDERMAN_parameters,plot=False,degree=norder)
         # spherearray is an array of wavelength x SH coefficents
     
         np.savez(outputNPZ,spherearray)

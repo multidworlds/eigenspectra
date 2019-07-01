@@ -53,7 +53,7 @@ def lnprior(theta,nparams):
 		lnpriorprob=-np.inf
 	return lnpriorprob
 
-def eigencurves(dict,plot=False,degree=3):
+def eigencurves(dict, planet_properties=None, plot=False, degree=3):
 	waves=dict['wavelength (um)']
 	times=dict['time (days)']
 	fluxes=dict['flux (ppm)']	#2D array times, waves
@@ -211,6 +211,7 @@ def eigencurves(dict,plot=False,degree=3):
 			params0=sp.ModelParams(brightness_model='spherical')	#no offset model
 			params0.nlayers=20
 
+		if planet is None:
 			params0.t0=-2.21857/2.				# Central time of PRIMARY transit [days]
 			params0.per=2.21857567			# Period [days]
 			params0.a_abs=0.0313			# The absolute value of the semi-major axis [AU]
@@ -221,6 +222,17 @@ def eigencurves(dict,plot=False,degree=3):
 			params0.a=8.863				# Semi-major axis scaled by stellar radius
 			params0.p_u1=0.			# Planetary limb darkening parameter
 			params0.p_u2=0.			# Planetary limb darkening parameter
+		else:
+			params0.t0=-planet_properties["per"]/2				# Central time of PRIMARY transit [days]
+			params0.per=planet_properties["per"]			# Period [days]
+			params0.a_abs=planet_properties["a_abs"]		# The absolute value of the semi-major axis [AU]
+			params0.inc=planet_properties["inc"]			# Inclination [degrees]
+			params0.ecc=planet_properties["ecc"]			# Eccentricity
+			params0.w=planet_properties["w"]			# Argument of periastron
+			params0.rp=planet_properties["rp"]				# Planet to star radius ratio
+			params0.a=planet_properties["a"]				# Semi-major axis scaled by stellar radius
+			params0.p_u1=planet_properties["p_u1"]			# Planetary limb darkening parameter
+			params0.p_u2=planet_properties["p_u2"]			# Planetary limb darkening parameter
 
 			params0.degree=degree	#maximum harmonic degree
 			params0.la0=0.

@@ -1,9 +1,9 @@
 import numpy as np
-from colorpy import colormodels
-# colormappingimport colorcet as cc
+from colormath.color_objects import sRGBColor, LabColor
+from colormath.color_conversions import convert_color
 from matplotlib import cm
 from matplotlib import colors
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
 
 def generate_map2d(hue_quantity, lightness_quantity, hue_cmap,
@@ -53,17 +53,29 @@ def generate_map2d(hue_quantity, lightness_quantity, hue_cmap,
     hue_map = cm.ScalarMappable(hue_scale, cmap=hue_cmap).get_cmap()
     hues = hue_map(hue_quantity)
 
-    colors_CIElab = np.zeros(np.r_[hues.shape[:-1], 3])
-    for index in np.ndindex(hues.shape[:-1]):
-        colors_CIElab[index] = colormodels.lab_from_xyz(
-            colormodels.xyz_from_rgb(hues[index][:-1]))
-
     lightness = lightness_quantity / \
         (np.ptp(lightness_range) / (scale_max - scale_min)) - \
         (np.nanmin(lightness_range) - scale_min)
     lightness[lightness < scale_min] = scale_min
     lightness[lightness > scale_max] = scale_max
 
+    # colors_CIElab = np.zeros(np.r_[hues.shape[:-1], 3])
+    rgb_maps = np.zeros(np.r_[hues.shape[:-1], 3])
+    for index in np.ndindex(hues.shape[:-1]):
+        # colors_CIElab[index] = colormodels.lab_from_xyz(
+        #     colormodels.xyz_from_rgb(hues[index][:-1]))
+        lab_base = convert_color(sRGBColor(*(hues[index][:-1])), LabColor)
+        lab_scale = LabColor(lab_a=lab_base.lab_a,
+                             lab_b=lab_base.lab_b,
+                             lab_l=lightness[index])
+        rgb_scale = np.asarray(
+                convert_color(lab_scale, sRGBColor).get_value_tuple()
+                )
+        rgb_scale[rgb_scale < 0] = 0
+        rgb_scale[rgb_scale > 1] = 1
+        rgb_maps[index] = rgb_scale
+
+    '''
     colors_CIElab[..., 0] = lightness
 
     rgb_maps = np.ones(np.r_[hue_quantity.shape, 4])
@@ -75,6 +87,7 @@ def generate_map2d(hue_quantity, lightness_quantity, hue_cmap,
             ]
     rgb_maps[rgb_maps < 0] = 0
     rgb_maps[rgb_maps > 1] = 1
+    '''
 
     return rgb_maps
 

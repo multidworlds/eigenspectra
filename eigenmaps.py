@@ -65,7 +65,7 @@ def generate_maps(sph, N_lon, N_lat):
 
     return wavelengths, lats, lons, fluxes
 
-def show_group_histos(global_map,lons,lats,kgroup_draws,
+def show_group_histos(map_day,lons,lats,kgroup_draws,
                       xLons=[-0.5,-0.5,0.5, 0.5],
                       xLats=[-0.5, 0.5,0.5,-0.5],
                       global_map_units='Mean Group',
@@ -75,13 +75,14 @@ def show_group_histos(global_map,lons,lats,kgroup_draws,
     
     Parameters
     ----------
-    global_map: 2D numpy array
-        Global map of brightness or another quantity
-        Latitudes? x Longitudes ?
+    map_day: 2D numpy array
+        Dayside map of brightness or another quantity
+        The map is the dayside only.
     lats: 2D numpy array
         Latitudes for the global_map grid in radians
     lons: 2D numpy array
         Longitudes for the global_map grid in radians
+        It will assume that the dayside is lons[:,londim//4:-londim//4]
     kgroup_draws: 3D numpy array
         Kgroup draws from k Means Nsamples x Latitudes? x Longitudes?
     
@@ -99,7 +100,7 @@ def show_group_histos(global_map,lons,lats,kgroup_draws,
     londim = lons.shape[1]
     
     fig, ax = p.subplots()
-    map_day = global_map
+    
     lon_day = lons[:,londim//4:-londim//4]
     lonMin = np.min(lon_day) * 180./np.pi
     lonMax = np.max(lon_day) * 180./np.pi

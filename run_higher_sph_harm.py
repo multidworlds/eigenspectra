@@ -90,7 +90,7 @@ def run_lc_noise_and_fit(norder=3,
 
         # ### Fit eigencurves to lightcurve
         print("Fitting eigencurves now for order {}".format(norder))
-        if afew=False:
+        if afew==False:
         	spherearray = eigencurves.eigencurves(noiseDict,plot=False,degree=norder)
         else:
         	spherearray = eigencurves_justafew.eigencurves(noiseDict,plot=False,degree=norder)

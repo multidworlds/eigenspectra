@@ -96,11 +96,14 @@ def show_group_histos(global_map,lons,lats,kgroup_draws,
     """
     
     
-    londim = global_map.shape[1]
+    londim = lons.shape[1]
     
     fig, ax = p.subplots()
-    map_day = global_map[:,londim//4:-londim//4]
-    plotData = ax.imshow(map_day, extent=[-90,90,-90,90])
+    map_day = global_map
+    lon_day = lons[:,londim//4:-londim//4]
+    lonMin = np.min(lon_day) * 180./np.pi
+    lonMax = np.max(lon_day) * 180./np.pi
+    plotData = ax.imshow(map_day, extent=[lonMin,lonMax,-90,90])
     cbar = fig.colorbar(plotData,ax=ax)
     cbar.set_label(global_map_units)
     ax.set_ylabel('Latitude')
@@ -113,8 +116,8 @@ def show_group_histos(global_map,lons,lats,kgroup_draws,
         xLon, xLat = xLons[ind], xLats[ind]
         left, bottom, width, height = [windowLocationsX[ind], windowLocationsY[ind], 0.2, 0.2]
         ax2 = fig.add_axes([left, bottom, width, height])
-        iLon, iLat = np.argmin(np.abs(lons[0,:] - xLon)), np.argmin(np.abs(lats[:,0] - xLat))
-        ax.text(lons[0,iLon]* 180./np.pi,lats[iLat,0]* 180./np.pi,windowLabels[ind],
+        iLon, iLat = np.argmin(np.abs(lon_day[0,:] - xLon)), np.argmin(np.abs(lats[:,0] - xLat))
+        ax.text(lon_day[0,iLon]* 180./np.pi,lats[iLat,0]* 180./np.pi,windowLabels[ind],
                 color='red')
         
         ax2.set_title(windowLabels[ind])

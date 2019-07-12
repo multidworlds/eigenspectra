@@ -13,7 +13,6 @@ import matplotlib.pyplot as p
 
 import eigensource.add_noise as add_noise
 import eigencurves
-import eigencurves_justafew
 import eigenmaps
 import kmeans
 from sys import argv
@@ -30,7 +29,7 @@ system = import_module('data.planet.{}'.format(planet_name))
 
 
 def run_lc_noise_and_fit(norder=3,
-                         usePath="data/input_lightcurves/eclipse_lightcurve_test1.npz",afew=False):
+                         usePath="data/input_lightcurves/eclipse_lightcurve_test1.npz",afew=10):
     """
     Add error bars to a forward model and then run eigencurves fitting to retrieve the map
     
@@ -40,6 +39,8 @@ def run_lc_noise_and_fit(norder=3,
         Number of the spherical harmonic to fit
     usePath: str
         Path to the npz file for light curves
+    afew: int
+        How many eigencurves to fit for (if >=10, the best fitting algorithm will run and select the number of eigencurves for you)
     
     Outputs:
     -----------
@@ -90,10 +91,7 @@ def run_lc_noise_and_fit(norder=3,
 
         # ### Fit eigencurves to lightcurve
         print("Fitting eigencurves now for order {}".format(norder))
-        if afew==False:
-        	spherearray = eigencurves.eigencurves(noiseDict,plot=False,degree=norder)
-        else:
-        	spherearray = eigencurves_justafew.eigencurves(noiseDict,plot=False,degree=norder)
+        spherearray = eigencurves.eigencurves(noiseDict,plot=False,degree=norder,afew=afew)
         # spherearray is an array of wavelength x SH coefficents
     
         np.savez(outputNPZ,spherearray)

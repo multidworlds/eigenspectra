@@ -123,7 +123,8 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
     
 
     
-def plot_retrieved_map(fullMapArray,lats,lons,waves,waveInd=3,degree=3):
+def plot_retrieved_map(fullMapArray,lats,lons,waves,waveInd=3,degree=3,
+                       saveName=None):
     percentiles = [5,50,95]
     mapLowMedHigh = np.percentile(fullMapArray,percentiles,axis=0)
     minflux=np.min(mapLowMedHigh[:,waveInd,:,:])
@@ -143,9 +144,11 @@ def plot_retrieved_map(fullMapArray,lats,lons,waves,waveInd=3,degree=3):
         #axArr[ind].show()
     
     fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
-    p.savefig('retrievedmap.png')
+    p.savefig('plots/retrieved_maps/retrieved_map_{}_deg_{}_waveInd_{}.pdf'.format(saveName,degree,waveInd))
+    p.close(fig)
 
-def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/"):
+def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/",
+                     saveName=None):
     '''
     Plots spherical harmonic maps at one wavelength for 5th, 50th, and 95th percentile posterior samples
     
@@ -164,7 +167,8 @@ def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_
         Wavelengths for the eigenspectra
     '''
     fullMapArray, lats, lons, waves = retrieve_map_full_samples(degree=degree,dataDir=dataDir)
-    plot_retrieved_map(fullMapArray,lats,lons,waves,degree=degree,waveInd=waveInd)
+    plot_retrieved_map(fullMapArray,lats,lons,waves,degree=degree,waveInd=waveInd,
+                       saveName=saveName)
     return waves, lats, lons
 
 def all_sph_degrees(waveInd=5):
@@ -274,7 +278,8 @@ def find_groups(dataDir,ngroups=4,degree=2,
         eigenspectra_draws_final, kgroup_draws_final = eigenspectra_draws, kgroup_draws
     return eigenspectra_draws_final, kgroup_draws_final, maps
     
-def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,waves):
+def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,waves,
+                           saveName='kmeans',degree=None):
     """
     Calculate the mean and standard deviation of the spectra
     as well as the kgroups map
@@ -290,18 +295,22 @@ def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,waves):
     print(np.around(np.min(kgroups)),np.around(np.max(kgroups)))
     counter=0
     colors=['b','g','orange','m']
+    fig, ax = p.subplots()
     for spec, err in zip(eigenspectra, eigenerrs):
-        p.errorbar(waves, spec, err,label=('Group '+np.str(counter)),linewidth=2,marker='.',markersize=10,color=colors[counter])
+        ax.errorbar(waves, spec, err,label=('Group '+np.str(counter)),linewidth=2,marker='.',markersize=10,color=colors[counter])
         counter+=1
-    p.xlabel('Wavelength (micron)',fontsize=20)
-    p.ylabel('Fp/Fs',fontsize=20)
-    p.tick_params(labelsize=20,axis="both",right=True,top=True,width=1.5,length=5)
-    p.title('Eigenspectra')
-    p.legend(fontsize=15)
+    ax.set_xlabel('Wavelength (micron)',fontsize=20)
+    ax.set_ylabel('Fp/Fs',fontsize=20)
+    ax.tick_params(labelsize=20,axis="both",right=True,top=True,width=1.5,length=5)
+    ax.set_title('Eigenspectra')
+    ax.legend(fontsize=15)
     
+    Ngroup = eigenspectra_draws.shape[1]
+    fig.savefig('plots/eigenmap_and_spec/{}_spectra_deg{}_grp_{}.pdf'.format(saveName,degree,Ngroup))
+    p.close(fig)
     return kgroups
     #p.show()
-    #p.savefig('plots/eigenmap_and_spec/'+'quadrant_spectra_deg6_2groups_error_bars.pdf',bbox_inches='tight')
+    #p.savefig('',bbox_inches='tight')
     
 
 def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):

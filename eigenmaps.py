@@ -141,5 +141,6 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
         
     if saveName is not None:
         fig.savefig(saveName,bbox_inches='tight')
+        p.close(fig)
     #fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
 

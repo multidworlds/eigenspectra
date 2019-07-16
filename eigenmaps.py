@@ -65,23 +65,25 @@ def generate_maps(sph, N_lon, N_lat):
 
     return wavelengths, lats, lons, fluxes
 
-def show_group_histos(global_map,lons,lats,kgroup_draws,
+def show_group_histos(input_map,lons,lats,kgroup_draws,
                       xLons=[-0.5,-0.5,0.5, 0.5],
                       xLats=[-0.5, 0.5,0.5,-0.5],
-                      global_map_units='Mean Group',
+                      alreadyTrimmed=True,
+                      lonsTrimmed=False,
+                      input_map_units='Mean Group',
                       saveName=None):
     """
     Show histograms of the groups for specific regions of the map
     
     Parameters
     ----------
-    global_map: 2D numpy array
+    input_map: 2D numpy array
         Global map of brightness or another quantity
-        Latitudes? x Longitudes ?
+        Latitudes x Longitudes
     lats: 2D numpy array
-        Latitudes for the global_map grid in radians
+        Latitudes for the input_map grid in radians
     lons: 2D numpy array
-        Longitudes for the global_map grid in radians
+        Longitudes for the input_map grid in radians
     kgroup_draws: 3D numpy array
         Kgroup draws from k Means Nsamples x Latitudes? x Longitudes?
     
@@ -89,20 +91,35 @@ def show_group_histos(global_map,lons,lats,kgroup_draws,
         longitudes of points to show histograms in radians
     xLats: 4 element list or numpy array
         latitudes of points to show histograms in radians
-    global_map_units: str
+    input_map_units: str
         Label for the global map units
     saveName: str or None
         Name of plot to save
+    alreadyTrimmed: bool
+        Is the input map already trimmed to the dayside?
+        If false, it will trim the global map
+    lonsTrimmed: bool
+        Is the longitude array already trimmed?
+        If false, it will trim the longitude array
     """
     
     
-    londim = global_map.shape[1]
+    londim = input_map.shape[1]
     
     fig, ax = p.subplots()
-    map_day = global_map[:,londim//4:-londim//4]
+    if alreadyTrimmed == True:
+        map_day = input_map
+    else:
+        map_day = input_map[:,londim//4:-londim//4]
+        
+    if lonsTrimmed == True:
+        useLons = lons
+    else:
+        useLons = lons[:,londim//4:-londim//4]
+    
     plotData = ax.imshow(map_day, extent=[-90,90,-90,90])
     cbar = fig.colorbar(plotData,ax=ax)
-    cbar.set_label(global_map_units)
+    cbar.set_label(input_map_units)
     ax.set_ylabel('Latitude')
     ax.set_xlabel('Longitude')
     
@@ -113,8 +130,8 @@ def show_group_histos(global_map,lons,lats,kgroup_draws,
         xLon, xLat = xLons[ind], xLats[ind]
         left, bottom, width, height = [windowLocationsX[ind], windowLocationsY[ind], 0.2, 0.2]
         ax2 = fig.add_axes([left, bottom, width, height])
-        iLon, iLat = np.argmin(np.abs(lons[0,:] - xLon)), np.argmin(np.abs(lats[:,0] - xLat))
-        ax.text(lons[0,iLon]* 180./np.pi,lats[iLat,0]* 180./np.pi,windowLabels[ind],
+        iLon, iLat = np.argmin(np.abs(useLons[0,:] - xLon)), np.argmin(np.abs(lats[:,0] - xLat))
+        ax.text(useLons[0,iLon]* 180./np.pi,lats[iLat,0]* 180./np.pi,windowLabels[ind],
                 color='red')
         
         ax2.set_title(windowLabels[ind])
@@ -126,4 +143,3 @@ def show_group_histos(global_map,lons,lats,kgroup_draws,
         fig.savefig(saveName,bbox_inches='tight')
     #fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
 
-    

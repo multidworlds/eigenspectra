@@ -117,7 +117,6 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
     else:
         useLons = lons[:,londim//4:-londim//4]
     
-    pdb.set_trace()
     plotData = ax.imshow(map_day, extent=[-90,90,-90,90])
     cbar = fig.colorbar(plotData,ax=ax)
     cbar.set_label(input_map_units)
@@ -144,4 +143,3 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
         fig.savefig(saveName,bbox_inches='tight')
     #fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
 
-    

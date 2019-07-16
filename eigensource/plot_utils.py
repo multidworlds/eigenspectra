@@ -115,6 +115,9 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
             #lats, lons, maps = testgenmaps.spmap(inputArr,londim, latdim)
             fullMapArray[drawInd,i,:,:] = fluxes
         
+        ## note that the maps have the origin at the top
+        ## so we have to flip the latitude array
+        lats = np.flip(lats,axis=0)
     
     return fullMapArray, lats, lons, waves
     
@@ -299,3 +302,118 @@ def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,waves):
     return kgroups
     #p.show()
     #p.savefig('plots/eigenmap_and_spec/'+'quadrant_spectra_deg6_2groups_error_bars.pdf',bbox_inches='tight')
+    
+
+def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
+    #full_extent = np.array([np.min(lons),np.max(lons),np.min(lats),np.max(lats)])/np.pi*180 #for full map
+    #full_extent = np.array([-90.,90.,-90.,90.]) #for dayside only
+    full_extent = np.array([-extent/2.*360.,extent/2.*360.,-90.,90.])
+    # londim, latdim = np.shape(maps)[1:]
+
+    maps_mean = np.average(maps, axis=0)
+    maps_error = np.std(maps, axis=0)
+
+    cmap = cc.cm['isolum']
+    cmap_grey = cc.cm['linear_grey_10_95_c0']
+    cmap_grey_r = cc.cm['linear_grey_10_95_c0_r']
+    # norm = Normalize(vmin=np.min(maps_mean), vmax=np.max(maps_mean))
+    londim=100
+    
+    kround=np.around(kgroups)
+    minlon=np.around(extent/2.*londim)
+    
+    contlons=lons[:,int(londim/2.-minlon):int(londim/2.+minlon)]
+    contlats=lats[:,int(londim/2.-minlon):int(londim/2.+minlon)]
+    
+    if hueType == 'group':
+        p.figure(figsize=(10,6.5))
+        p.title('Eigengroups', fontsize=22)
+        
+        group_map = generate_map2d(hue_quantity=kround,
+                                   lightness_quantity=maps_mean,
+                                   hue_cmap=cmap,
+                                   scale_min=10,
+                                   scale_max=90)
+        p.imshow(group_map, extent=full_extent, interpolation='gaussian')
+        CS = p.contour(contlons/np.pi*180, -contlats/np.pi*180, kround,
+                       levels=np.arange(ngroups), colors='k', linestyles=['solid', 'dashed', 'dotted'])
+
+        p.clabel(CS, inline=1, fmt='%1.0f', fontsize=12)
+
+        p.xlabel(r'Longitude ($^\circ$)', fontsize=16)
+        p.ylabel(r'Latitude ($^\circ$)', fontsize=16)
+        p.setp(p.axes().get_xticklabels(), fontsize=16)
+        p.setp(p.axes().get_yticklabels(), fontsize=16)
+
+        cmap_group = cmap
+        cNorm_group  = Normalize(vmin=0, vmax=ngroups-1)
+        scalarMap_group = cm.ScalarMappable(norm=cNorm_group, cmap=cmap_group)
+
+        cmap_flux = cmap_grey
+        cNorm_flux  = Normalize(vmin=0, vmax=np.nanmax(maps_mean))
+        scalarMap_flux = cm.ScalarMappable(norm=cNorm_flux, cmap=cmap_flux)
+
+        bounds = np.linspace(-0.5, ngroups-0.5, ngroups+1)
+        norm_group = BoundaryNorm(bounds, cmap_group.N)
+
+        divider = make_axes_locatable(p.axes())
+        ax2 = divider.append_axes("bottom", size="7.5%", pad=1)
+        cb = colorbar.ColorbarBase(ax2, cmap=cmap_group, norm=norm_group, spacing="proportional", orientation='horizontal', ticks=np.arange(0, ngroups, 1), boundaries=bounds)
+        cb.ax.xaxis.set_minor_formatter(FormatStrFormatter('%.1g'))
+        cb.ax.tick_params(axis='x', labelsize=13)
+        cb.ax.tick_params(axis='x', direction='inout',  top='off', bottom='off',
+                          labeltop='on', labelbottom='off', labelsize=13, pad=-15)
+        cb.ax.set_title('Group', y=1.35, fontsize=19)
+
+        ax3 = divider.append_axes("bottom", size="7.5%", pad=0.75)
+        cb = colorbar.ColorbarBase(ax3, cmap=cmap_flux, norm=cNorm_flux, orientation='horizontal')
+        cb.ax.tick_params(axis='x', labelsize=13)
+        cb.ax.set_title('Flux', y=1.35, fontsize=19)
+
+        #for filetype in ['png', 'pdf']:
+        #    p.savefig('HUEgroup_LUMflux_quadrant_deg6_group4.{}'.format(filetype), dpi=300, bbox_inches='tight')
+    elif hueType == 'flux':
+        p.figure(figsize=(10,6.5))
+        p.title('Flux', fontsize=22)
+
+        group_map = generate_map2d(hue_quantity=(maps_mean-np.min(maps_mean))/np.ptp(maps_mean),
+                                   lightness_quantity=1-((maps_error-np.min(maps_error))/np.ptp(maps_error)),
+                                   hue_cmap=cmap,
+                                   scale_min=10,
+                                   scale_max=90)
+        p.imshow(group_map, extent=full_extent, interpolation='gaussian')
+        CS = p.contour(contlons/np.pi*180, -contlats/np.pi*180, kround,
+                       levels=np.arange(ngroups), colors='k', linestyles=['solid', 'dashed', 'dotted'])
+
+        p.clabel(CS, inline=1, fmt='%1.0f', fontsize=12)
+
+        p.xlabel(r'Longitude ($^\circ$)', fontsize=16)
+        p.ylabel(r'Latitude ($^\circ$)', fontsize=16)
+        p.setp(p.axes().get_xticklabels(), fontsize=16)
+        p.setp(p.axes().get_yticklabels(), fontsize=16)
+
+        cmap_flux = cmap
+        cNorm_flux = Normalize(vmin=0, vmax=np.nanmax(maps_mean))
+        scalarMap_flux = cm.ScalarMappable(norm=cNorm_flux, cmap=cmap_flux)
+
+        cmap_stdev = cmap_grey_r
+        cNorm_stdev  = Normalize(vmin=0, vmax=np.nanmax(maps_error))
+        scalarMap_stdev = cm.ScalarMappable(norm=cNorm_stdev, cmap=cmap_stdev)
+
+        divider = make_axes_locatable(p.axes())
+        ax2 = divider.append_axes("bottom", size="7.5%", pad=1)
+        cb = colorbar.ColorbarBase(ax2, cmap=cmap_flux, norm=cNorm_flux, orientation='horizontal')
+        cb.ax.tick_params(axis='x', labelsize=13)
+        cb.ax.set_title('Flux', y=1.35, fontsize=19)
+
+        ax3 = divider.append_axes("bottom", size="7.5%", pad=0.75)
+        cb = colorbar.ColorbarBase(ax3, cmap=cmap_stdev, norm=cNorm_stdev, orientation='horizontal')
+        cb.ax.tick_params(axis='x', labelsize=13)
+        cb.ax.set_title('Uncertainty', y=1.35, fontsize=19)
+        
+        #for filetype in ['png', 'pdf']:
+        #    p.savefig('HUEflux_LUMstdev_quadrant_deg6_group4.{}'.format(filetype), dpi=300, bbox_inches='tight')
+        
+    else:
+        raise Exception("Unrecognized hueType {}".format(hueType))
+        

@@ -514,6 +514,7 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
                                    plot_input_hp_maps = False,
                                    plot_lightcurves = True,
                                    plot_points_on_map_spec = False,
+                                   points_on_map = [(-0.4, 0.4), (-0.4, -0.4), (0.4, 0.4), (0.4, -0.4), (0.0, 0.0)],
                                    plot_diagnostic = True,
                                    save_output = False,
                                    save_tag = "eclipse_lightcurve_test2"):
@@ -534,6 +535,26 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
         Wavelength bin width
     lmax : int
         Largest spherical harmonic degree in the surface map
+    plot_input_hp_maps : bool
+        Plot the input HEALPix map
+    plot_lightcurves : bool
+        Plot the output lightcurves computed by `starry`
+    plot_points_on_map_spec : bool
+        Plot points on the visible map with the corresponding spectrum at
+        each point
+    points_on_map : list of (x,y) tuple
+        Points to plot on map if `plot_points_on_map_spec` is set to True. Note
+        that (0,0) is the center of the planet at secondary eclipse with the
+        radius normalized to unity.
+    plot_diagnostic : bool
+        Make a diagnostic plot of many random spectra drawn from the visible
+        disk of the planet to compare against the input spectra. This shows
+        roughly how information is lost transforming the input spectral map to
+        spherical harmonics.
+    save_output : bool
+        Set to save the output to a npz
+    save_tag : str
+        Name of file to save output to 
 
     Returns
     -------
@@ -659,32 +680,30 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
 
     if plot_points_on_map_spec:
 
-        # Which points to plot
-        x1, y1 = 100, 200
-        x2, y2 = 100, 100
-        x3, y3 = 200, 200
-        x4, y4 = 200, 100
-
         # Which wavelength to plot map at
         iwavelength = 0
 
         fig, ax = plt.subplots(1, 2, figsize = (10,4))
+        ax[1].set_xlabel(r"Wavelength [$\mu$m]")
+        ax[1].set_ylabel(r"Relative Flux")
         ax[0].imshow(I[:,:,iwavelength],origin="lower")
         ax[0].axis('off')
 
-        # Plot points
-        ax[0].plot(x1,y1, "o", c="C0", ms = 10)
-        ax[0].plot(x2,y2, "o", c="C1", ms = 10)
-        ax[0].plot(x3,y3, "o", c="C2", ms = 10)
-        ax[0].plot(x4,y4, "o", c="C3", ms = 10)
+        # Loop over points to plot
+        for i in range(len(points_on_map)):
 
-        # Plot FpFs
-        ax[1].set_xlabel(r"Wavelength [$\mu$m]")
-        ax[1].set_ylabel(r"Relative Flux")
-        ax[1].plot(lamlo, I[x1,y1,:], c="C0")
-        ax[1].plot(lamlo, I[x2,y2,:], c="C1")
-        ax[1].plot(lamlo, I[x3,y3,:], c="C2")
-        ax[1].plot(lamlo, I[x4,y4,:], c="C3")
+            # Get ith point
+            xi, yi = points_on_map[i]
+
+            # Scale point to array indices
+            ix = int(np.round(0.5*nx*(xi + 1.0)))
+            iy = int(np.round(0.5*ny*(yi + 1.0)))
+
+            # Plot point on map
+            ax[0].plot(ix,iy, "o", c="C%i" %(i%10), ms = 10)
+
+            # Plot spectrum at point
+            ax[1].plot(lamlo, I[iy,ix,:], c="C%i" %(i%10))
 
         plt.show()
 

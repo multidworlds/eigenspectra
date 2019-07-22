@@ -145,7 +145,7 @@ def plot_retrieved_map(fullMapArray,lats,lons,waves,waveInd=3,degree=3,
     
     fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
     p.savefig('plots/retrieved_maps/retrieved_map_{}_deg_{}_waveInd_{}.pdf'.format(saveName,degree,waveInd))
-    p.close(fig)
+    
 
 def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/",
                      saveName=None):
@@ -307,10 +307,9 @@ def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,waves,
     
     Ngroup = eigenspectra_draws.shape[1]
     fig.savefig('plots/eigenmap_and_spec/{}_spectra_deg{}_grp_{}.pdf'.format(saveName,degree,Ngroup))
-    p.close(fig)
+    
     return kgroups
-    #p.show()
-    #p.savefig('',bbox_inches='tight')
+    
     
 
 def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):

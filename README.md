@@ -13,3 +13,5 @@ This code requires:
  - `spiderman`: <https://spiderman.readthedocs.io/en/latest/>
  - `batman`: <https://astro.uchicago.edu/~kreidberg/batman/installation.html>
  - `colorcet`: <https://github.com/pyviz/colorcet>
+ - `colorpy`: <https://pypi.org/project/colorpy/>
+ 

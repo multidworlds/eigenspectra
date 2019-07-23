@@ -79,6 +79,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 	else:
 		assert (np.shape(fluxes)[0]==np.shape(times)[0]) | (np.shape(fluxes)[0]==np.shape(waves)[0]),"Flux array dimension must match wavelength and time arrays."
 
+	nParamsUsed, ecoeffList, escoreList = [], [], []
 	for counter in np.arange(np.shape(waves)[0]):
 		wavelength=waves[counter] #wavelength this secondary eclipse is for
 		eclipsetimes=times	#in days
@@ -261,6 +262,11 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 			plt.plot(times,templc,color='k')
 			plt.errorbar(eclipsetimes,eclipsefluxes,yerr=eclipseerrors,linestyle='none',color='r')
 			plt.show()
-
-	finaldict={'wavelength (um)':waves,'spherical coefficients':alltheoutput}
+		nParamsUsed.append(nparams)
+		ecoeffList.append(ecoeff)
+		escoreList.append(escore)
+		
+	
+	finaldict={'wavelength (um)':waves,'spherical coefficients':alltheoutput,'N Params Used':nParamsUsed,
+				'ecoeffList': ecoeffList,'escoreList': escoreList}
 	return finaldict

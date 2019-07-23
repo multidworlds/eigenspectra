@@ -12,4 +12,4 @@ This code requires:
  - `starry`: <https://rodluger.github.io/starry/v0.3.0/install.html>
  - `spiderman`: <https://spiderman.readthedocs.io/en/latest/>
  - `batman`: <https://astro.uchicago.edu/~kreidberg/batman/installation.html>
-
+ - `colorcet`: <https://github.com/pyviz/colorcet>

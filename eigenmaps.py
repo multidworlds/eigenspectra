@@ -71,7 +71,7 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
                       alreadyTrimmed=True,
                       lonsTrimmed=False,
                       input_map_units='Mean Group',
-                      saveName=None):
+                      saveName=None,histoLabel='Grp'):
     """
     Show histograms of the groups for specific regions of the map
     
@@ -101,6 +101,8 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
     lonsTrimmed: bool
         Is the longitude array already trimmed?
         If false, it will trim the longitude array
+    histoLabel: str
+        Label for the histograms
     """
     
     
@@ -135,7 +137,7 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
                 color='red')
         
         ax2.set_title(windowLabels[ind])
-        ax2.set_xlabel('Grp')
+        ax2.set_xlabel(histoLabel)
         
         ax2.hist(kgroup_draws[:,iLat,iLon])
         

@@ -58,8 +58,9 @@ def generate_maps(sph, N_lon, N_lat):
 
     # Here we convert to (-pi, pi) in longitude, and (-pi/2, pi/2) in latitude,
     # and multiply by the factor that normalizes the harmonics.
-    fluxes = 2*np.sqrt(np.pi) * \
-        np.flip(np.roll(fluxes, N_lon//2, axis=-1), axis=-2)
+    # fluxes = 2*np.sqrt(np.pi) * \
+    #     np.flip(np.roll(fluxes, N_lon//2, axis=-1), axis=-2)
+    fluxes = 2*np.sqrt(2)*np.sqrt(np.pi) * fluxes
 
     lons, lats = np.meshgrid(los-np.pi, las-np.pi/2)
 

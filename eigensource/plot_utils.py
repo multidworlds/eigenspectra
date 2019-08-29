@@ -343,7 +343,7 @@ def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
                                    scale_min=10,
                                    scale_max=90)
         p.imshow(group_map, extent=full_extent, interpolation='gaussian')
-        CS = p.contour(contlons/np.pi*180, contlats/np.pi*180, kround,
+        CS = p.contour(contlons/np.pi*180, -contlats/np.pi*180, kround,
                        levels=np.arange(ngroups), colors='k', linestyles=['solid', 'dashed', 'dotted'])
 
         p.clabel(CS, inline=1, fmt='%1.0f', fontsize=12)
@@ -390,7 +390,7 @@ def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
                                    scale_min=10,
                                    scale_max=90)
         p.imshow(group_map, extent=full_extent, interpolation='gaussian')
-        CS = p.contour(contlons/np.pi*180, contlats/np.pi*180, kround,
+        CS = p.contour(contlons/np.pi*180, -contlats/np.pi*180, kround,
                        levels=np.arange(ngroups), colors='k', linestyles=['solid', 'dashed', 'dotted'])
 
         p.clabel(CS, inline=1, fmt='%1.0f', fontsize=12)

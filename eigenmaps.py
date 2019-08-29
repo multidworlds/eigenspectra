@@ -119,11 +119,9 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
     
     plotData = ax.imshow(map_day, extent=[-90,90,-90,90])
     cbar = fig.colorbar(plotData,ax=ax)
-    cbar.set_label(input_map_units,fontsize=15)
-    cbar.ax.tick_params(labelsize=15,width=1.5,length=6)
-    ax.set_ylabel('Latitude',fontsize=20)
-    ax.set_xlabel('Longitude',fontsize=20)
-    ax.tick_params(labelsize=20,axis="both",right=True,top=True,width=1.5,length=5)
+    cbar.set_label(input_map_units)
+    ax.set_ylabel('Latitude')
+    ax.set_xlabel('Longitude')
     
     windowLocationsX = [-0.16,-0.16, 1.0, 1.0]
     windowLocationsY = [ 0.1,  0.6 , 0.6, 0.1]
@@ -134,11 +132,10 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
         ax2 = fig.add_axes([left, bottom, width, height])
         iLon, iLat = np.argmin(np.abs(useLons[0,:] - xLon)), np.argmin(np.abs(lats[:,0] - xLat))
         ax.text(useLons[0,iLon]* 180./np.pi,lats[iLat,0]* 180./np.pi,windowLabels[ind],
-                color='red',fontsize=15)
+                color='red')
         
         ax2.set_title(windowLabels[ind])
-        ax2.set_xlabel('Group',fontsize=15)
-        ax2.tick_params(labelsize=20,axis="both",right=True,top=True,width=1.5,length=5)
+        ax2.set_xlabel('Grp')
         
         ax2.hist(kgroup_draws[:,iLat,iLon])
         

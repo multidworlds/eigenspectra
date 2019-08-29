@@ -302,7 +302,7 @@ def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,waves,
     ax.set_xlabel('Wavelength (micron)',fontsize=20)
     ax.set_ylabel('Fp/Fs',fontsize=20)
     ax.tick_params(labelsize=20,axis="both",right=True,top=True,width=1.5,length=5)
-    ax.set_title('Eigenspectra',fontsize=20)
+    ax.set_title('Eigenspectra')
     ax.legend(fontsize=15)
     
     Ngroup = eigenspectra_draws.shape[1]

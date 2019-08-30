@@ -57,7 +57,7 @@ def show_orig_map(lam,spaxels,waveInd=0):#testNum=1):
     p.show()
     return spec2d
 
-def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/"):
+def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/",isspider=True):
     tmp = np.load("{}spherearray_deg_{}.npz".format(dataDir,degree))
     outDictionary = tmp['arr_0'].tolist()
     
@@ -71,49 +71,52 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
     
     fullMapArray = np.zeros([nRandom,len(waves),londim,latdim])
     #SPIDERMAN stuff added by Megan
-    params0=sp.ModelParams(brightness_model='spherical')
-    params0.nlayers=20
-    params0.t0=-2.21857/2.
-    params0.per=2.21857567
-    params0.a_abs=0.0313
-    params0.inc=85.71
-    params0.ecc=0.0
-    params0.w=90.
-    params0.rp=0.155313
-    params0.a=8.863
-    params0.p_u1=0.
-    params0.p_u2=0.
-    params0.degree=degree
-    params0.la0=0.
-    params0.lo0=0.
+    if isspider:
+        params0=sp.ModelParams(brightness_model='spherical')
+        params0.nlayers=20
+        params0.t0=-2.21857/2.
+        params0.per=2.21857567
+        params0.a_abs=0.0313
+        params0.inc=85.71
+        params0.ecc=0.0
+        params0.w=90.
+        params0.rp=0.155313
+        params0.a=8.863
+        params0.p_u1=0.
+        params0.p_u2=0.
+        params0.degree=degree
+        params0.la0=0.
+        params0.lo0=0.
     
     for drawInd, draw in enumerate(samples[randomIndices]):
-#         inputArr = np.zeros([len(waves),samples.shape[1]+1])
-#         inputArr[:,0] = waves
-#         inputArr[:,1:] = draw.transpose()
+        if not isspider:
+            inputArr = np.zeros([len(waves),samples.shape[1]+1])
+            inputArr[:,0] = waves
+            inputArr[:,1:] = draw.transpose()
         
-#         wavelengths, lats, lons, maps = eigenmaps.generate_maps(inputArr,
-#                                                                 N_lon=londim, N_lat=latdim)
-#         fullMapArray[drawInd,:,:,:] = maps
+            wavelengths, lats, lons, maps = eigenmaps.generate_maps(inputArr,
+                                                                N_lon=londim, N_lat=latdim)
+            fullMapArray[drawInd,:,:,:] = maps
             #MEGAN ADDED STUFF
-        for i in np.arange(np.shape(waves)[0]):
-            params0.sph=list(samples[drawInd,:,i])
-            nla=latdim
-            nlo=londim
-            las = np.linspace(-np.pi/2,np.pi/2,nla)
-            los = np.linspace(-np.pi,np.pi,nlo)
-            fluxes = []
-            for la in las:
-                row = []
-                for lo in los:
-                    flux = sp.call_map_model(params0,la,lo)
-                    row += [flux[0]]
-                fluxes += [row]
-            fluxes = np.array(fluxes)
-            lons, lats = np.meshgrid(los,las)
+        else:
+            for i in np.arange(np.shape(waves)[0]):
+                params0.sph=list(samples[drawInd,:,i])
+                nla=latdim
+                nlo=londim
+                las = np.linspace(-np.pi/2,np.pi/2,nla)
+                los = np.linspace(-np.pi,np.pi,nlo)
+                fluxes = []
+                for la in las:
+                    row = []
+                    for lo in los:
+                        flux = sp.call_map_model(params0,la,lo)
+                        row += [flux[0]]
+                    fluxes += [row]
+                fluxes = np.array(fluxes)
+                lons, lats = np.meshgrid(los,las)
             #print(np.min(lats),np.min(lons),np.min(las),np.min(los))
             #lats, lons, maps = testgenmaps.spmap(inputArr,londim, latdim)
-            fullMapArray[drawInd,i,:,:] = fluxes
+                fullMapArray[drawInd,i,:,:] = fluxes
         
         ## note that the maps have the origin at the top
         ## so we have to flip the latitude array
@@ -148,7 +151,7 @@ def plot_retrieved_map(fullMapArray,lats,lons,waves,waveInd=3,degree=3,
     
 
 def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/",
-                     saveName=None):
+                     saveName=None,isspider=True):
     '''
     Plots spherical harmonic maps at one wavelength for 5th, 50th, and 95th percentile posterior samples
     
@@ -166,7 +169,7 @@ def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_
     waves: array
         Wavelengths for the eigenspectra
     '''
-    fullMapArray, lats, lons, waves = retrieve_map_full_samples(degree=degree,dataDir=dataDir)
+    fullMapArray, lats, lons, waves = retrieve_map_full_samples(degree=degree,dataDir=dataDir,isspider=True)
     plot_retrieved_map(fullMapArray,lats,lons,waves,degree=degree,waveInd=waveInd,
                        saveName=saveName)
     return waves, lats, lons
@@ -178,7 +181,7 @@ def all_sph_degrees(waveInd=5):
 
 def find_groups(dataDir,ngroups=4,degree=2,
                 londim=100, latdim=100,
-                trySamples=45,extent=0.5,sortMethod='avg'):
+                trySamples=45,extent=0.5,sortMethod='avg',isspider=True):
     """ 
     Find the eigenspectra using k means clustering
     
@@ -211,22 +214,23 @@ def find_groups(dataDir,ngroups=4,degree=2,
     eigenspectra_draws = []
     kgroup_draws = []
     
-    params0=sp.ModelParams(brightness_model='spherical') #megan added stuff
-    params0.nlayers=20
-    params0.t0=-2.21857/2.
-    params0.per=2.21857567
-    params0.a_abs=0.0313
-    params0.inc=85.71
-    params0.ecc=0.0
-    params0.w=90.
-    params0.rp=0.155313
-    params0.a=8.863
-    params0.p_u1=0.
-    params0.p_u2=0.
-    params0.degree=degree
-    params0.la0=0.
-    params0.lo0=0.
-    waves=np.array([2.41,2.59,2.77,2.95,3.13,3.31,3.49,3.67,3.85,4.03])
+    if isspider:
+        params0=sp.ModelParams(brightness_model='spherical') #megan added stuff
+        params0.nlayers=20
+        params0.t0=-2.21857/2.
+        params0.per=2.21857567
+        params0.a_abs=0.0313
+        params0.inc=85.71
+        params0.ecc=0.0
+        params0.w=90.
+        params0.rp=0.155313
+        params0.a=8.863
+        params0.p_u1=0.
+        params0.p_u2=0.
+        params0.degree=degree
+        params0.la0=0.
+        params0.lo0=0.
+        waves=np.array([2.41,2.59,2.77,2.95,3.13,3.31,3.49,3.67,3.85,4.03])
     minlon=np.around(extent/2.*londim)
     #print(minlon)
 
@@ -236,33 +240,38 @@ def find_groups(dataDir,ngroups=4,degree=2,
         ## 1st dimension is wavelength
         ## 2nd dimensions is data (0th element = wavelength)
         ##                        (1: elements are spherical harmonic coefficients)
-        #inputArr = np.zeros([10,samples.shape[1]+1])
-        #inputArr[:,0] = np.array([2.41,2.59,2.77,2.95,3.13,3.31,3.49,3.67,3.85,4.03])
-        #inputArr[:,1:] = draw.transpose()
+        if not isspider:
+            inputArr = np.zeros([10,samples.shape[1]+1])
+            inputArr[:,0] = np.array([2.41,2.59,2.77,2.95,3.13,3.31,3.49,3.67,3.85,4.03])
+            inputArr[:,1:] = draw.transpose()
 
-        #wavelengths, lats, lons, maps = eigenmaps.generate_maps(inputArr, N_lon=londim, N_lat=latdim)
-        
+            waves, lats, lons, maps = eigenmaps.generate_maps(inputArr, N_lon=londim, N_lat=latdim)
+            maps=maps[:,int(londim/2.-minlon):int(londim/2.+minlon)]
+
         #maps=np.zeros((np.shape(waves)[0],londim,latdim)) #full map
-        maps=np.zeros((np.shape(waves)[0],latdim,int(minlon*2))) #only dayside
+
+        else:
+            maps=np.zeros((np.shape(waves)[0],latdim,int(minlon*2))) #only dayside
         #print(np.shape(maps))
-        for i in np.arange(np.shape(waves)[0]):
-            params0.sph=list(samples[drawInd,:,i])
-            nla=latdim
-            nlo=londim
-            las = np.linspace(-np.pi/2,np.pi/2,nla)
-            los = np.linspace(-np.pi,np.pi,nlo)
-            fluxes = []
-            for la in las:
-                row = []
-                for lo in los:
-                    flux = sp.call_map_model(params0,la,lo)
-                    row += [flux[0]]
-                fluxes += [row]
-            fluxes = np.array(fluxes)
-            lons, lats = np.meshgrid(los,las)
-            #print(np.min(lats),np.min(lons),np.min(las),np.min(los))
-            #lats, lons, maps = testgenmaps.spmap(inputArr,londim, latdim)
-            maps[i,:,:] = fluxes[:,int(londim/2.-minlon):int(londim/2.+minlon)]
+
+            for i in np.arange(np.shape(waves)[0]):
+                params0.sph=list(samples[drawInd,:,i])
+                nla=latdim
+                nlo=londim
+                las = np.linspace(-np.pi/2,np.pi/2,nla)
+                los = np.linspace(-np.pi,np.pi,nlo)
+                fluxes = []
+                for la in las:
+                    row = []
+                    for lo in los:
+                        flux = sp.call_map_model(params0,la,lo)
+                        row += [flux[0]]
+                    fluxes += [row]
+                fluxes = np.array(fluxes)
+                lons, lats = np.meshgrid(los,las)
+                #print(np.min(lats),np.min(lons),np.min(las),np.min(los))
+                #lats, lons, maps = testgenmaps.spmap(inputArr,londim, latdim)
+                maps[i,:,:] = fluxes[:,int(londim/2.-minlon):int(londim/2.+minlon)]
             
         kgroups = kmeans.kmeans(maps, ngroups)
 

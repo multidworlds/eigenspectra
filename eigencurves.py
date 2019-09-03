@@ -181,16 +181,29 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		pos = [theta + 1e-5*np.random.randn(ndim) for i in range(nwalkers)]
 		
 		print("Running MCMC at {} um".format(waves[counter]))
-		sampler.run_mcmc(pos,nsteps)
+
+		bestfit=np.zeros(ndim+1)
+		bestfit[0]=10.**8
+
+		#sampler.run_mcmc(pos,nsteps)
+		for i, result in enumerate(sampler.sample(pos, iterations=nsteps)):
+			if i>burnin:
+				for guy in np.arange(nwalkers):
+					resid=mpmodel(result[0][guy],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
+					chi2val=np.sum((resid//eclipseerrors)**2.)
+					if chi2val<bestfit[0]:
+						bestfit[0]=chi2val
+						bestfit[1:]=result[0][guy]
 
 		samples = sampler.chain[:, burnin:, :].reshape((-1, ndim))
 		#pdb.set_trace()
 		def quantile(x, q):
 			return np.percentile(x, [100. * qi for qi in q])
 
-		bestcoeffs=np.zeros(np.shape(samples)[1])
-		for i in np.arange(np.shape(bestcoeffs)[0]):
-			bestcoeffs[i]=quantile(samples[:,i],[0.5])
+		# bestcoeffs=np.zeros(np.shape(samples)[1])
+		# for i in np.arange(np.shape(bestcoeffs)[0]):
+		# 	bestcoeffs[i]=quantile(samples[:,i],[0.5])
+		bestcoeffs=bestfit[1:]
 
 		# plt.figure()
 		# plt.plot(eclipsetimes,bestcoeffs[2]*escore[0,:])

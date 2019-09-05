@@ -1,4 +1,5 @@
 import numpy as np
+import pdb
 
 
 def bin_eigenspectra(spectra, kgroups):
@@ -24,11 +25,14 @@ def bin_eigenspectra(spectra, kgroups):
     kgroups = kgroups.reshape(-1)
 
     eigenspectra = []
+    eigenlist = [[]]*ngroups
     for g in range(ngroups):
         ingroup = (kgroups == g).astype(int)
         eigenspec = np.sum(spectra*ingroup, axis=1)/np.sum(ingroup)
         # eigenspec is the mean of spectra in group
         eigenspectra.append(eigenspec)
+        ingroups2 = (kgroups == g)
+        eigenlist[g]=spectra[:,ingroups2]
 
-    return eigenspectra
+    return eigenspectra,eigenlist
 

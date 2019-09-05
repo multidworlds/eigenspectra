@@ -201,7 +201,7 @@ def find_groups(dataDir,ngroups=4,degree=2,
         Method to sort the groups returned by K means clustering
         None, will not sort the output
         'avg' will sort be the average of the spectrum
-        'middle' will sort by the flux in the middl of the spectrum
+        'middle' will sort by the flux in the middle of the spectrum
     extent: time covered by the eclipse/phase curve. 
         Sets what portion of the map is used for clustering (e.g. full planet or dayside only)
     """
@@ -213,6 +213,7 @@ def find_groups(dataDir,ngroups=4,degree=2,
 
     eigenspectra_draws = []
     kgroup_draws = []
+    uber_eigenlist=[[[[] for i in range(10)] for i in range(ngroups)] for i in range(trySamples)]
     
     if isspider:
         params0=sp.ModelParams(brightness_model='spherical') #megan added stuff
@@ -275,33 +276,51 @@ def find_groups(dataDir,ngroups=4,degree=2,
             
         kgroups = kmeans.kmeans(maps, ngroups)
 
-        eigenspectra = bin_eigenspectra.bin_eigenspectra(maps, kgroups)
+        eigenspectra,eigenlist = bin_eigenspectra.bin_eigenspectra(maps, kgroups)
 
         eigenspectra_draws.append(eigenspectra)
         kgroup_draws.append(kgroups)
+        for groupind in range(ngroups):
+            for waveind in range(10):
+                uber_eigenlist[drawInd][groupind][waveind]=eigenlist[groupind][waveind,:]
+
     if sortMethod is not None:
-        eigenspectra_draws_final, kgroup_draws_final = kmeans.sort_draws(eigenspectra_draws,
-                                                                         kgroup_draws,
+        eigenspectra_draws_final, kgroup_draws_final,uber_eigenlist_final = kmeans.sort_draws(eigenspectra_draws,
+                                                                         kgroup_draws,uber_eigenlist,
                                                                          method=sortMethod)
     else:
-        eigenspectra_draws_final, kgroup_draws_final = eigenspectra_draws, kgroup_draws
-    return eigenspectra_draws_final, kgroup_draws_final, maps
+        eigenspectra_draws_final, kgroup_draws_final,uber_eigenlist_final = eigenspectra_draws, kgroup_draws,uber_eigenlist
+    return eigenspectra_draws_final, kgroup_draws_final,uber_eigenlist_final, maps
     
-def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,waves,
+def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,uber_eigenlist,waves,
                            saveName='kmeans',degree=None):
     """
     Calculate the mean and standard deviation of the spectra
     as well as the kgroups map
     Plot the mean and standard deviations of the spectra
     """
-    eigenspectra = np.mean(eigenspectra_draws, axis=0)
-    eigenerrs = np.std(eigenspectra_draws, axis=0)
+    #eigenspectra = np.mean(eigenspectra_draws, axis=0)
+    #eigenerrs = np.std(eigenspectra_draws, axis=0)
     kgroups = np.mean(kgroup_draws, axis=0)
-    print(np.shape(kgroups))
+
+    allsamples=[[[] for i in range(np.shape(waves)[0])] for i in range(np.shape(uber_eigenlist)[1])]
+    for x in range(np.shape(uber_eigenlist)[0]):
+        for y in range(np.shape(uber_eigenlist)[1]):
+            for z in range(np.shape(uber_eigenlist)[2]):
+                allsamples[y][z]=np.concatenate((allsamples[y][z],uber_eigenlist[x][y][z]))
+
+    eigenspectra=np.zeros((np.shape(allsamples)[0],np.shape(allsamples)[1]))
+    eigenerrs=np.zeros((np.shape(allsamples)[0],np.shape(allsamples)[1]))
+    for x in range(np.shape(allsamples)[0]):
+        for y in range(np.shape(allsamples)[1]):
+            eigenspectra[x,y]=np.mean(allsamples[x][y])
+            eigenerrs[x,y]=np.std(allsamples[x][y])
+
+    #print(np.shape(kgroups))
     #waves=np.array([2.41,2.59,2.77,2.95,3.13,3.31,3.49,3.67,3.85,4.03])
     #print(kgroups)
-    print(np.min(kgroups),np.max(kgroups))
-    print(np.around(np.min(kgroups)),np.around(np.max(kgroups)))
+    #print(np.min(kgroups),np.max(kgroups))
+    #print(np.around(np.min(kgroups)),np.around(np.max(kgroups)))
     counter=0
     colors=['b','g','orange','m']
     fig, ax = p.subplots()

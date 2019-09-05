@@ -60,7 +60,7 @@ def kmeansBest(fluxmap, n=10):
     k = np.argmax(score)
     return k
 
-def sort_draws(eigenspectra_draws,kgroup_draws,method='avg'):
+def sort_draws(eigenspectra_draws,kgroup_draws,uber_eigenlist,method='avg'):
     '''
     Take the many different draws and sort the groups so that we avoid
     the sorting problem where the groups are all mixed up from one 
@@ -100,13 +100,16 @@ def sort_draws(eigenspectra_draws,kgroup_draws,method='avg'):
     
     sortedDraws = np.zeros_like(eDraws)
     sortedKgroups = np.zeros_like(kGroup)
-    
+    sortedubereigenlist=[[[[] for i in range(np.shape(uber_eigenlist)[2])] for i in range(np.shape(uber_eigenlist)[1])] for i in range(np.shape(uber_eigenlist)[0])]
     
     for ind,oneDraw in enumerate(eDraws):
         sortedDraws[ind] = oneDraw[sortArg[ind]]
         for oneGroup in ascendingOrder:
             pts = kGroup[ind] == oneGroup
             sortedKgroups[ind][pts] = sortArg[ind][oneGroup]
+            for wavenum in range(np.shape(uber_eigenlist)[2]):
+                sortedubereigenlist[ind][np.where(sortArg[ind]==oneGroup)[0][0]][wavenum] = uber_eigenlist[ind][oneGroup][wavenum]
     
-    return sortedDraws, sortedKgroups
+
+    return sortedDraws, sortedKgroups,sortedubereigenlist
     

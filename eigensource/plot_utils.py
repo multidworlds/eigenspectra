@@ -169,7 +169,7 @@ def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_
     waves: array
         Wavelengths for the eigenspectra
     '''
-    fullMapArray, lats, lons, waves = retrieve_map_full_samples(degree=degree,dataDir=dataDir,isspider=True)
+    fullMapArray, lats, lons, waves = retrieve_map_full_samples(degree=degree,dataDir=dataDir,isspider=isspider)
     plot_retrieved_map(fullMapArray,lats,lons,waves,degree=degree,waveInd=waveInd,
                        saveName=saveName)
     return waves, lats, lons

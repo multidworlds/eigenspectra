@@ -164,6 +164,8 @@ def get_map_and_plot(waveInd=3,degree=3,percentiles=[5,50,95],
         Index of the wavelength for which a map will be created
     degree: int
         Spherical harmonic degree to draw samples from
+    percentiles: list of three ints
+        Percentages (0-100) of the map sample brightnesses, in monotonically increasing order
     dataDir: str
         Path to the directory containing the spherical harmonic coefficients
         

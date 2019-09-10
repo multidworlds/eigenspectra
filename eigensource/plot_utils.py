@@ -211,6 +211,9 @@ def find_groups(dataDir,ngroups=4,degree=2,
     outDictionary = tmp['arr_0'].tolist()
     samples = outDictionary['spherical coefficients'] # output from eigencurves
 
+    if trySamples>len(samples):
+    	assert(trySamples<=len(samples)),("trySamples must be less than the total number of MCMC samples, "+str(len(samples)))
+
     eigenspectra_draws = []
     kgroup_draws = []
     uber_eigenlist=[[[[] for i in range(10)] for i in range(ngroups)] for i in range(trySamples)]
@@ -272,7 +275,8 @@ def find_groups(dataDir,ngroups=4,degree=2,
                 lons, lats = np.meshgrid(los,las)
                 #print(np.min(lats),np.min(lons),np.min(las),np.min(los))
                 #lats, lons, maps = testgenmaps.spmap(inputArr,londim, latdim)
-                maps[i,:,:] = fluxes[:,:,int(londim/2.-minlon):int(londim/2.+minlon)]
+                #pdb.set_trace()
+                maps[i,:,:] = fluxes[:,int(londim/2.-minlon):int(londim/2.+minlon)]
             
         kgroups = kmeans.kmeans(maps, ngroups)
         

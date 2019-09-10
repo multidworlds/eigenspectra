@@ -71,6 +71,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 	## and n waves is the number of wavelengths looped over
 	
 	alltheoutput=np.zeros(((nsteps-burnin)*nwalkers,int(degree**2.),np.shape(waves)[0]))
+	bestfitoutput=np.zeros((int(degree**2.),np.shape(waves)[0]))
 	
 	if np.shape(fluxes)[0]==np.shape(waves)[0]:
 		rows=True
@@ -223,6 +224,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 			for i in range(1,int(degree**2.)):
 				spheresbest[i] += fcoeffbest.T[j,2*i-1]-fcoeffbest.T[j,2*(i-1)]
 		spheresbest[0] = bestcoeffs[0]#c0_best
+		bestfitoutput[:,counter]=spheresbest
 		#pdb.set_trace()
 		for sampnum in np.arange(np.shape(samples)[0]):
 			fcoeff=np.zeros_like(ecoeff)
@@ -275,5 +277,5 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 			plt.errorbar(eclipsetimes,eclipsefluxes,yerr=eclipseerrors,linestyle='none',color='r')
 			plt.show()
 
-	finaldict={'wavelength (um)':waves,'spherical coefficients':alltheoutput}
+	finaldict={'wavelength (um)':waves,'spherical coefficients':alltheoutput,'best fit coefficients':bestfitoutput}
 	return finaldict

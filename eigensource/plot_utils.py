@@ -65,11 +65,13 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
     latdim = 100
     samples = outDictionary['spherical coefficients'] # output from eigencurves
     waves = outDictionary['wavelength (um)']
+    bestsamples=outDictionary['best fit coefficients'] # best fit sample from eigencurves
     
     randomIndices = np.random.randint(0,len(samples),39)
     nRandom = len(randomIndices)
     
     fullMapArray = np.zeros([nRandom,len(waves),londim,latdim])
+    bestMapArray = np.zeros([len(waves),londim,latdim])
     #SPIDERMAN stuff added by Megan
     if isspider:
         params0=sp.ModelParams(brightness_model='spherical')
@@ -88,6 +90,31 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
         params0.la0=0.
         params0.lo0=0.
     
+    if not isspider:
+        inputArr=np.zeros([len(waves),bestsamples.shape[0]+1])
+        inputArr[:,0] = waves
+        inputArr[:,1:] = bestsamples.transpose()
+        wavelengths, lats, lons, maps = eigenmaps.generate_maps(inputArr,N_lon=londim, N_lat=latdim)
+        bestMapArray=maps
+    else:
+        for i in np.arange(np.shape(waves)[0]):
+            params0.sph=list(bestsamples[:,i])
+            nla=latdim
+            nlo=londim
+            las = np.linspace(-np.pi/2,np.pi/2,nla)
+            los = np.linspace(-np.pi,np.pi,nlo)
+            fluxes = []
+            for la in las:
+                row = []
+                for lo in los:
+                    flux = sp.call_map_model(params0,la,lo)
+                    row += [flux[0]]
+                fluxes += [row]
+            fluxes = np.array(fluxes)
+            lons, lats = np.meshgrid(los,las)
+            bestMapArray[i,:,:] = fluxes
+
+
     for drawInd, draw in enumerate(samples[randomIndices]):
         if not isspider:
             inputArr = np.zeros([len(waves),samples.shape[1]+1])
@@ -122,17 +149,20 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
         ## so we have to flip the latitude array
         lats = np.flip(lats,axis=0)
     
-    return fullMapArray, lats, lons, waves
+    return fullMapArray, bestMapArray, lats, lons, waves
     
 
     
-def plot_retrieved_map(fullMapArray,lats,lons,waves,waveInd=3,degree=3,
+def plot_retrieved_map(fullMapArray,bestMapArray,lats,lons,waves,waveInd=3,degree=3,
                        saveName=None):
     percentiles = [5,50,95]
     mapLowMedHigh = np.percentile(fullMapArray,percentiles,axis=0)
     minflux=np.min(mapLowMedHigh[:,waveInd,:,:])
     maxflux=np.max(mapLowMedHigh[:,waveInd,:,:])
     londim = fullMapArray.shape[2]
+
+    #replace the median map with the best fit map
+    mapLowMedHigh[1]=bestMapArray
     
     fig, axArr = p.subplots(1,3,figsize=(22,5))
     for ind,onePercentile in enumerate(percentiles):
@@ -169,8 +199,8 @@ def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_
     waves: array
         Wavelengths for the eigenspectra
     '''
-    fullMapArray, lats, lons, waves = retrieve_map_full_samples(degree=degree,dataDir=dataDir,isspider=isspider)
-    plot_retrieved_map(fullMapArray,lats,lons,waves,degree=degree,waveInd=waveInd,
+    fullMapArray, bestMapArray, lats, lons, waves = retrieve_map_full_samples(degree=degree,dataDir=dataDir,isspider=isspider)
+    plot_retrieved_map(fullMapArray,bestMapArray,lats,lons,waves,degree=degree,waveInd=waveInd,
                        saveName=saveName)
     return waves, lats, lons
 
@@ -417,7 +447,7 @@ def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
         p.title('Flux', fontsize=22)
 
         group_map = generate_map2d(hue_quantity=(maps_mean-np.min(maps_mean))/np.ptp(maps_mean),
-                                   lightness_quantity=1-((maps_error-np.min(maps_error))/np.ptp(maps_error)),
+                                   lightness_quantity=1-((maps_error*100.-np.min(maps_error*100.))/np.ptp(maps_error*100.)),
                                    hue_cmap=cmap,
                                    scale_min=10,
                                    scale_max=90)
@@ -437,7 +467,7 @@ def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
         scalarMap_flux = cm.ScalarMappable(norm=cNorm_flux, cmap=cmap_flux)
 
         cmap_stdev = cmap_grey_r
-        cNorm_stdev  = Normalize(vmin=0, vmax=np.nanmax(maps_error))
+        cNorm_stdev  = Normalize(vmin=0, vmax=np.nanmax(maps_error*100.))
         scalarMap_stdev = cm.ScalarMappable(norm=cNorm_stdev, cmap=cmap_stdev)
 
         divider = make_axes_locatable(p.axes())
@@ -449,7 +479,7 @@ def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
         ax3 = divider.append_axes("bottom", size="7.5%", pad=0.75)
         cb = colorbar.ColorbarBase(ax3, cmap=cmap_stdev, norm=cNorm_stdev, orientation='horizontal')
         cb.ax.tick_params(axis='x', labelsize=13)
-        cb.ax.set_title('Uncertainty', y=1.35, fontsize=19)
+        cb.ax.set_title('Uncertainty [\%]', y=1.35, fontsize=19)
         
         #for filetype in ['png', 'pdf']:
         #    p.savefig('HUEflux_LUMstdev_quadrant_deg6_group4.{}'.format(filetype), dpi=300, bbox_inches='tight')

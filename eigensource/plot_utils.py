@@ -181,13 +181,14 @@ def get_map_and_plot(waveInd=3,degree=3,percentiles=[5,50,95],
     if animate:
         maps_frames = np.percentile(fullMapArray,percentiles,axis=0)[:,waveInd,...]
         selected_waves = waveInd
+        vmax = np.max(maps_frames)
+        vmin = np.min(maps_frames)
+        for plotData in plotsData:
+            plotData.set_clim(vmin, vmax)
         def update(i):
             map_frames = maps_frames[:,i,...]
-            vmax = np.max(map_frames)
-            vmin = np.min(map_frames)
             for map_frame, plotData in zip(map_frames,plotsData):
                 plotData.set_data(map_frame)
-                plotData.set_clim(vmin, vmax)
             title.set_text('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd[i]]))
 
         FFwriter = FFMpegWriter()

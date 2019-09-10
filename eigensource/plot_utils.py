@@ -15,9 +15,11 @@ import healpy as hp
 import colorcet as cc
 from colormap2d import generate_map2d
 from matplotlib import colorbar, cm
+from matplotlib.animation import FFMpegWriter, FuncAnimation
 from matplotlib.colors import BoundaryNorm, Normalize
 from matplotlib.ticker import FormatStrFormatter, ScalarFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+p.rcParams['animation.ffmpeg_path'] = '/usr/local/bin/ffmpeg'
 
 import run_higher_sph_harm
 
@@ -120,22 +122,22 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
         lats = np.flip(lats,axis=0)
     
     return fullMapArray, lats, lons, waves
-    
 
-    
+            
 def plot_retrieved_map(fullMapArray,lats,lons,waves,waveInd=3,degree=3,
-                       saveName=None):
-    percentiles = [5,50,95]
+                       percentiles=[5,50,95],saveName=None):
     mapLowMedHigh = np.percentile(fullMapArray,percentiles,axis=0)
     minflux=np.min(mapLowMedHigh[:,waveInd,:,:])
     maxflux=np.max(mapLowMedHigh[:,waveInd,:,:])
     londim = fullMapArray.shape[2]
-    
+
     fig, axArr = p.subplots(1,3,figsize=(22,5))
+    plotsData = []
     for ind,onePercentile in enumerate(percentiles):
         map_day = mapLowMedHigh[ind][waveInd][:,londim//4:-londim//4]
         extent = np.array([np.min(lons)/np.pi/2.*180,np.max(lons)/np.pi/2.*180,np.min(lats)/np.pi*180,np.max(lats)/np.pi*180])
         plotData = axArr[ind].imshow(map_day, extent=extent,vmin=minflux,vmax=maxflux)
+        plotsData.append(plotData)
         cbar = fig.colorbar(plotData,ax=axArr[ind])
         cbar.set_label('Brightness')
         axArr[ind].set_ylabel('Latitude')
@@ -143,12 +145,15 @@ def plot_retrieved_map(fullMapArray,lats,lons,waves,waveInd=3,degree=3,
         axArr[ind].set_title("{} %".format(onePercentile))
         #axArr[ind].show()
     
-    fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
-    p.savefig('plots/retrieved_maps/retrieved_map_{}_deg_{}_waveInd_{}.pdf'.format(saveName,degree,waveInd))
-    
+    title = fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
+    if saveName is not None:
+        p.savefig('plots/retrieved_maps/retrieved_map_{}_deg_{}_waveInd_{}.pdf'.format(saveName,degree,waveInd))
+
+    return fig, plotsData, percentiles, title
+
 
 def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/",
-                     saveName=None):
+                     saveName=None,animate=False):
     '''
     Plots spherical harmonic maps at one wavelength for 5th, 50th, and 95th percentile posterior samples
     
@@ -166,9 +171,30 @@ def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_
     waves: array
         Wavelengths for the eigenspectra
     '''
+        
     fullMapArray, lats, lons, waves = retrieve_map_full_samples(degree=degree,dataDir=dataDir)
-    plot_retrieved_map(fullMapArray,lats,lons,waves,degree=degree,waveInd=waveInd,
-                       saveName=saveName)
+    fig, plotsData, percentiles, title = plot_retrieved_map(fullMapArray,lats,lons,waves,degree=degree,waveInd=np.atleast_1d(waveInd)[0],
+                                                            saveName=saveName)
+    if animate:
+        maps_frames = np.percentile(fullMapArray,percentiles,axis=0)[:,waveInd,...]
+        selected_waves = waveInd
+        def update(i):
+            map_frames = maps_frames[:,i,...]
+            vmax = np.max(map_frames)
+            vmin = np.min(map_frames)
+            for map_frame, plotData in zip(map_frames,plotsData):
+                plotData.set_data(map_frame)
+                plotData.set_clim(vmin, vmax)
+            title.set_text('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd[i]]))
+
+        FFwriter = FFMpegWriter()
+        animation = FuncAnimation(fig, update, frames=len(np.atleast_1d(waveInd)))
+        animation.save('plots/retrieved_maps/retrieved_map_{}_deg_{}_animation.mp4'.format(saveName,degree), writer=FFwriter)
+
+    else:
+        for ind in np.atleast_1d(waveInd):
+            plot_retrieved_map(fullMapArray,lats,lons,waves,degree=degree,waveInd=ind,
+                               saveName=saveName)
     return waves, lats, lons
 
 def all_sph_degrees(waveInd=5):

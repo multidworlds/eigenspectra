@@ -247,7 +247,7 @@ def find_groups(dataDir,ngroups=4,degree=2,
             inputArr[:,1:] = draw.transpose()
 
             waves, lats, lons, maps = eigenmaps.generate_maps(inputArr, N_lon=londim, N_lat=latdim)
-            maps=maps[:,int(londim/2.-minlon):int(londim/2.+minlon)]
+            maps=maps[:,:,int(londim/2.-minlon):int(londim/2.+minlon)]
 
         #maps=np.zeros((np.shape(waves)[0],londim,latdim)) #full map
 
@@ -272,10 +272,10 @@ def find_groups(dataDir,ngroups=4,degree=2,
                 lons, lats = np.meshgrid(los,las)
                 #print(np.min(lats),np.min(lons),np.min(las),np.min(los))
                 #lats, lons, maps = testgenmaps.spmap(inputArr,londim, latdim)
-                maps[i,:,:] = fluxes[:,int(londim/2.-minlon):int(londim/2.+minlon)]
+                maps[i,:,:] = fluxes[:,:,int(londim/2.-minlon):int(londim/2.+minlon)]
             
         kgroups = kmeans.kmeans(maps, ngroups)
-
+        
         eigenspectra,eigenlist = bin_eigenspectra.bin_eigenspectra(maps, kgroups)
 
         eigenspectra_draws.append(eigenspectra)

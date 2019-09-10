@@ -247,7 +247,7 @@ def find_groups(dataDir,ngroups=4,degree=2,
             inputArr[:,1:] = draw.transpose()
 
             waves, lats, lons, maps = eigenmaps.generate_maps(inputArr, N_lon=londim, N_lat=latdim)
-            maps=maps[:,int(londim/2.-minlon):int(londim/2.+minlon)]
+            maps=maps[:,:,int(londim/2.-minlon):int(londim/2.+minlon)]
 
         #maps=np.zeros((np.shape(waves)[0],londim,latdim)) #full map
 
@@ -272,10 +272,10 @@ def find_groups(dataDir,ngroups=4,degree=2,
                 lons, lats = np.meshgrid(los,las)
                 #print(np.min(lats),np.min(lons),np.min(las),np.min(los))
                 #lats, lons, maps = testgenmaps.spmap(inputArr,londim, latdim)
-                maps[i,:,:] = fluxes[:,int(londim/2.-minlon):int(londim/2.+minlon)]
+                maps[i,:,:] = fluxes[:,:,int(londim/2.-minlon):int(londim/2.+minlon)]
             
         kgroups = kmeans.kmeans(maps, ngroups)
-
+        
         eigenspectra,eigenlist = bin_eigenspectra.bin_eigenspectra(maps, kgroups)
 
         eigenspectra_draws.append(eigenspectra)
@@ -371,7 +371,7 @@ def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
                                    scale_min=10,
                                    scale_max=90)
         p.imshow(group_map, extent=full_extent, interpolation='gaussian')
-        CS = p.contour(contlons/np.pi*180, -contlats/np.pi*180, kround,
+        CS = p.contour(contlons/np.pi*180, contlats/np.pi*180, kround,
                        levels=np.arange(ngroups), colors='k', linestyles=['solid', 'dashed', 'dotted'])
 
         p.clabel(CS, inline=1, fmt='%1.0f', fontsize=12)
@@ -418,7 +418,7 @@ def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
                                    scale_min=10,
                                    scale_max=90)
         p.imshow(group_map, extent=full_extent, interpolation='gaussian')
-        CS = p.contour(contlons/np.pi*180, -contlats/np.pi*180, kround,
+        CS = p.contour(contlons/np.pi*180, contlats/np.pi*180, kround,
                        levels=np.arange(ngroups), colors='k', linestyles=['solid', 'dashed', 'dotted'])
 
         p.clabel(CS, inline=1, fmt='%1.0f', fontsize=12)

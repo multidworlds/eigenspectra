@@ -149,10 +149,11 @@ def plot_retrieved_map(fullMapArray,lats,lons,waves,waveInd=3,degree=3,
     if saveName is not None:
         p.savefig('plots/retrieved_maps/retrieved_map_{}_deg_{}_waveInd_{}.pdf'.format(saveName,degree,waveInd))
 
-    return fig, plotsData, percentiles, title
+    return fig, plotsData, title
 
 
-def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/",
+def get_map_and_plot(waveInd=3,degree=3,percentiles=[5,50,95],
+                     dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/",
                      saveName=None,animate=False):
     '''
     Plots spherical harmonic maps at one wavelength for 5th, 50th, and 95th percentile posterior samples
@@ -173,8 +174,8 @@ def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_
     '''
         
     fullMapArray, lats, lons, waves = retrieve_map_full_samples(degree=degree,dataDir=dataDir)
-    fig, plotsData, percentiles, title = plot_retrieved_map(fullMapArray,lats,lons,waves,degree=degree,waveInd=np.atleast_1d(waveInd)[0],
-                                                            saveName=saveName)
+    fig, plotsData, title = plot_retrieved_map(fullMapArray,lats,lons,waves,degree=degree,waveInd=np.atleast_1d(waveInd)[0],
+                                               saveName=saveName)
     if animate:
         maps_frames = np.percentile(fullMapArray,percentiles,axis=0)[:,waveInd,...]
         selected_waves = waveInd

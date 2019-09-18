@@ -161,7 +161,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 					chi2i=chi2f
 					bici=bicf
 					tempparams=mpfit[0]
-					print('BIC criterion says the best number of eigencurves to use is '+str(nparams-3))
+			print('BIC criterion says the best number of eigencurves to use is '+str(nparams-3))
 
 		#pdb.set_trace()
 			nparams-=1	#need this line back when I change back again

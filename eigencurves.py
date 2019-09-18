@@ -82,6 +82,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 
 	nParamsUsed, ecoeffList, escoreList = [], [], []
 	elcList = []
+	eigencurvecoeffList = []
 	for counter in np.arange(np.shape(waves)[0]):
 		wavelength=waves[counter] #wavelength this secondary eclipse is for
 		eclipsetimes=times	#in days
@@ -155,7 +156,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 					#pdb.set_trace()
 					#print(np.sum((resid//eclipseerrors)**2),loglike)
 					#print(chi2i,chi2f,bici,bicf)
-					print(nparams-2)#,chi2f-chi2i,bicf-bici)
+					print(nparams-2,bicf-bici)#,chi2f-chi2i,bicf-bici)
 					print(mpfit[0])
 					print(mpfit[0][:-1]-tempparams)
 					chi2i=chi2f
@@ -283,8 +284,9 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		ecoeffList.append(ecoeff)
 		escoreList.append(escore)
 		elcList.append(elc)
+		eigencurvecoeffList.append(samples)
 		
 	
 	finaldict={'wavelength (um)':waves,'spherical coefficients':alltheoutput,'best fit coefficients':bestfitoutput,'N Params Used':nParamsUsed,
-				'ecoeffList': ecoeffList,'escoreList': escoreList,'elcList': elcList}
+				'ecoeffList': ecoeffList,'escoreList': escoreList,'elcList': elcList,'eigencurve coefficients':eigencurvecoeffList}
 	return finaldict

@@ -71,6 +71,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 	## and n waves is the number of wavelengths looped over
 	
 	alltheoutput=np.zeros(((nsteps-burnin)*nwalkers,int(degree**2.),np.shape(waves)[0]))
+	bestfitoutput=np.zeros((int(degree**2.),np.shape(waves)[0]))
 	
 	if np.shape(fluxes)[0]==np.shape(waves)[0]:
 		rows=True
@@ -79,6 +80,9 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 	else:
 		assert (np.shape(fluxes)[0]==np.shape(times)[0]) | (np.shape(fluxes)[0]==np.shape(waves)[0]),"Flux array dimension must match wavelength and time arrays."
 
+	nParamsUsed, ecoeffList, escoreList = [], [], []
+	elcList = []
+	eigencurvecoeffList = []
 	for counter in np.arange(np.shape(waves)[0]):
 		wavelength=waves[counter] #wavelength this secondary eclipse is for
 		eclipsetimes=times	#in days
@@ -152,13 +156,13 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 					#pdb.set_trace()
 					#print(np.sum((resid//eclipseerrors)**2),loglike)
 					#print(chi2i,chi2f,bici,bicf)
-					print(nparams-2)#,chi2f-chi2i,bicf-bici)
+					print(nparams-2,bicf-bici)#,chi2f-chi2i,bicf-bici)
 					print(mpfit[0])
 					print(mpfit[0][:-1]-tempparams)
 					chi2i=chi2f
 					bici=bicf
 					tempparams=mpfit[0]
-					print('BIC criterion says the best number of eigencurves to use is '+str(nparams-3))
+			print('BIC criterion says the best number of eigencurves to use is '+str(nparams-3))
 
 		#pdb.set_trace()
 			nparams-=1	#need this line back when I change back again
@@ -181,16 +185,29 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		pos = [theta + 1e-5*np.random.randn(ndim) for i in range(nwalkers)]
 		
 		print("Running MCMC at {} um".format(waves[counter]))
-		sampler.run_mcmc(pos,nsteps)
+
+		bestfit=np.zeros(ndim+1)
+		bestfit[0]=10.**8
+
+		#sampler.run_mcmc(pos,nsteps)
+		for i, result in enumerate(sampler.sample(pos, iterations=nsteps)):
+			if i>burnin:
+				for guy in np.arange(nwalkers):
+					resid=mpmodel(result[0][guy],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
+					chi2val=np.sum((resid//eclipseerrors)**2.)
+					if chi2val<bestfit[0]:
+						bestfit[0]=chi2val
+						bestfit[1:]=result[0][guy]
 
 		samples = sampler.chain[:, burnin:, :].reshape((-1, ndim))
 		#pdb.set_trace()
 		def quantile(x, q):
 			return np.percentile(x, [100. * qi for qi in q])
 
-		bestcoeffs=np.zeros(np.shape(samples)[1])
-		for i in np.arange(np.shape(bestcoeffs)[0]):
-			bestcoeffs[i]=quantile(samples[:,i],[0.5])
+		# bestcoeffs=np.zeros(np.shape(samples)[1])
+		# for i in np.arange(np.shape(bestcoeffs)[0]):
+		# 	bestcoeffs[i]=quantile(samples[:,i],[0.5])
+		bestcoeffs=bestfit[1:]
 
 		# plt.figure()
 		# plt.plot(eclipsetimes,bestcoeffs[2]*escore[0,:])
@@ -210,6 +227,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 			for i in range(1,int(degree**2.)):
 				spheresbest[i] += fcoeffbest.T[j,2*i-1]-fcoeffbest.T[j,2*(i-1)]
 		spheresbest[0] = bestcoeffs[0]#c0_best
+		bestfitoutput[:,counter]=spheresbest
 		#pdb.set_trace()
 		for sampnum in np.arange(np.shape(samples)[0]):
 			fcoeff=np.zeros_like(ecoeff)
@@ -262,5 +280,13 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 			plt.errorbar(eclipsetimes,eclipsefluxes,yerr=eclipseerrors,linestyle='none',color='r')
 			plt.show()
 
-	finaldict={'wavelength (um)':waves,'spherical coefficients':alltheoutput}
+		nParamsUsed.append(nparams)
+		ecoeffList.append(ecoeff)
+		escoreList.append(escore)
+		elcList.append(elc)
+		eigencurvecoeffList.append(samples)
+		
+	
+	finaldict={'wavelength (um)':waves,'spherical coefficients':alltheoutput,'best fit coefficients':bestfitoutput,'N Params Used':nParamsUsed,
+				'ecoeffList': ecoeffList,'escoreList': escoreList,'elcList': elcList,'eigencurve coefficients':eigencurvecoeffList}
 	return finaldict

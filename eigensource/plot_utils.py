@@ -36,6 +36,47 @@ def plot_setup():
     rcParams["font.sans-serif"] = ["Computer Modern Sans Serif"]
     rcParams["text.usetex"] = True
 
+def create_linear_colormap(c1 = "white", c2 = "C4", c3 = None, N = 1000, cmap_name = "custom_cmap"):
+    """
+    Creates a colormap with a linear gradient between two user-specified colors
+
+    Parameters
+    ----------
+    c1 : str
+        Color of the smallest value
+    c2 : str
+        Color of the largest/middle value
+    c3 : str
+        Color of the largest value
+    N : int
+        Color resolution
+    cmap_name : str
+        Name of new colormap
+
+    Returns
+    -------
+    cm : matplotlib.colors.LinearSegmentedColormap
+        New colormap
+    """
+
+    from matplotlib.colors import LinearSegmentedColormap, colorConverter
+
+    # If a third color was not specified
+    if c3 is None:
+
+        # Create list with two end-member RGBA color tuples
+        c = [colorConverter.to_rgba(c1), colorConverter.to_rgba(c2)]
+
+    else:
+
+        # Create list with two end-member RGBA color tuples
+        c = [colorConverter.to_rgba(c1), colorConverter.to_rgba(c2), colorConverter.to_rgba(c3)]
+
+    # Create the colormap
+    cm = LinearSegmentedColormap.from_list(cmap_name, c, N = N)
+
+    return cm
+
 def show_orig_map(lam,spaxels,waveInd=0):#testNum=1):
     """
     Show the original map at a given wavelength

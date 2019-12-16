@@ -23,10 +23,64 @@ import run_higher_sph_harm
 
 from importlib import import_module
 
+def plot_setup():
+    """
+    Set some default plotting parameters
+    """
+    from matplotlib import rcParams
+    rcParams["savefig.dpi"] = 200
+    rcParams["figure.dpi"] = 100
+    rcParams["font.size"] = 20
+    rcParams["figure.figsize"] = [8, 5]
+    rcParams["font.family"] = "sans-serif"
+    rcParams["font.sans-serif"] = ["Computer Modern Sans Serif"]
+    rcParams["text.usetex"] = True
+
+def create_linear_colormap(c1 = "white", c2 = "C4", c3 = None, N = 1000, cmap_name = "custom_cmap"):
+    """
+    Creates a colormap with a linear gradient between two user-specified colors
+
+    Parameters
+    ----------
+    c1 : str
+        Color of the smallest value
+    c2 : str
+        Color of the largest/middle value
+    c3 : str
+        Color of the largest value
+    N : int
+        Color resolution
+    cmap_name : str
+        Name of new colormap
+
+    Returns
+    -------
+    cm : matplotlib.colors.LinearSegmentedColormap
+        New colormap
+    """
+
+    from matplotlib.colors import LinearSegmentedColormap, colorConverter
+
+    # If a third color was not specified
+    if c3 is None:
+
+        # Create list with two end-member RGBA color tuples
+        c = [colorConverter.to_rgba(c1), colorConverter.to_rgba(c2)]
+
+    else:
+
+        # Create list with two end-member RGBA color tuples
+        c = [colorConverter.to_rgba(c1), colorConverter.to_rgba(c2), colorConverter.to_rgba(c3)]
+
+    # Create the colormap
+    cm = LinearSegmentedColormap.from_list(cmap_name, c, N = N)
+
+    return cm
+
 def show_orig_map(lam,spaxels,waveInd=0):#testNum=1):
     """
     Show the original map at a given wavelength
-    
+
     Parameters
     -----------
     waveInd: int
@@ -60,16 +114,16 @@ def show_orig_map(lam,spaxels,waveInd=0):#testNum=1):
 def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/",isspider=True):
     tmp = np.load("{}spherearray_deg_{}.npz".format(dataDir,degree))
     outDictionary = tmp['arr_0'].tolist()
-    
+
     londim = 100
     latdim = 100
     samples = outDictionary['spherical coefficients'] # output from eigencurves
     waves = outDictionary['wavelength (um)']
     bestsamples=outDictionary['best fit coefficients'] # best fit sample from eigencurves
-    
+
     randomIndices = np.random.randint(0,len(samples),39)
     nRandom = len(randomIndices)
-    
+
     fullMapArray = np.zeros([nRandom,len(waves),londim,latdim])
     bestMapArray = np.zeros([len(waves),londim,latdim])
     #SPIDERMAN stuff added by Megan
@@ -89,7 +143,7 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
         params0.degree=degree
         params0.la0=0.
         params0.lo0=0.
-    
+
     if not isspider:
         inputArr=np.zeros([len(waves),bestsamples.shape[0]+1])
         inputArr[:,0] = waves
@@ -120,7 +174,7 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
             inputArr = np.zeros([len(waves),samples.shape[1]+1])
             inputArr[:,0] = waves
             inputArr[:,1:] = draw.transpose()
-        
+
             wavelengths, lats, lons, maps = eigenmaps.generate_maps(inputArr,
                                                                 N_lon=londim, N_lat=latdim)
             fullMapArray[drawInd,:,:,:] = maps
@@ -144,15 +198,15 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
             #print(np.min(lats),np.min(lons),np.min(las),np.min(los))
             #lats, lons, maps = testgenmaps.spmap(inputArr,londim, latdim)
                 fullMapArray[drawInd,i,:,:] = fluxes
-        
+
         ## note that the maps have the origin at the top
         ## so we have to flip the latitude array
         lats = np.flip(lats,axis=0)
-    
-    return fullMapArray, bestMapArray, lats, lons, waves
-    
 
-    
+    return fullMapArray, bestMapArray, lats, lons, waves
+
+
+
 def plot_retrieved_map(fullMapArray,bestMapArray,lats,lons,waves,waveInd=3,degree=3,
                        saveName=None):
     percentiles = [5,50,95]
@@ -163,7 +217,7 @@ def plot_retrieved_map(fullMapArray,bestMapArray,lats,lons,waves,waveInd=3,degre
 
     #replace the median map with the best fit map
     mapLowMedHigh[1]=bestMapArray
-    
+
     fig, axArr = p.subplots(1,3,figsize=(22,5))
     for ind,onePercentile in enumerate(percentiles):
         map_day = mapLowMedHigh[ind][waveInd][:,londim//4:-londim//4]
@@ -175,16 +229,16 @@ def plot_retrieved_map(fullMapArray,bestMapArray,lats,lons,waves,waveInd=3,degre
         axArr[ind].set_xlabel('Longitude')
         axArr[ind].set_title("{} %".format(onePercentile))
         #axArr[ind].show()
-    
+
     fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
     p.savefig('plots/retrieved_maps/retrieved_map_{}_deg_{}_waveInd_{}.pdf'.format(saveName,degree,waveInd))
-    
+
 
 def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/",
                      saveName=None,isspider=True):
     '''
     Plots spherical harmonic maps at one wavelength for 5th, 50th, and 95th percentile posterior samples
-    
+
     Inputs
     ----------
     waveInd: int
@@ -193,7 +247,7 @@ def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_
         Spherical harmonic degree to draw samples from
     dataDir: str
         Path to the directory containing the spherical harmonic coefficients
-        
+
     Outputs
     -----------
     waves: array
@@ -207,14 +261,14 @@ def get_map_and_plot(waveInd=3,degree=3,dataDir="data/sph_harmonic_coefficients_
 def all_sph_degrees(waveInd=5):
     for oneDegree in np.arange(2,6):
         get_map_and_plot(waveInd=waveInd,degree=oneDegree)
-        
+
 
 def find_groups(dataDir,ngroups=4,degree=2,
                 londim=100, latdim=100,
                 trySamples=45,extent=0.5,sortMethod='avg',isspider=True):
-    """ 
+    """
     Find the eigenspectra using k means clustering
-    
+
     Parameters
     ----------
     ngroups: int
@@ -232,7 +286,7 @@ def find_groups(dataDir,ngroups=4,degree=2,
         None, will not sort the output
         'avg' will sort be the average of the spectrum
         'middle' will sort by the flux in the middle of the spectrum
-    extent: time covered by the eclipse/phase curve. 
+    extent: time covered by the eclipse/phase curve.
         Sets what portion of the map is used for clustering (e.g. full planet or dayside only)
     """
     #samplesDir = "data/sph_harmonic_coefficients_full_samples"
@@ -247,7 +301,7 @@ def find_groups(dataDir,ngroups=4,degree=2,
     eigenspectra_draws = []
     kgroup_draws = []
     uber_eigenlist=[[[[] for i in range(10)] for i in range(ngroups)] for i in range(trySamples)]
-    
+
     if isspider:
         params0=sp.ModelParams(brightness_model='spherical') #megan added stuff
         params0.nlayers=20
@@ -307,9 +361,9 @@ def find_groups(dataDir,ngroups=4,degree=2,
                 #lats, lons, maps = testgenmaps.spmap(inputArr,londim, latdim)
                 #pdb.set_trace()
                 maps[i,:,:] = fluxes[:,int(londim/2.-minlon):int(londim/2.+minlon)]
-            
+
         kgroups = kmeans.kmeans(maps, ngroups)
-        
+
         eigenspectra,eigenlist = bin_eigenspectra.bin_eigenspectra(maps, kgroups)
 
         eigenspectra_draws.append(eigenspectra)
@@ -325,7 +379,7 @@ def find_groups(dataDir,ngroups=4,degree=2,
     else:
         eigenspectra_draws_final, kgroup_draws_final,uber_eigenlist_final = eigenspectra_draws, kgroup_draws,uber_eigenlist
     return eigenspectra_draws_final, kgroup_draws_final,uber_eigenlist_final, maps
-    
+
 def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,uber_eigenlist,waves,
                            saveName='kmeans',degree=None):
     """
@@ -361,18 +415,18 @@ def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,uber_eigenlist,waves,
     for spec, err in zip(eigenspectra, eigenerrs):
         ax.errorbar(waves, spec, err,label=('Group '+np.str(counter)),linewidth=2,marker='.',markersize=10,color=colors[counter])
         counter+=1
-    ax.set_xlabel('Wavelength (micron)',fontsize=20)
-    ax.set_ylabel('Fp/Fs',fontsize=20)
+    ax.set_xlabel('Wavelength ($\mu$m)',fontsize=20)
+    ax.set_ylabel('F$_p$/F$_*$',fontsize=20)
     ax.tick_params(labelsize=20,axis="both",right=True,top=True,width=1.5,length=5)
     ax.set_title('Eigenspectra')
     ax.legend(fontsize=15)
-    
+
     Ngroup = eigenspectra_draws.shape[1]
-    fig.savefig('plots/eigenmap_and_spec/{}_spectra_deg{}_grp_{}.pdf'.format(saveName,degree,Ngroup))
-    
+    fig.savefig('plots/eigenmap_and_spec/{}_spectra_deg{}_grp_{}.pdf'.format(saveName,degree,Ngroup),bbox_inches='tight')
+
     return kgroups
-    
-    
+
+
 
 def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
     #full_extent = np.array([np.min(lons),np.max(lons),np.min(lats),np.max(lats)])/np.pi*180 #for full map
@@ -388,17 +442,17 @@ def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
     cmap_grey_r = cc.cm['linear_grey_10_95_c0_r']
     # norm = Normalize(vmin=np.min(maps_mean), vmax=np.max(maps_mean))
     londim=100
-    
+
     kround=np.around(kgroups)
     minlon=np.around(extent/2.*londim)
-    
+
     contlons=lons[:,int(londim/2.-minlon):int(londim/2.+minlon)]
     contlats=lats[:,int(londim/2.-minlon):int(londim/2.+minlon)]
-    
+
     if hueType == 'group':
         p.figure(figsize=(10,6.5))
         p.title('Eigengroups', fontsize=22)
-        
+
         group_map = generate_map2d(hue_quantity=kround,
                                    lightness_quantity=maps_mean,
                                    hue_cmap=cmap,
@@ -480,10 +534,9 @@ def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
         cb = colorbar.ColorbarBase(ax3, cmap=cmap_stdev, norm=cNorm_stdev, orientation='horizontal')
         cb.ax.tick_params(axis='x', labelsize=13)
         cb.ax.set_title('Uncertainty [\%]', y=1.35, fontsize=19)
-        
+
         #for filetype in ['png', 'pdf']:
         #    p.savefig('HUEflux_LUMstdev_quadrant_deg6_group4.{}'.format(filetype), dpi=300, bbox_inches='tight')
-        
+
     else:
         raise Exception("Unrecognized hueType {}".format(hueType))
-        

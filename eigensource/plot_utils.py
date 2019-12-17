@@ -381,7 +381,7 @@ def find_groups(dataDir,ngroups=4,degree=2,
     return eigenspectra_draws_final, kgroup_draws_final,uber_eigenlist_final, maps
 
 def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,uber_eigenlist,waves,
-                           saveName='kmeans',degree=None):
+                           saveName='kmeans',degree=None,returnFig=False):
     """
     Calculate the mean and standard deviation of the spectra
     as well as the kgroups map
@@ -419,12 +419,18 @@ def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,uber_eigenlist,waves,
     ax.set_ylabel('F$_p$/F$_*$',fontsize=20)
     ax.tick_params(labelsize=20,axis="both",right=True,top=True,width=1.5,length=5)
     ax.set_title('Eigenspectra')
-    ax.legend(fontsize=15)
+    if returnFig == True:
+        print("Skipping legend so it can be added later")
+    else:
+        ax.legend(fontsize=15)
 
     Ngroup = eigenspectra_draws.shape[1]
     fig.savefig('plots/eigenmap_and_spec/{}_spectra_deg{}_grp_{}.pdf'.format(saveName,degree,Ngroup),bbox_inches='tight')
-
-    return kgroups
+    
+    if returnFig == True:
+        return fig
+    else:
+        return kgroups
 
 
 

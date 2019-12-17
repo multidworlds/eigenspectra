@@ -29,3 +29,5 @@ def plot_hotspot_derived_spectra():
     fig.savefig('plots/paper_figures/hot_spot_spectra_deg3_2groups_error_bars.pdf',
                 bbox_inches='tight')
 
+if __name__ == "__main__":
+    plot_hotspot_derived_spectra()

@@ -2,10 +2,10 @@
 
 import numpy as np
 
-def corrplot(file):
+def corrplot(file,waveindex):
 	tmp=np.load(file)
 	outDictionary = tmp['arr_0'].tolist()
-	eigen=outDictionary['eigencurve coefficients'][2]
+	eigen=outDictionary['eigencurve coefficients'][waveindex]
 	corrcoeffs=-np.ones((np.shape(eigen)[1],np.shape(eigen)[1]))
 	for i in np.arange(np.shape(eigen)[1]):
 		for j in np.arange(i+1,np.shape(eigen)[1]):

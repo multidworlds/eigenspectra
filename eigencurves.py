@@ -81,7 +81,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		assert (np.shape(fluxes)[0]==np.shape(times)[0]) | (np.shape(fluxes)[0]==np.shape(waves)[0]),"Flux array dimension must match wavelength and time arrays."
 
 	nParamsUsed, ecoeffList, escoreList = [], [], []
-	elcList = []
+	#elcList = []
 	eigencurvecoeffList = []
 	for counter in np.arange(np.shape(waves)[0]):
 		wavelength=waves[counter] #wavelength this secondary eclipse is for
@@ -117,61 +117,67 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		ecoeff,escore,elatent = princomp(elc[1:,:].T)
 		escore=np.real(escore)
 
-		if not isinstance(afew,int):
-			assert isinstance(afew,int), "afew must be an integer >=1!"
-		elif afew>=10:
-			print('Performing fit for best number of eigencurves to use.')
-			delbic=20.
-			nparams=4
-			params0=10.**-4.*np.ones(nparams)
-			mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
-			resid=mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
-			chi2i=np.sum((resid//eclipseerrors)**2.)
-			loglike=-0.5*(np.sum((resid//eclipseerrors)**2 + np.log(2.0*np.pi*(eclipseerrors)**2)))
-			bici=-2.*loglike + nparams*np.log(np.shape(eclipseerrors)[0])
-		#print(nparams,chi2i,bici,mpfit[0])
-			tempparams=mpfit[0]
-		#pdb.set_trace()
-			while delbic>10.:#sf>0.00001:
-				nparams+=1
-				if nparams==15:
-					params0=10.**-4.*np.ones(nparams)
-					mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
-					chi2f=np.sum((mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)//eclipseerrors)**2.)
-					#dof=np.shape(eclipseerrors)[0]-nparams
-					#Fval=(chi2i-chi2f)/(chi2f/dof)
-					#sf=0.00000001
-					delbic=5.
-				else:
-					params0=10.**-4.*np.ones(nparams)
-					mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
-					resid=mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
-					chi2f=np.sum((resid//eclipseerrors)**2.)
-					#dof=np.shape(eclipseerrors)[0]-nparams
-					#Fval=(chi2i-chi2f)/(chi2f/dof)
-					#sf=stats.f.sf(Fval,nparams-1,nparams)
-					loglike=-0.5*(np.sum((resid//eclipseerrors)**2 + np.log(2.0*np.pi*(eclipseerrors)**2)))
-					bicf=-2.*loglike + nparams*np.log(np.shape(eclipseerrors)[0])
-					delbic=bici-bicf
-					#pdb.set_trace()
-					#print(np.sum((resid//eclipseerrors)**2),loglike)
-					#print(chi2i,chi2f,bici,bicf)
-					print(nparams-2,bicf-bici)#,chi2f-chi2i,bicf-bici)
-					print(mpfit[0])
-					print(mpfit[0][:-1]-tempparams)
-					chi2i=chi2f
-					bici=bicf
-					tempparams=mpfit[0]
-			print('BIC criterion says the best number of eigencurves to use is '+str(nparams-3))
+		if isinstance(afew,list):#np.shape(afew)[0]==10:
+			print('Gave an array of afew values')
+			if not np.shape(waves)[0]==np.shape(afew)[0]:
+				assert (np.shape(waves)[0]==np.shape(afew)[0]), "Array of afew values must be the same length as the number of wavelength bins, which is"+str(np.shape(waves)[0])
+			nparams=int(afew[counter]+2)
+		else:
+			if not isinstance(afew,int):
+				assert isinstance(afew,int), "afew must be an integer >=1!"
+			elif afew>=10:
+				print('Performing fit for best number of eigencurves to use.')
+				delbic=20.
+				nparams=4
+				params0=10.**-4.*np.ones(nparams)
+				mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
+				resid=mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
+				chi2i=np.sum((resid//eclipseerrors)**2.)
+				loglike=-0.5*(np.sum((resid//eclipseerrors)**2 + np.log(2.0*np.pi*(eclipseerrors)**2)))
+				bici=-2.*loglike + nparams*np.log(np.shape(eclipseerrors)[0])
+			#print(nparams,chi2i,bici,mpfit[0])
+				tempparams=mpfit[0]
+			#pdb.set_trace()
+				while delbic>10.:#sf>0.00001:
+					nparams+=1
+					if nparams==15:
+						params0=10.**-4.*np.ones(nparams)
+						mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
+						chi2f=np.sum((mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)//eclipseerrors)**2.)
+						#dof=np.shape(eclipseerrors)[0]-nparams
+						#Fval=(chi2i-chi2f)/(chi2f/dof)
+						#sf=0.00000001
+						delbic=5.
+					else:
+						params0=10.**-4.*np.ones(nparams)
+						mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
+						resid=mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
+						chi2f=np.sum((resid//eclipseerrors)**2.)
+						#dof=np.shape(eclipseerrors)[0]-nparams
+						#Fval=(chi2i-chi2f)/(chi2f/dof)
+						#sf=stats.f.sf(Fval,nparams-1,nparams)
+						loglike=-0.5*(np.sum((resid//eclipseerrors)**2 + np.log(2.0*np.pi*(eclipseerrors)**2)))
+						bicf=-2.*loglike + nparams*np.log(np.shape(eclipseerrors)[0])
+						delbic=bici-bicf
+						#pdb.set_trace()
+						#print(np.sum((resid//eclipseerrors)**2),loglike)
+						#print(chi2i,chi2f,bici,bicf)
+						print(nparams-2,bicf-bici)#,chi2f-chi2i,bicf-bici)
+						print(mpfit[0])
+						print(mpfit[0][:-1]-tempparams)
+						chi2i=chi2f
+						bici=bicf
+						tempparams=mpfit[0]
+				print('BIC criterion says the best number of eigencurves to use is '+str(nparams-3))
 
-		#pdb.set_trace()
-			nparams-=1	#need this line back when I change back again
-		
-		elif ((afew<10)&(afew>=1)):
-			nparams=int(afew+2)
+			#pdb.set_trace()
+				nparams-=1	#need this line back when I change back again
+			
+			elif ((afew<10)&(afew>=1)):
+				nparams=int(afew+2)
 
-		else:	#assert afew is an integer here
-			assert afew>1 ,"afew must be an integer >=1!"
+			else:	#assert afew is an integer here
+				assert afew>1 ,"afew must be an integer >=1!"
 		#nparams=5
 		params0=10.**-4.*np.ones(nparams)
 		
@@ -198,6 +204,11 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 					if chi2val<bestfit[0]:
 						bestfit[0]=chi2val
 						bestfit[1:]=result[0][guy]
+
+		resid=mpmodel(bestfit[1:],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
+		chi2f=np.sum((resid//eclipseerrors)**2.)
+		loglike=-0.5*(np.sum((resid//eclipseerrors)**2 + np.log(2.0*np.pi*(eclipseerrors)**2)))
+		bicf=-2.*loglike + nparams*np.log(np.shape(eclipseerrors)[0])
 
 		samples = sampler.chain[:, burnin:, :].reshape((-1, ndim))
 		#pdb.set_trace()
@@ -283,10 +294,10 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		nParamsUsed.append(nparams)
 		ecoeffList.append(ecoeff)
 		escoreList.append(escore)
-		elcList.append(elc)
+		#elcList.append(elc)
 		eigencurvecoeffList.append(samples)
 		
 	
 	finaldict={'wavelength (um)':waves,'spherical coefficients':alltheoutput,'best fit coefficients':bestfitoutput,'N Params Used':nParamsUsed,
-				'ecoeffList': ecoeffList,'escoreList': escoreList,'elcList': elcList,'eigencurve coefficients':eigencurvecoeffList}
+				'ecoeffList': ecoeffList,'escoreList': escoreList,'elc': elc,'eigencurve coefficients':eigencurvecoeffList,'BIC':bicf}
 	return finaldict

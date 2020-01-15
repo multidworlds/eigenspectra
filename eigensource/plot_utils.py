@@ -539,7 +539,7 @@ def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
         ax3 = divider.append_axes("bottom", size="7.5%", pad=0.75)
         cb = colorbar.ColorbarBase(ax3, cmap=cmap_stdev, norm=cNorm_stdev, orientation='horizontal')
         cb.ax.tick_params(axis='x', labelsize=13)
-        cb.ax.set_title('Uncertainty [\%]', y=1.35, fontsize=19)
+        cb.ax.set_title('Uncertainty [%]', y=1.35, fontsize=19)
 
         #for filetype in ['png', 'pdf']:
         #    p.savefig('HUEflux_LUMstdev_quadrant_deg6_group4.{}'.format(filetype), dpi=300, bbox_inches='tight')

@@ -80,7 +80,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 	else:
 		assert (np.shape(fluxes)[0]==np.shape(times)[0]) | (np.shape(fluxes)[0]==np.shape(waves)[0]),"Flux array dimension must match wavelength and time arrays."
 
-	nParamsUsed, ecoeffList, escoreList = [], [], []
+	nParamsUsed, ecoeffList, escoreList,elatentList = [], [], [], []
 	#elcList = []
 	eigencurvecoeffList = []
 	for counter in np.arange(np.shape(waves)[0]):
@@ -296,8 +296,9 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		escoreList.append(escore)
 		#elcList.append(elc)
 		eigencurvecoeffList.append(samples)
+		elatentList.append(elatent)
 		
 	
 	finaldict={'wavelength (um)':waves,'spherical coefficients':alltheoutput,'best fit coefficients':bestfitoutput,'N Params Used':nParamsUsed,
-				'ecoeffList': ecoeffList,'escoreList': escoreList,'elc': elc,'eigencurve coefficients':eigencurvecoeffList,'BIC':bicf}
+				'ecoeffList': ecoeffList,'escoreList': escoreList,'elc': elc,'eigencurve coefficients':eigencurvecoeffList,'BIC':bicf,'elatentList':elatentList}
 	return finaldict

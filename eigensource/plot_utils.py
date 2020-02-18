@@ -409,8 +409,9 @@ def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,uber_eigenlist,waves,
     #print(kgroups)
     #print(np.min(kgroups),np.max(kgroups))
     #print(np.around(np.min(kgroups)),np.around(np.max(kgroups)))
+    cmap = cc.cm['isolum']
+    colors = [cmap(val) for val in np.linspace(0, 255, num=np.shape(eigenspectra)[0])]
     counter=0
-    colors=['b','g','orange','m']
     fig, ax = p.subplots()
     for spec, err in zip(eigenspectra, eigenerrs):
         ax.errorbar(waves, spec, err,label=('Group '+np.str(counter)),linewidth=2,marker='.',markersize=10,color=colors[counter])

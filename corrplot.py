@@ -4,7 +4,7 @@ import numpy as np
 from scipy import stats
 
 def corrplot(file,waveindex):
-	tmp=np.load(file)
+	tmp=np.load(file, encoding='latin1', allow_pickle=True)
 	outDictionary = tmp['arr_0'].tolist()
 	eigen=outDictionary['eigencurve coefficients'][waveindex]
 	corrcoeffs=-np.ones((np.shape(eigen)[1],np.shape(eigen)[1]))

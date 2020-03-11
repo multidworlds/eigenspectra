@@ -11,13 +11,13 @@ plt.rc("xtick", labelsize=15)
 plt.rc("ytick", labelsize=15)
 
 
-def get_flux_maps(output_file, N_lat=181, N_lon=361):
+def get_flux_maps(output_file, wave_idx=0, N_lat=181, N_lon=361):
     file = np.load(output_file, encoding='latin1', allow_pickle=True)
     harmonic_weights = np.asarray(file["arr_0"][()]["ecoeffList"])
     signed_weights = np.einsum("abc->acb", harmonic_weights)
     weights = signed_weights[..., 1::2] - signed_weights[..., ::2]
-    signed_curves = np.asarray(file["arr_0"][()]["elc"])[1:]
-    eigencurves = signed_curves[..., 1::2] - signed_curves[..., ::2]
+    signed_curves = np.asarray(file["arr_0"][()]["escoreList"])
+    eigencurves = signed_curves[wave_idx, :np.shape(signed_curves)[1]//2, ...]
 
     las = np.linspace(0, np.pi, N_lat)
     los = np.linspace(-np.pi, np.pi, N_lon)
@@ -66,8 +66,12 @@ def make_eigenplots(output_file, degree, wave_idx, save_name=None):
 
     map_min = np.min(eigenmaps)
     map_max = np.max(eigenmaps)
-    curve_min = np.min(eigencurves)
-    curve_max = np.max(eigencurves)
+
+    flip_curves = {"1": np.array([1, 1, 1]),
+                   "2": np.array([-1, 1, 1, 1, 1, 1, 1, 1])}
+    plotted_curves = flip_curves[str(degree-1)][:, np.newaxis] * eigencurves
+    curve_min = np.min(plotted_curves)
+    curve_max = np.max(plotted_curves)
 
     map_colors = {"1": "Blues_r",
                   "2": "Oranges_r",
@@ -88,8 +92,9 @@ def make_eigenplots(output_file, degree, wave_idx, save_name=None):
                        extent=(-180, 180, -90, 90))
         rect_ax.xaxis.tick_top()
 
-    phases = np.linspace(-180, 180, np.shape(eigencurves)[-1])
-    for curve, ax in zip(eigencurves, axes[0, :].flatten()):
+    phases = np.linspace(-180, 180, np.shape(plotted_curves)[-1])
+    for curve, ax in zip(plotted_curves,
+                         axes[0, :].flatten()):
         ax.plot(phases, curve, linewidth=2, c="C{}".format(degree-2))
         ax.spines["top"].set_visible(False)
         ax.spines["left"].set_visible(False)
@@ -116,7 +121,7 @@ def make_eigenplots(output_file, degree, wave_idx, save_name=None):
                fontsize=18)
 
     plt.figure(fig.number)
-    plot_dimensions = {"1": {"top": 0.975,
+    plot_dimensions = {"1": {"top": 0.95,
                              "bottom": 0.01,
                              "left": 0.05,
                              "right": 0.99,

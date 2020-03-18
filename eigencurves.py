@@ -125,7 +125,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		else:
 			if not isinstance(afew,int):
 				assert isinstance(afew,int), "afew must be an integer >=1!"
-			elif afew>=10:
+			elif afew>=16:
 				print('Performing fit for best number of eigencurves to use.')
 				delbic=20.
 				nparams=4
@@ -173,11 +173,11 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 			#pdb.set_trace()
 				nparams-=1	#need this line back when I change back again
 			
-			elif ((afew<10)&(afew>=1)):
+			elif ((afew<16)&(afew>=1)):
 				nparams=int(afew+2)
 
 			else:	#assert afew is an integer here
-				assert afew>1 ,"afew must be an integer >=1!"
+				assert afew>1 ,"afew must be an integer 1<=afew<=15!"
 		#nparams=5
 		params0=10.**-4.*np.ones(nparams)
 		

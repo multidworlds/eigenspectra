@@ -3,9 +3,11 @@ import numpy as np
 from astropy.io import fits, ascii
 import matplotlib.pyplot as plt
 import pdb
+import eigenmaps
 
 def plot_hotspot_derived_spectra():
-    dataDir = 'data/sph_harmonic_coefficients_full_samples/hotspot/'
+    #dataDir = 'data/sph_harmonic_coefficients_full_samples/hotspot/'
+    dataDir = 'data/sph_harmonic_coefficients_full_samples/hotspot_3curves/'
     allOutput = plot_utils.find_groups(dataDir,ngroups=2,degree=3,isspider=False)
 
     eigenspectra_draws, kgroup_draws,uber_eigenlist, maps = allOutput
@@ -33,6 +35,44 @@ def plot_hotspot_derived_spectra():
     plt.close(fig)
 
 
+def plot_group_histos(ngroups=2,degree=3):
+    ## get te groups
+    if degree == 3:
+        model = 'hotspot_3curves'
+    else:
+        model = 'hotspot'
+    
+    dataDir = 'data/sph_harmonic_coefficients_full_samples/{}/'.format(model)
+    
+    npzLightcurve = np.load('data/input_lightcurves/hotspot.npz')
+    time = npzLightcurve['time']
+    extent=(np.max(time)-np.min(time))/2.21857567+180./360. #phase coverage of the eclipse observations
+    
+    allOutput = plot_utils.find_groups(dataDir,ngroups=ngroups,degree=degree,isspider=False,extent=extent)
+
+    eigenspectra_draws, kgroup_draws,uber_eigenlist, maps = allOutput
+    
+    ## get the waves, longitudes and latitudes
+    dataDir = 'data/sph_harmonic_coefficients_full_samples/{}/'.format(model)
+    waves, lats, lons = plot_utils.get_map_and_plot(waveInd=8,degree=degree,dataDir=dataDir,isspider=False)
+    
+
+    
+    kgroups = plot_utils.show_spectra_of_groups(eigenspectra_draws,kgroup_draws,uber_eigenlist,waves)
+    ## plot the histos
+    saveName = 'plots/paper_figures/group_histos_{}_degree_{}_ngroup_{}.pdf'.format(model,degree, ngroups)
+    xLons= np.array([-50,-10,40,59]) * np.pi/180.
+    xLats= np.array([40,5, 0,-59]) * np.pi/180.
+    
+    eigenmaps.show_group_histos(kgroups,lons,lats,kgroup_draws,
+                                xLons=xLons,xLats=xLats,
+                                saveName=saveName,figsize=(3,2))
+
+def plot_all_group_histos():
+    for ngroup in [2,3]:
+        for degree in [2,3]:
+            plot_group_histos(ngroup,degree)
+    
 def plot_hue_maps(degree=3,model='hotspot'):
     dataDir = 'data/sph_harmonic_coefficients_full_samples/{}/'.format(model)
     ngroups = 2

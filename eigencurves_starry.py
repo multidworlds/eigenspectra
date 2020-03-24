@@ -10,8 +10,8 @@
 
 #OUTPUTS:
 #	Coefficients for each of the spherical harmonics
-#from lightcurves_sh_starry import sh_lcs
-from lightcurves_sh import sh_lcs
+from lightcurves_sh_starry import sh_lcs
+#from lightcurves_sh import sh_lcs
 from pca_eig import princomp
 import numpy as np 
 import matplotlib.pyplot as plt 
@@ -63,6 +63,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 	burnin=200
 	nsteps=1000
 	nwalkers=32 #number of walkers	
+	maxparams=int(2*((degree)**2.-1.))
 	
 	
 	#This file is going to be a 3D numpy array 
@@ -122,6 +123,11 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		#  PCA
 		ecoeff,escore,elatent = princomp(elc[1:,:].T)
 		escore=np.real(escore)
+		# for i in range(16):
+		# 	plt.figure()
+		# 	plt.plot(t,escore[i,:])
+		# 	plt.show()
+		# pdb.set_trace()
 
 		if isinstance(afew,list):#np.shape(afew)[0]==10:
 			print('Gave an array of afew values')
@@ -131,7 +137,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		else:
 			if not isinstance(afew,int):
 				assert isinstance(afew,int), "afew must be an integer >=1!"
-			elif afew>=16:
+			elif afew>=maxparams:
 				print('Performing fit for best number of eigencurves to use.')
 				delbic=20.
 				nparams=4
@@ -146,7 +152,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 			#pdb.set_trace()
 				while delbic>10.:#sf>0.00001:
 					nparams+=1
-					if nparams==15:
+					if nparams==int(maxparams+2):
 						params0=10.**-4.*np.ones(nparams)
 						mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
 						chi2f=np.sum((mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)//eclipseerrors)**2.)
@@ -179,11 +185,11 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 			#pdb.set_trace()
 				nparams-=1	#need this line back when I change back again
 			
-			elif ((afew<16)&(afew>=1)):
+			elif ((afew<maxparams)&(afew>=1)):
 				nparams=int(afew+2)
 
 			else:	#assert afew is an integer here
-				assert afew>1 ,"afew must be an integer 1<=afew<=15!"
+				assert afew>=1 ,"afew must be an integer 1<=afew<="+maxparams+"!"
 		#nparams=5
 		params0=10.**-4.*np.ones(nparams)
 		
@@ -233,17 +239,35 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		# plt.show()
 		#print(bestcoeffs)
 		#pdb.set_trace()
+
 		# translate coefficients
 		fcoeffbest=np.zeros_like(ecoeff)
 		for i in np.arange(np.shape(bestcoeffs)[0]-2):
 			fcoeffbest[:,i] = bestcoeffs[i+2]*ecoeff[:,i]
-
+		#pdb.set_trace()
 		# how to go from coefficients to best fit map
 		spheresbest=np.zeros(int((degree)**2.))
 		for j in range(0,len(fcoeffbest)):
 			for i in range(1,int((degree)**2.)):
 				spheresbest[i] += fcoeffbest.T[j,2*i-1]-fcoeffbest.T[j,2*(i-1)]
-		spheresbest[0] = bestcoeffs[0]#c0_best
+		spheresbest[0] = bestcoeffs[0]
+
+		# spheresbest=np.zeros(int((lmax+1)**2.))
+		# for j in range(0,len(fcoeffbest)):
+		# 	shi=0
+		# 	yi=1
+		# 	for l in range(1,lmax+1):
+		# 		for m in range(-1*l,l+1):
+		# 			spheresbest[yi] = 1.0*fcoeffbest.T[j,shi]-1.0*fcoeffbest.T[j,shi+1]
+		# 			yi+=1
+		# 			shi+=2
+
+		#pdb.set_trace()
+		# spheresbest=np.zeros(int((lmax+1)**2.))
+		# for j in range(0,len(fcoeffbest)):
+		# 	for i in range(1,int((lmax+1)**2.)):
+		# 		spheresbest[i] += fcoeffbest.T[j,2*i-1]-fcoeffbest.T[j,2*(i-1)]
+		# spheresbest[0] = bestcoeffs[0]#c0_best
 		bestfitoutput[:,counter]=spheresbest
 		#pdb.set_trace()
 		for sampnum in np.arange(np.shape(samples)[0]):
@@ -264,38 +288,38 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		#alltheoutput[counter,1:]=spheres
 		#print(spheresbest)
 
-		if plot:
-			params0=sp.ModelParams(brightness_model='spherical')	#no offset model
-			params0.nlayers=20
+		# if plot:
+		# 	params0=sp.ModelParams(brightness_model='spherical')	#no offset model
+		# 	params0.nlayers=20
 
-			params0.t0=-2.21857/2.				# Central time of PRIMARY transit [days]
-			params0.per=2.21857567			# Period [days]
-			params0.a_abs=0.0313			# The absolute value of the semi-major axis [AU]
-			params0.inc=85.71			# Inclination [degrees]
-			params0.ecc=0.0			# Eccentricity
-			params0.w=90.			# Argument of periastron
-			params0.rp=0.155313				# Planet to star radius ratio
-			params0.a=8.863				# Semi-major axis scaled by stellar radius
-			params0.p_u1=0.			# Planetary limb darkening parameter
-			params0.p_u2=0.			# Planetary limb darkening parameter
+		# 	params0.t0=-2.21857/2.				# Central time of PRIMARY transit [days]
+		# 	params0.per=2.21857567			# Period [days]
+		# 	params0.a_abs=0.0313			# The absolute value of the semi-major axis [AU]
+		# 	params0.inc=85.71			# Inclination [degrees]
+		# 	params0.ecc=0.0			# Eccentricity
+		# 	params0.w=90.			# Argument of periastron
+		# 	params0.rp=0.155313				# Planet to star radius ratio
+		# 	params0.a=8.863				# Semi-major axis scaled by stellar radius
+		# 	params0.p_u1=0.			# Planetary limb darkening parameter
+		# 	params0.p_u2=0.			# Planetary limb darkening parameter
 
-			params0.degree=degree	#maximum harmonic degree
-			params0.la0=0.
-			params0.lo0=0.
-			params0.sph=list(spheresbest)
+		# 	params0.degree=(lmax+1)	#maximum harmonic degree
+		# 	params0.la0=0.
+		# 	params0.lo0=0.
+		# 	params0.sph=list(spheresbest)
 
-			times=eclipsetimes
-			templc=params0.lightcurve(times)
+		# 	times=eclipsetimes
+		# 	templc=params0.lightcurve(times)
 
-			params0.plot_square()
+		# 	params0.plot_square()
 
-			# doing a test spiderman run to see if the output lightcurve is similar
-			# #PERSON CHECKING THIS: You can use this to make sure the spherical harmonics fit is doing the right thing!
+		# 	# doing a test spiderman run to see if the output lightcurve is similar
+		# 	# #PERSON CHECKING THIS: You can use this to make sure the spherical harmonics fit is doing the right thing!
 
-			plt.figure()
-			plt.plot(times,templc,color='k')
-			plt.errorbar(eclipsetimes,eclipsefluxes,yerr=eclipseerrors,linestyle='none',color='r')
-			plt.show()
+		# 	plt.figure()
+		# 	plt.plot(times,templc,color='k')
+		# 	plt.errorbar(eclipsetimes,eclipsefluxes,yerr=eclipseerrors,linestyle='none',color='r')
+		# 	plt.show()
 
 		nParamsUsed.append(nparams)
 		ecoeffList.append(ecoeff)

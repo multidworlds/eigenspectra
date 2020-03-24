@@ -19,6 +19,7 @@ import emcee
 import csv
 import spiderman as sp
 from scipy.optimize import leastsq
+from scipy.optimize import least_squares
 import pdb
 from scipy import stats
 from scipy import special
@@ -142,28 +143,41 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 				delbic=20.
 				nparams=4
 				params0=10.**-4.*np.ones(nparams)
-				mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
-				resid=mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
+				boundsup=[np.inf]*nparams 
+				boundsdown=[0]*2+[-np.inf]*(nparams-2)
+				#mpfit=leastsq(mpmodel,params0,bounds=,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
+				mpfit=least_squares(mpmodel,params0,bounds=(boundsdown,boundsup),args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
+				#resid=mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
+				resid=mpmodel(mpfit.x,eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
 				chi2i=np.sum((resid//eclipseerrors)**2.)
 				loglike=-0.5*(np.sum((resid//eclipseerrors)**2 + np.log(2.0*np.pi*(eclipseerrors)**2)))
 				bici=-2.*loglike + nparams*np.log(np.shape(eclipseerrors)[0])
 			#print(nparams,chi2i,bici,mpfit[0])
-				tempparams=mpfit[0]
+				#tempparams=mpfit[0]
+				tempparams=mpfit.x
 			#pdb.set_trace()
 				while delbic>10.:#sf>0.00001:
 					nparams+=1
 					if nparams==int(maxparams+2):
 						params0=10.**-4.*np.ones(nparams)
-						mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
-						chi2f=np.sum((mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)//eclipseerrors)**2.)
+						boundsup=[np.inf]*nparams 
+						boundsdown=[0]*2+[-np.inf]*(nparams-2)
+						#mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
+						mpfit=least_squares(mpmodel,params0,bounds=(boundsdown,boundsup),args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
+						#chi2f=np.sum((mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)//eclipseerrors)**2.)
+						chi2f=np.sum((mpmodel(mpfit.x,eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)//eclipseerrors)**2.)
 						#dof=np.shape(eclipseerrors)[0]-nparams
 						#Fval=(chi2i-chi2f)/(chi2f/dof)
 						#sf=0.00000001
 						delbic=5.
 					else:
 						params0=10.**-4.*np.ones(nparams)
-						mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
-						resid=mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
+						boundsup=[np.inf]*nparams 
+						boundsdown=[0]*2+[-np.inf]*(nparams-2)
+						#mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
+						mpfit=least_squares(mpmodel,params0,bounds=(boundsdown,boundsup),args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
+						#resid=mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
+						resid=mpmodel(mpfit.x,eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
 						chi2f=np.sum((resid//eclipseerrors)**2.)
 						#dof=np.shape(eclipseerrors)[0]-nparams
 						#Fval=(chi2i-chi2f)/(chi2f/dof)
@@ -175,11 +189,14 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 						#print(np.sum((resid//eclipseerrors)**2),loglike)
 						#print(chi2i,chi2f,bici,bicf)
 						print(nparams-2,bicf-bici)#,chi2f-chi2i,bicf-bici)
-						print(mpfit[0])
-						print(mpfit[0][:-1]-tempparams)
+						#print(mpfit[0])
+						print(mpfit.x)
+						#print(mpfit[0][:-1]-tempparams)
+						print(mpfit.x[:-1]-tempparams)
 						chi2i=chi2f
 						bici=bicf
-						tempparams=mpfit[0]
+						#tempparams=mpfit[0]
+						tempparams=mpfit.x
 				print('BIC criterion says the best number of eigencurves to use is '+str(nparams-3))
 
 			#pdb.set_trace()
@@ -192,11 +209,15 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 				assert afew>=1 ,"afew must be an integer 1<=afew<="+maxparams+"!"
 		#nparams=5
 		params0=10.**-4.*np.ones(nparams)
+		boundsup=[np.inf]*nparams 
+		boundsdown=[0]*2+[-np.inf]*(nparams-2)
 		
 		#pdb.set_trace()
-		mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
+		#mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
+		mpfit=least_squares(mpmodel,params0,bounds=(boundsdown,boundsup),args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
 		#format parameters for mcmc fit
-		theta=mpfit[0]
+		#theta=mpfit[0]
+		theta=mpfit.x
 		ndim=np.shape(theta)[0]	#set number of dimensions
 		#print(mpfit[0])
 		sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,escore,nparams),threads=6)
@@ -214,8 +235,9 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 					resid=mpmodel(result[0][guy],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
 					chi2val=np.sum((resid//eclipseerrors)**2.)
 					if chi2val<bestfit[0]:
-						bestfit[0]=chi2val
-						bestfit[1:]=result[0][guy]
+						if result[0][guy][1]>0.:
+							bestfit[0]=chi2val
+							bestfit[1:]=result[0][guy]
 
 		resid=mpmodel(bestfit[1:],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)
 		chi2f=np.sum((resid//eclipseerrors)**2.)
@@ -244,15 +266,15 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		fcoeffbest=np.zeros_like(ecoeff)
 		for i in np.arange(np.shape(bestcoeffs)[0]-2):
 			fcoeffbest[:,i] = bestcoeffs[i+2]*ecoeff[:,i]
-		#pdb.set_trace()
+		
 		# how to go from coefficients to best fit map
-		spheresbest=np.zeros(int((degree)**2.))
+		spheresbest=np.zeros(int((degree)**2.)) 	#FINDME: are these equivalent? If not need to figure this out
 		for j in range(0,len(fcoeffbest)):
 			for i in range(1,int((degree)**2.)):
 				spheresbest[i] += fcoeffbest.T[j,2*i-1]-fcoeffbest.T[j,2*(i-1)]
 		spheresbest[0] = bestcoeffs[0]
-
-		# spheresbest=np.zeros(int((lmax+1)**2.))
+		#pdb.set_trace()
+		# spheresbest=np.zeros(int((degree)**2.))
 		# for j in range(0,len(fcoeffbest)):
 		# 	shi=0
 		# 	yi=1

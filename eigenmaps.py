@@ -62,6 +62,7 @@ def generate_maps(sph, N_lon, N_lat):
         np.flip(np.roll(fluxes, N_lon//2, axis=-1), axis=-2)
 
     lons, lats = np.meshgrid(los-np.pi, las-np.pi/2)
+    fluxes=np.flip(fluxes,axis=1)
 
     return wavelengths, lats, lons, fluxes
 

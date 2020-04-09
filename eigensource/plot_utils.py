@@ -199,7 +199,10 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
 
         ## note that the maps have the origin at the top
         ## so we have to flip the latitude array
-        lats = np.flip(lats,axis=0)
+        #print(lats)
+        #lats = np.flip(lats,axis=0) #getting rid of this doesn't change anything!!!!
+        #print(lats)
+        #lons = np.flip(lons,axis=0) #added in to see if this fixes our maps
 
     return fullMapArray, bestMapArray, lats, lons, waves
 

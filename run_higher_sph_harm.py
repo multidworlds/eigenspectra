@@ -12,7 +12,7 @@ import matplotlib.pyplot as p
 #get_ipython().run_line_magic('matplotlib', 'inline')
 
 import eigensource.add_noise as add_noise
-import eigencurves_starry
+import eigencurves#_starry
 import eigenmaps
 import kmeans
 from sys import argv
@@ -91,7 +91,7 @@ def run_lc_noise_and_fit(norder=3,
 
         # ### Fit eigencurves to lightcurve
         print("Fitting eigencurves now for order {}".format(norder))
-        spherearray = eigencurves_starry.eigencurves(noiseDict,plot=False,degree=norder,afew=afew)
+        spherearray = eigencurves.eigencurves(noiseDict,plot=False,degree=norder,afew=afew)#_starry
         # spherearray is an array of wavelength x SH coefficents
     
         np.savez(outputNPZ,spherearray)

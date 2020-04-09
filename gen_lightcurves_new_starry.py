@@ -19,7 +19,9 @@ from scipy import signal
 import healpy as hp
 import matplotlib.pyplot as plt
 import os, sys
-import starry_beta as starry
+import starry
+starry.config.lazy = False
+starry.config.quiet = True
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -47,7 +49,7 @@ def expand_hp(healpix_map, lmax):
 
     # Instantiate a starry map so we can rotate it to the
     # correct orientation
-    map = starry.Map(lmax=lmax)
+    map = starry.Map(ymax=lmax)
     map[:, :] = ylm
     map.axis = [1, 0, 0]
     map.rotate(90.0);
@@ -569,10 +571,6 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
         shape ``(len(time), len(lamlo))``
     """
 
-    # Only this function should import starry so it doesn't
-    # break if you don't have it
-    import starry
-
     # Construct low res wavelength grid
     lamlo, dlamlo = construct_lam(lammin, lammax, dlam=dlam)
     Nlamlo = len(lamlo)
@@ -596,9 +594,26 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
             hp.mollview(spec2d[:,i], title=r"%0.2f $\mu$m" %lamlo[i])
             plt.show()
 
-    # Create starry planet
-    planet = starry.kepler.Secondary(lmax=lmax, nwav=Nlamlo)
+    # Planet luminosity
+    L = 0.00344
 
+    # Create starry planet map
+    map = starry.Map(ydeg=lmax, nw=Nlamlo, amp = L*np.ones(Nlamlo))
+
+    # Create starry planet w/ map and HD189 parameters
+    planet = starry.Secondary(map,
+                              m=0,      # mass in solar masses
+                              r=0.155313,    # radius in solar radii
+                              a=8.863,       # a/rstar
+                              porb=2.21857567,  # orbital period in days
+                              prot=2.21857567,  # rotation period in days (synchronous)
+                              #Omega=30,  # longitude of ascending node in degrees
+                              ecc=0.0,  # eccentricity
+                              w=90,  # longitude of pericenter in degrees
+                              t0=-2.21857567 / 2.,  # time of transit in days
+    )
+
+    """
     # HD189 parameters
     planet.r = 0.155313
     L = 0.00344
@@ -610,6 +625,7 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
     planet.tref = -2.21857567 / 2.
     planet.ecc = 0.0
     planet.w = 90
+    """
 
     # Calculate disk-integrated Fp/Fs -- This should be the secondary eclipse depth,
     # but it must be consistent with the individual map fluxes
@@ -618,6 +634,7 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
     """
     # Rodrigo Luger's fix for starry spectral map normalization:
     """
+    """
     # Loop over wavelengths loading map into starry
     y = np.zeros_like(planet.y)
     for i in range(Nlamlo):
@@ -625,17 +642,20 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
         # up to degree `lmax`
         y[:, i] = expand_hp(spec2d[:, i], lmax=lmax)
     # Renormalize planet map and luminosity accordingly
-    planet[:, :] = y / y[0]
+    planet.map[:, :] = y / y[0]
     planet.L = y[0]
+    """
 
     # Get the map intensity across the planet
     nx, ny = 300, 300
-    x0 = np.linspace(-1, 1, nx)
-    y0 = np.linspace(-1, 1, ny)
+    #x0 = np.linspace(-1, 1, nx)
+    #y0 = np.linspace(-1, 1, ny)
+    x0 = np.linspace(-90, 90, nx)
+    y0 = np.linspace(-90, 90, ny)
     X, Y = np.meshgrid(x0, y0)
     I = np.zeros((nx, ny, Nlamlo))
     for i in range(nx):
-        I[i] = planet(x=X[i], y=Y[i])
+        I[i] = planet.map.intensity(lat=X[i], lon=Y[i])
 
     # Plot the starry map during secondary eclipse
     if False:
@@ -646,22 +666,26 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
         plt.show()
 
     # Create a generic star with starry
-    star = starry.kepler.Primary(nwav=Nlamlo)
+    #r = 0.805
+    #m = 0.846
+    star = starry.Primary(starry.Map(ydeg=1, nw=Nlamlo), m=1.0, r=1.0, prot=1.0)
 
     # Set wavelength-dependent limb darkening params, which don't matter in
     # Secondary eclipse
-    star[1] = 0.40 * np.ones(Nlamlo)
-    star[2] = 0.26 * np.ones(Nlamlo)
+    star.map.y[1] = 0.40 * np.ones(Nlamlo)
+    star.map.y[2] = 0.26 * np.ones(Nlamlo)
 
     # Create starry system with star and planet
-    system = starry.kepler.System(star, planet)
+    system = starry.System(star, planet)
 
     # Create time grid in days (secondary eclipse is at 0.0)
     time = np.linspace(-0.1, 0.1, 10000)
 
     # Calculate lightcurve in starry
-    system.compute(time)
-    lightcurve = system.lightcurve / system.lightcurve[0]
+    #system.compute(time)
+    #lightcurve = system.lightcurve / system.lightcurve[0]
+    flux = system.flux(time)
+    lightcurve = flux / flux[0]
 
     # Apply vertical shift so the bottom of the eclipse is at 0.0
     lightcurve = lightcurve + (1.0 - np.max(lightcurve))

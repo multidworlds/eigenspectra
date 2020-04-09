@@ -19,8 +19,6 @@ from matplotlib.colors import BoundaryNorm, Normalize
 from matplotlib.ticker import FormatStrFormatter, ScalarFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-import run_higher_sph_harm
-
 from importlib import import_module
 
 def plot_setup():
@@ -336,7 +334,7 @@ def find_groups(dataDir,ngroups=4,degree=3,
         waves=np.array([2.41,2.59,2.77,2.95,3.13,3.31,3.49,3.67,3.85,4.03])
     minlon=np.around(extent/2.*londim)
     #print(minlon)
-    
+
     np.random.seed(0)
     randomIndices = np.random.randint(0,len(samples),trySamples)
     for drawInd,draw in enumerate(samples[randomIndices]):
@@ -446,7 +444,7 @@ def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,uber_eigenlist,waves,
     #outfile.close()
     Ngroup = eigenspectra_draws.shape[1]
     fig.savefig('plots/eigenmap_and_spec/{}_spectra_deg{}_grp_{}.pdf'.format(saveName,degree,Ngroup),bbox_inches='tight')
-    
+
     if returnFig == True:
         return fig
     else:

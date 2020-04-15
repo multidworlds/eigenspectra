@@ -7,12 +7,13 @@ import eigenmaps
 
 def plot_hotspot_derived_spectra():
     #dataDir = 'data/sph_harmonic_coefficients_full_samples/hotspot/'
-    dataDir = 'data/sph_harmonic_coefficients_full_samples/hotspot_3curves/'
+    #dataDir = 'data/sph_harmonic_coefficients_full_samples/hotspot_3curves/'
+    dataDir = 'data/sph_harmonic_coefficients_full_samples/finalgood/hotspot64/'
     allOutput = plot_utils.find_groups(dataDir,ngroups=2,degree=3,isspider=False)
 
     eigenspectra_draws, kgroup_draws,uber_eigenlist, maps = allOutput
 
-    npzResults = np.load('data/sph_harmonic_coefficients_full_samples/hotspot/spherearray_deg_3.npz')
+    npzResults = np.load('data/sph_harmonic_coefficients_full_samples/finalgood/hotspot64/spherearray_deg_3.npz')
     resultDict = npzResults['arr_0'].tolist()
     waves = resultDict['wavelength (um)']
     
@@ -37,12 +38,9 @@ def plot_hotspot_derived_spectra():
 
 def plot_group_histos(ngroups=2,degree=3):
     ## get te groups
-    if degree == 3:
-        model = 'hotspot_3curves'
-    else:
-        model = 'hotspot'
+    model = 'hotspot64'
     
-    dataDir = 'data/sph_harmonic_coefficients_full_samples/{}/'.format(model)
+    dataDir = 'data/sph_harmonic_coefficients_full_samples/finalgood/{}/'.format(model)
     
     npzLightcurve = np.load('data/input_lightcurves/hotspot.npz')
     time = npzLightcurve['time']
@@ -53,7 +51,6 @@ def plot_group_histos(ngroups=2,degree=3):
     eigenspectra_draws, kgroup_draws,uber_eigenlist, maps = allOutput
     
     ## get the waves, longitudes and latitudes
-    dataDir = 'data/sph_harmonic_coefficients_full_samples/{}/'.format(model)
     waves, lats, lons = plot_utils.get_map_and_plot(waveInd=8,degree=degree,dataDir=dataDir,isspider=False)
     
 
@@ -73,8 +70,8 @@ def plot_all_group_histos():
         for degree in [2,3]:
             plot_group_histos(ngroup,degree)
     
-def plot_hue_maps(degree=3,model='hotspot'):
-    dataDir = 'data/sph_harmonic_coefficients_full_samples/{}/'.format(model)
+def plot_hue_maps(degree=3,model='hotspot64'):
+    dataDir = 'data/sph_harmonic_coefficients_full_samples/finalgood/{}/'.format(model)
     ngroups = 2
     waves, lats, lons = plot_utils.get_map_and_plot(waveInd=8,degree=degree,dataDir=dataDir,isspider=False)
     

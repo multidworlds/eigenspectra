@@ -110,7 +110,7 @@ def show_orig_map(lam,spaxels,waveInd=0):#testNum=1):
     return spec2d
 
 def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/",isspider=True):
-    tmp = np.load("{}spherearray_deg_{}.npz".format(dataDir,degree),allow_pickle=True)
+    tmp = np.load("{}spherearray_deg_{}.npz".format(dataDir,degree), allow_pickle=True, encoding="latin1")
     outDictionary = tmp['arr_0'].tolist()
 
     londim = 100
@@ -307,7 +307,7 @@ def find_groups(dataDir,ngroups=4,degree=3,
     """
     #samplesDir = "data/sph_harmonic_coefficients_full_samples"
     #dataDir = "{}/eclipse_lightcurve_test{}/".format(samplesDir,testNum)
-    tmp = np.load("{}spherearray_deg_{}.npz".format(dataDir,degree),allow_pickle=True)
+    tmp = np.load("{}spherearray_deg_{}.npz".format(dataDir,degree), allow_pickle=True, encoding="latin1")
     outDictionary = tmp['arr_0'].tolist()
     samples = outDictionary['spherical coefficients'] # output from eigencurves
 
@@ -426,9 +426,9 @@ def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,uber_eigenlist,waves,
     #print(kgroups)
     #print(np.min(kgroups),np.max(kgroups))
     #print(np.around(np.min(kgroups)),np.around(np.max(kgroups)))
-    #outfile=open('mystery4_eigenspectra5.txt','w')
+    cmap = cc.cm['isolum']
+    colors = [cmap(val) for val in np.linspace(0, 255, num=np.shape(eigenspectra)[0])]
     counter=0
-    colors=['b','g','orange','m']
     fig, ax = p.subplots()
     for spec, err in zip(eigenspectra, eigenerrs):
         ax.errorbar(waves, spec, err,label=('Group '+np.str(counter)),linewidth=2,marker='.',markersize=10,color=colors[counter])
@@ -455,7 +455,7 @@ def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,uber_eigenlist,waves,
 
 
 
-def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
+def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group',saveName='mystery1_eigenbest'):
     #full_extent = np.array([np.min(lons),np.max(lons),np.min(lats),np.max(lats)])/np.pi*180 #for full map
     #full_extent = np.array([-90.,90.,-90.,90.]) #for dayside only
     full_extent = np.array([-extent/2.*360.,extent/2.*360.,-90.,90.])
@@ -521,8 +521,8 @@ def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
         cb.ax.tick_params(axis='x', labelsize=13)
         cb.ax.set_title('Flux', y=1.35, fontsize=19)
 
-        #for filetype in ['png', 'pdf']:
-        #    p.savefig('HUEgroup_LUMflux_quadrant_deg6_group4.{}'.format(filetype), dpi=300, bbox_inches='tight')
+        for filetype in ['png', 'pdf']:
+            p.savefig('HUEgroup_LUMflux_{}.{}'.format(saveName,filetype), dpi=300, bbox_inches='tight')
     elif hueType == 'flux':
         p.figure(figsize=(10,6.5))
         p.title('Flux', fontsize=22)
@@ -562,8 +562,8 @@ def do_hue_maps(extent,maps,lons,lats,kgroups,ngroups,hueType='group'):
         cb.ax.tick_params(axis='x', labelsize=13)
         cb.ax.set_title('Uncertainty [%]', y=1.35, fontsize=19)
 
-        #for filetype in ['png', 'pdf']:
-        #    p.savefig('HUEflux_LUMstdev_quadrant_deg6_group4.{}'.format(filetype), dpi=300, bbox_inches='tight')
+        for filetype in ['png', 'pdf']:
+            p.savefig('HUEflux_LUMstdev_{}.{}'.format(saveName,filetype), dpi=300, bbox_inches='tight')
 
     else:
         raise Exception("Unrecognized hueType {}".format(hueType))

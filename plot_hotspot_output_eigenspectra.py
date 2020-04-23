@@ -13,7 +13,7 @@ def plot_hotspot_derived_spectra():
 
     eigenspectra_draws, kgroup_draws,uber_eigenlist, maps = allOutput
 
-    npzResults = np.load('data/sph_harmonic_coefficients_full_samples/finalgood/hotspot64/spherearray_deg_3.npz')
+    npzResults = np.load('data/sph_harmonic_coefficients_full_samples/hotspot/spherearray_deg_3.npz', allow_pickle=True, encoding="latin1")
     resultDict = npzResults['arr_0'].tolist()
     waves = resultDict['wavelength (um)']
     
@@ -75,7 +75,7 @@ def plot_hue_maps(degree=3,model='hotspot64'):
     ngroups = 2
     waves, lats, lons = plot_utils.get_map_and_plot(waveInd=8,degree=degree,dataDir=dataDir,isspider=False)
     
-    npzLightcurve = np.load('data/input_lightcurves/hotspot.npz')
+    npzLightcurve = np.load('data/input_lightcurves/hotspot.npz', allow_pickle=True, encoding="latin1")
     time = npzLightcurve['time']
     extent=(np.max(time)-np.min(time))/2.21857567+180./360. #phase coverage of the eclipse observations
 

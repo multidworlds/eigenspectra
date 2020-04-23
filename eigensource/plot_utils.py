@@ -14,12 +14,10 @@ import healpy as hp
 
 import colorcet as cc
 from colormap2d import generate_map2d
-from matplotlib import colorbar, cm
+from matplotlib import colorbar, cm, rc
 from matplotlib.colors import BoundaryNorm, Normalize
 from matplotlib.ticker import FormatStrFormatter, ScalarFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-import run_higher_sph_harm
 
 from importlib import import_module
 
@@ -201,7 +199,10 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
 
         ## note that the maps have the origin at the top
         ## so we have to flip the latitude array
-        lats = np.flip(lats,axis=0)
+        #print(lats)
+        #lats = np.flip(lats,axis=0) #getting rid of this doesn't change anything!!!!
+        #print(lats)
+        #lons = np.flip(lons,axis=0) #added in to see if this fixes our maps
 
     return fullMapArray, bestMapArray, lats, lons, waves
 
@@ -218,19 +219,34 @@ def plot_retrieved_map(fullMapArray,bestMapArray,lats,lons,waves,waveInd=3,degre
     #replace the median map with the best fit map
     mapLowMedHigh[1]=bestMapArray
 
-    fig, axArr = p.subplots(1,3,figsize=(22,5))
-    for ind,onePercentile in enumerate(percentiles):
-        map_day = mapLowMedHigh[ind][waveInd][:,londim//4:-londim//4]
-        extent = np.array([np.min(lons)/np.pi/2.*180,np.max(lons)/np.pi/2.*180,np.min(lats)/np.pi*180,np.max(lats)/np.pi*180])
-        plotData = axArr[ind].imshow(map_day, extent=extent,vmin=minflux,vmax=maxflux)
-        cbar = fig.colorbar(plotData,ax=axArr[ind])
-        cbar.set_label('Brightness')
-        axArr[ind].set_ylabel('Latitude')
-        axArr[ind].set_xlabel('Longitude')
-        axArr[ind].set_title("{} %".format(onePercentile))
-        #axArr[ind].show()
+    # fig, axArr = p.subplots(1,3,figsize=(22,5))
+    # for ind,onePercentile in enumerate(percentiles):
+    #     map_day = mapLowMedHigh[ind][waveInd][:,londim//4:-londim//4]
+    #     extent = np.array([np.min(lons)/np.pi/2.*180,np.max(lons)/np.pi/2.*180,np.min(lats)/np.pi*180,np.max(lats)/np.pi*180])
+    #     plotData = axArr[ind].imshow(map_day, extent=extent,vmin=minflux,vmax=maxflux)
+    #     cbar = fig.colorbar(plotData,ax=axArr[ind])
+    #     cbar.set_label('Brightness')
+    #     axArr[ind].set_ylabel('Latitude')
+    #     axArr[ind].set_xlabel('Longitude')
+    #     axArr[ind].set_title("{} %".format(onePercentile))
+    #     #axArr[ind].show()
 
-    fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
+    rc('axes',linewidth=2)
+    p.figure()
+    map_day = mapLowMedHigh[1][waveInd][:,londim//4:-londim//4]
+    extent = np.array([np.min(lons)/np.pi/2.*180,np.max(lons)/np.pi/2.*180,np.min(lats)/np.pi*180,np.max(lats)/np.pi*180])
+    plotData = p.imshow(map_day, extent=extent,vmin=minflux,vmax=maxflux)
+    cbar = p.colorbar(plotData)
+    cbar.set_label('Brightness',fontsize=15)
+    cbar.ax.tick_params(labelsize=15,width=2,length=6)
+    p.ylabel('Latitude',fontsize=20)
+    p.xlabel('Longitude',fontsize=20)
+    p.tick_params(labelsize=20,axis="both",top=True,right=True,width=2,length=8,direction='in')
+    #axArr[ind].set_title("{} %".format(onePercentile))
+    #axArr[ind].show()
+    p.title('{:.2f}$\mu$m'.format(waves[waveInd]),fontsize=20)
+    p.tight_layout()
+    #fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
     p.savefig('plots/retrieved_maps/retrieved_map_{}_deg_{}_waveInd_{}.pdf'.format(saveName,degree,waveInd))
 
 
@@ -263,7 +279,7 @@ def all_sph_degrees(waveInd=5):
         get_map_and_plot(waveInd=waveInd,degree=oneDegree)
 
 
-def find_groups(dataDir,ngroups=4,degree=2,
+def find_groups(dataDir,ngroups=4,degree=3,
                 londim=100, latdim=100,
                 trySamples=45,extent=0.5,sortMethod='avg',isspider=True):
     """
@@ -322,6 +338,7 @@ def find_groups(dataDir,ngroups=4,degree=2,
     minlon=np.around(extent/2.*londim)
     #print(minlon)
 
+    np.random.seed(0)
     randomIndices = np.random.randint(0,len(samples),trySamples)
     for drawInd,draw in enumerate(samples[randomIndices]):
         ## Re-formatting here into a legacy system
@@ -416,6 +433,8 @@ def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,uber_eigenlist,waves,
     for spec, err in zip(eigenspectra, eigenerrs):
         ax.errorbar(waves, spec, err,label=('Group '+np.str(counter)),linewidth=2,marker='.',markersize=10,color=colors[counter])
         counter+=1
+        #for i in np.arange(np.shape(waves)[0]):
+        #    print(waves[i],spec[i],err[i],file=outfile)
     ax.set_xlabel('Wavelength ($\mu$m)',fontsize=20)
     ax.set_ylabel('F$_p$/F$_*$',fontsize=20)
     ax.tick_params(labelsize=20,axis="both",right=True,top=True,width=1.5,length=5)
@@ -425,9 +444,10 @@ def show_spectra_of_groups(eigenspectra_draws,kgroup_draws,uber_eigenlist,waves,
     else:
         ax.legend(fontsize=15)
 
+    #outfile.close()
     Ngroup = eigenspectra_draws.shape[1]
     fig.savefig('plots/eigenmap_and_spec/{}_spectra_deg{}_grp_{}.pdf'.format(saveName,degree,Ngroup),bbox_inches='tight')
-    
+
     if returnFig == True:
         return fig
     else:

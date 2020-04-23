@@ -19,7 +19,7 @@ from scipy import signal
 import healpy as hp
 import matplotlib.pyplot as plt
 import os, sys
-import starry
+import starry_beta as starry
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -554,7 +554,7 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
     save_output : bool
         Set to save the output to a npz
     save_tag : str
-        Name of file to save output to 
+        Name of file to save output to
 
     Returns
     -------

@@ -62,6 +62,7 @@ def generate_maps(sph, N_lon, N_lat):
         np.flip(np.roll(fluxes, N_lon//2, axis=-1), axis=-2)
 
     lons, lats = np.meshgrid(los-np.pi, las-np.pi/2)
+    fluxes=np.flip(fluxes,axis=1)
 
     return wavelengths, lats, lons, fluxes
 
@@ -71,7 +72,7 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
                       alreadyTrimmed=True,
                       lonsTrimmed=False,
                       input_map_units='Mean Group',
-                      saveName=None):
+                      saveName=None,figsize=None):
     """
     Show histograms of the groups for specific regions of the map
     
@@ -106,7 +107,7 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
     
     londim = input_map.shape[1]
     
-    fig, ax = p.subplots()
+    fig, ax = p.subplots(figsize=figsize)
     if alreadyTrimmed == True:
         map_day = input_map
     else:
@@ -123,8 +124,13 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
     ax.set_ylabel('Latitude')
     ax.set_xlabel('Longitude')
     
-    windowLocationsX = [-0.16,-0.16, 1.0, 1.0]
-    windowLocationsY = [ 0.1,  0.6 , 0.6, 0.1]
+    if figsize is None:
+        windowLocationsX = [-0.16,-0.16, 1.0, 1.0]
+        windowLocationsY = [ 0.1,  0.6 , 0.6, 0.1]
+    else:
+        windowLocationsX = [-0.26,-0.26, 1.1, 1.1]
+        windowLocationsY = [ 0.1,  0.7 , 0.7, 0.1]
+    
     windowLabels = ['A','B','C','D']
     for ind in np.arange(len(xLons)):
         xLon, xLat = xLons[ind], xLats[ind]
@@ -135,9 +141,10 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
                 color='red')
         
         ax2.set_title(windowLabels[ind])
-        ax2.set_xlabel('Grp')
+        ax2.set_xlabel('Group')
         
         ax2.hist(kgroup_draws[:,iLat,iLon])
+        ax2.set_xlim(-0.5,np.max(kgroup_draws) + 0.5)
         
     if saveName is not None:
         fig.savefig(saveName,bbox_inches='tight')

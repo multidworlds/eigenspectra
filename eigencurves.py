@@ -10,6 +10,7 @@
 
 #OUTPUTS:
 #	Coefficients for each of the spherical harmonics
+#from lightcurves_sh_starry import sh_lcs
 from lightcurves_sh import sh_lcs
 from pca_eig import princomp
 import numpy as np 
@@ -24,7 +25,7 @@ from scipy import special
 
 def mpmodel(p,x,y,z,elc,escore,nparams):#fjac=None,x=None,y=None,err=None):
 	model = p[0]*elc[0,:] + p[1]
-	for ind in range(2,nparams):
+	for ind in range(2,nparams): #FINDME changed to go to nparams+1
 		model = model + p[ind] * escore[ind-2,:]
 	return np.array(y-model)
 
@@ -34,7 +35,7 @@ def lnprob(theta,x,y,yerr,elc,escore,nparams):
 
 def lnlike(theta,x,y,yerr,elc,escore,nparams):
 	model = theta[0] * elc[0,:] + theta[1]
-	for ind in range(2,nparams):
+	for ind in range(2,nparams): #FINDME changed to go to nparams+1
 		model = model + theta[ind] * escore[ind-2,:]
 	resid=y-model
 	chi2=np.sum((resid/yerr)**2)
@@ -70,8 +71,8 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 	## n parameters is the number of parameters
 	## and n waves is the number of wavelengths looped over
 	
-	alltheoutput=np.zeros(((nsteps-burnin)*nwalkers,int(degree**2.),np.shape(waves)[0]))
-	bestfitoutput=np.zeros((int(degree**2.),np.shape(waves)[0]))
+	alltheoutput=np.zeros(((nsteps-burnin)*nwalkers,int((degree)**2.),np.shape(waves)[0]))
+	bestfitoutput=np.zeros((int((degree)**2.),np.shape(waves)[0]))
 	
 	if np.shape(fluxes)[0]==np.shape(waves)[0]:
 		rows=True
@@ -97,12 +98,17 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 
 		#	Calculate spherical harmonic maps using SPIDERMAN
 		
-		lc,t = sh_lcs(t0=-2.21857/2.,ntimes=eclipsetimes,degree=degree)	#model it for the times of the observations
-		
+		lc,t = sh_lcs(t0=-2.21857/2.,ntimes=eclipsetimes,degree=degree)#degree=lmax+1)#	#model it for the times of the observations
+		# for i in range(16):
+		# 	plt.figure()
+		# 	plt.plot(t,lc[i,:])
+		# 	plt.show()
+		# pdb.set_trace()
+		#print(np.shape(lc),np.shape(t))
 		#Optional add-on above: test whether we want to include higher-order spherical harmonics when making our eigencurves?
 
 		# subtract off stellar flux
-		lc = lc-1
+		#lc = lc-1
 
 		# just analyze time around secondary eclipse (from start to end of observations)
 		starttime=np.min(eclipsetimes)
@@ -125,7 +131,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		else:
 			if not isinstance(afew,int):
 				assert isinstance(afew,int), "afew must be an integer >=1!"
-			elif afew>=10:
+			elif afew>=16:
 				print('Performing fit for best number of eigencurves to use.')
 				delbic=20.
 				nparams=4
@@ -173,11 +179,11 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 			#pdb.set_trace()
 				nparams-=1	#need this line back when I change back again
 			
-			elif ((afew<10)&(afew>=1)):
+			elif ((afew<16)&(afew>=1)):
 				nparams=int(afew+2)
 
 			else:	#assert afew is an integer here
-				assert afew>1 ,"afew must be an integer >=1!"
+				assert afew>1 ,"afew must be an integer 1<=afew<=15!"
 		#nparams=5
 		params0=10.**-4.*np.ones(nparams)
 		
@@ -233,9 +239,9 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 			fcoeffbest[:,i] = bestcoeffs[i+2]*ecoeff[:,i]
 
 		# how to go from coefficients to best fit map
-		spheresbest=np.zeros(int(degree**2.))
+		spheresbest=np.zeros(int((degree)**2.))
 		for j in range(0,len(fcoeffbest)):
-			for i in range(1,int(degree**2.)):
+			for i in range(1,int((degree)**2.)):
 				spheresbest[i] += fcoeffbest.T[j,2*i-1]-fcoeffbest.T[j,2*(i-1)]
 		spheresbest[0] = bestcoeffs[0]#c0_best
 		bestfitoutput[:,counter]=spheresbest
@@ -246,9 +252,9 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 				fcoeff[:,i] = samples[sampnum,i+2]*ecoeff[:,i]
 
 			# how to go from coefficients to best fit map
-			spheres=np.zeros(int(degree**2.))
+			spheres=np.zeros(int((degree)**2.))
 			for j in range(0,len(fcoeff)):
-				for i in range(1,int(degree**2.)):
+				for i in range(1,int((degree)**2.)):
 					spheres[i] += fcoeff.T[j,2*i-1]-fcoeff.T[j,2*(i-1)]
 			spheres[0] = samples[sampnum,0]#bestcoeffs[0]#c0_best	
 			

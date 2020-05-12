@@ -145,6 +145,7 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
         
         ax2.hist(kgroup_draws[:,iLat,iLon])
         ax2.set_xlim(-0.5,np.max(kgroup_draws) + 0.5)
+        ax2.set_xticks(np.arange(np.max(kgroup_draws) + 1))
         
     if saveName is not None:
         fig.savefig(saveName,bbox_inches='tight')

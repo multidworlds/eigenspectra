@@ -67,8 +67,9 @@ def plot_group_histos(ngroups=2,degree=3):
 
 def plot_all_group_histos():
     for ngroup in [2,3]:
-        for degree in [2,3]:
-            plot_group_histos(ngroup,degree)
+    #    for degree in [2,3]:
+        degree=3
+        plot_group_histos(ngroup,degree)
     
 def plot_hue_maps(degree=3,model='hotspot64'):
     dataDir = 'data/sph_harmonic_coefficients_full_samples/finalgood/{}/'.format(model)

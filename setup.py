@@ -39,11 +39,14 @@ setup(name='eigenspectra',
                         'scipy',
                         'matplotlib',
                         'astropy',
-                        'h5py',
                         'emcee',
                         'corner',
                         'healpy',
-                        'starry==0.3.0', # TODO: update to latest starry! 
+                        'starry==1.0.0',
+                        'xarray==0.16.0', # TODO: This is a hack fix b/c 0.16.1 introduced a bug
+                        'spiderman-package',
+                        'colormath',
+                        'colorcet'
                         ],
       dependency_links=[],
       scripts=[],

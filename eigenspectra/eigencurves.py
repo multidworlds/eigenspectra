@@ -11,10 +11,10 @@
 #OUTPUTS:
 #	Coefficients for each of the spherical harmonics
 #from lightcurves_sh_starry import sh_lcs
-from lightcurves_sh import sh_lcs
-from pca_eig import princomp
-import numpy as np 
-import matplotlib.pyplot as plt 
+from .lightcurves_sh import sh_lcs
+from .pca_eig import princomp
+import numpy as np
+import matplotlib.pyplot as plt
 import emcee
 import csv
 import spiderman as sp
@@ -59,21 +59,21 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 	times=dict['time (days)']
 	fluxes=dict['flux (ppm)']	#2D array times, waves
 	errors=dict['flux err (ppm)']
-	
+
 	burnin=200
 	nsteps=1000
-	nwalkers=32 #number of walkers	
-	
-	
-	#This file is going to be a 3D numpy array 
+	nwalkers=32 #number of walkers
+
+
+	#This file is going to be a 3D numpy array
 	## The shape is (nsamples,n parameters,n waves)
 	## where nsamples is the number of posterior MCMC samples
 	## n parameters is the number of parameters
 	## and n waves is the number of wavelengths looped over
-	
+
 	alltheoutput=np.zeros(((nsteps-burnin)*nwalkers,int((degree)**2.),np.shape(waves)[0]))
 	bestfitoutput=np.zeros((int((degree)**2.),np.shape(waves)[0]))
-	
+
 	if np.shape(fluxes)[0]==np.shape(waves)[0]:
 		rows=True
 	elif np.shape(fluxes)[0]==np.shape(times)[0]:
@@ -97,7 +97,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		#alltheoutput[counter,0]=wavelength
 
 		#	Calculate spherical harmonic maps using SPIDERMAN
-		
+
 		lc,t = sh_lcs(t0=-2.21857/2.,ntimes=eclipsetimes,degree=degree)#degree=lmax+1)#	#model it for the times of the observations
 		# for i in range(16):
 		# 	plt.figure()
@@ -178,7 +178,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 
 			#pdb.set_trace()
 				nparams-=1	#need this line back when I change back again
-			
+
 			elif ((afew<16)&(afew>=1)):
 				nparams=int(afew+2)
 
@@ -186,7 +186,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 				assert afew>1 ,"afew must be an integer 1<=afew<=15!"
 		#nparams=5
 		params0=10.**-4.*np.ones(nparams)
-		
+
 		#pdb.set_trace()
 		mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))
 		#format parameters for mcmc fit
@@ -195,7 +195,7 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		#print(mpfit[0])
 		sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,escore,nparams),threads=6)
 		pos = [theta + 1e-5*np.random.randn(ndim) for i in range(nwalkers)]
-		
+
 		print("Running MCMC at {} um".format(waves[counter]))
 
 		bestfit=np.zeros(ndim+1)
@@ -256,8 +256,8 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 			for j in range(0,len(fcoeff)):
 				for i in range(1,int((degree)**2.)):
 					spheres[i] += fcoeff.T[j,2*i-1]-fcoeff.T[j,2*(i-1)]
-			spheres[0] = samples[sampnum,0]#bestcoeffs[0]#c0_best	
-			
+			spheres[0] = samples[sampnum,0]#bestcoeffs[0]#c0_best
+
 			alltheoutput[sampnum,:,counter]=spheres
 		#pdb.set_trace()
 		#Translate all the coefficients for all of the posterior samples
@@ -303,8 +303,8 @@ def eigencurves(dict,plot=False,degree=3,afew=5):
 		#elcList.append(elc)
 		eigencurvecoeffList.append(samples)
 		elatentList.append(elatent)
-		
-	
+
+
 	finaldict={'wavelength (um)':waves,'spherical coefficients':alltheoutput,'best fit coefficients':bestfitoutput,'N Params Used':nParamsUsed,
 				'ecoeffList': ecoeffList,'escoreList': escoreList,'elc': elc,'eigencurve coefficients':eigencurvecoeffList,'BIC':bicf,'elatentList':elatentList}
 	return finaldict

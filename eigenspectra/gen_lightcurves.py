@@ -19,7 +19,8 @@ from scipy import signal
 import healpy as hp
 import matplotlib.pyplot as plt
 import os, sys
-import starry_beta as starry
+#import starry_beta as starry
+import starry
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 

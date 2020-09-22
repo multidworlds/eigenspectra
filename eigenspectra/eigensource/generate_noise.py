@@ -10,7 +10,11 @@ import matplotlib
 import matplotlib.pyplot as plt
 from astropy.table import Table, vstack
 
-import pynrc
+try:
+    import pynrc
+except ModuleNotFoundError:
+    print("ERROR in 'generate_noise': pynrc is not installed! See https://pynrc.readthedocs.io/en/latest/installation.html")
+
 from copy import deepcopy
 import pysynphot as S
 
@@ -20,12 +24,12 @@ def sum_spectrum(img,ap=4,center=None):
     if center is None:
         center = img.shape[0]/2
     subImg = img[(center-ap):(center+ap),:]
-    
+
     return np.sum(subImg,axis=0)
 
 
 def make_snr_spectrum():
-    ### 
+    ###
 
     bp_k = S.ObsBandpass('johnson,k')
     sp = pynrc.stellar_spectrum('K0V',5.541,'vegamag',bp_k,)
@@ -39,24 +43,23 @@ def make_snr_spectrum():
     varImg = pix_noise**2
     SNR = np.sum(psfImg) / np.sqrt(np.sum(varImg))
     print(' Broadband noise (ppm) = {0}'.format(1e6/SNR))
-    
+
     ## SNR spectrum
     SNRSpec = np.sum(psfImg,axis=0) / np.sqrt(np.sum(varImg,axis=0))
     tSpec = Table()
     tSpec['wave'] = wave
     tSpec['sigma_ppm'] = 1e6/SNRSpec
-    
+
     keepWave = (tSpec['wave'] > 2.4) & (tSpec['wave'] <= 4.02)
     tSpec2 = tSpec[keepWave]
-    
+
     tSpec2.meta = {'filter':'F322W2W','TEXP':det.time_total}
     tSpec2.write('data/instrument/snr_spec_f322w2.fits',overwrite=True)
     tSpec2.write('data/instrument/snr_spec_f322w2.csv',overwrite=True)
-    
+
     fig, ax = plt.subplots()
-    
+
     plt.plot(tSpec2['wave'],tSpec2['sigma_ppm'])
     plt.ylim(300,900)
-    
-    fig.savefig('data/instrument/snr_spectrum.pdf')
 
+    fig.savefig('data/instrument/snr_spectrum.pdf')

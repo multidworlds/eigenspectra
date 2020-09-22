@@ -1,19 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as p
 
-import eigencurves
-import eigenmaps
-import kmeans
-import bin_eigenspectra
+#import eigencurves
+from .. import gen_lightcurves
+from ..colormap2d import generate_map2d
+from .. import eigenmaps
+from .. import kmeans
+from .. import bin_eigenspectra
+
 import os
 import pdb
 import spiderman as sp
 
-import gen_lightcurves
 import healpy as hp
 
 import colorcet as cc
-from colormap2d import generate_map2d
 from matplotlib import colorbar, cm, rc
 from matplotlib.colors import BoundaryNorm, Normalize
 from matplotlib.ticker import FormatStrFormatter, ScalarFormatter

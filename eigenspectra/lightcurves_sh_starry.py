@@ -6,7 +6,7 @@ import pickle
 import starry
 starry.config.lazy = False
 starry.config.quiet = True
-from pca_eig import princomp
+from .pca_eig import princomp
 import pdb
 
 # def minmax(x):
@@ -53,7 +53,7 @@ def sh_lcs(t0=0,per=2.21857567,inc=85.71,ecc=0.0,w=90,rp=0.155313,a=8.863,ntimes
 	for l in range(1,degree):
 		for m in range(-1*l,l+1):
 	        #print(shi,l,m)
-	                
+
 	        # calculate negative version of SH component:
 			planet.map[l,m]=-1.0
 			system = starry.System(star, planet)
@@ -75,6 +75,3 @@ def sh_lcs(t0=0,per=2.21857567,inc=85.71,ecc=0.0,w=90,rp=0.155313,a=8.863,ntimes
 	        #pdb.set_trace()
 
 	return SHcurves,time
-
-
-

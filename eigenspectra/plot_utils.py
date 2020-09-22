@@ -1,12 +1,16 @@
+"""
+Plotting Utilities
+------------------
+"""
 import numpy as np
 import matplotlib.pyplot as p
 
 #import eigencurves
-from .. import gen_lightcurves
-from ..colormap2d import generate_map2d
-from .. import eigenmaps
-from .. import kmeans
-from .. import bin_eigenspectra
+from . import gen_lightcurves
+from .colormap2d import generate_map2d
+from . import eigenmaps
+from . import kmeans
+from . import bin_eigenspectra
 
 import os
 import pdb
@@ -111,6 +115,8 @@ def show_orig_map(lam,spaxels,waveInd=0):#testNum=1):
     return spec2d
 
 def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_full_samples/hotspot/",isspider=True):
+    """
+    """
     tmp = np.load("{}spherearray_deg_{}.npz".format(dataDir,degree), allow_pickle=True, encoding="latin1")
     outDictionary = tmp['arr_0'].tolist()
 
@@ -211,6 +217,8 @@ def retrieve_map_full_samples(degree=3,dataDir="data/sph_harmonic_coefficients_f
 
 def plot_retrieved_map(fullMapArray,bestMapArray,lats,lons,waves,waveInd=3,degree=3,
                        saveName=None):
+    """
+    """
     percentiles = [5,50,95]
     mapLowMedHigh = np.percentile(fullMapArray,percentiles,axis=0)
     minflux=np.min(mapLowMedHigh[:,waveInd,:,:])

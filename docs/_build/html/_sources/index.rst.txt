@@ -23,6 +23,7 @@ Documentation
    :caption: Contents:
 
    install
+   examples
    api
 
 

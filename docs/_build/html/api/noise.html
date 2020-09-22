@@ -1,0 +1,332 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Make Noise &mdash; eigenspectra 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Eigencurves" href="eigencurves.html" />
+    <link rel="prev" title="Generate Synthetic Lightcurves" href="gen_lightcurves.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> eigenspectra
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="gen_lightcurves.html">Generate Synthetic Lightcurves</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Noise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eigencurves.html">Eigencurves</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eigenmaps.html">Eigenmaps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kmeans.html">K-Means Clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_utils.html">Plotting Utilities</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">eigenspectra</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">API</a> &raquo;</li>
+        
+      <li>Make Noise</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/noise.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<span class="target" id="module-eigenspectra.noise"></span><div class="section" id="make-noise">
+<h1>Make Noise<a class="headerlink" href="#make-noise" title="Permalink to this headline">¶</a></h1>
+<p>(Replaces the files <cite>add_noise</cite> and <cite>generate_noise</cite> from <code class="docutils literal notranslate"><span class="pre">eigensource</span></code>)</p>
+<dl class="py function">
+<dt id="eigenspectra.noise.get_lc">
+<code class="sig-prename descclassname">eigenspectra.noise.</code><code class="sig-name descname">get_lc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">practiceVersion</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">inputFile</span><span class="o">=</span><span class="default_value">'data/input_lightcurves/eclipse_lightcurve_test2.npz'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/noise.html#get_lc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.noise.get_lc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the input lightcurves from the NPZ files and put them in the format
+that <code class="docutils literal notranslate"><span class="pre">add_noise</span></code> is expecting</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputFile</strong> (<em>str</em>) – path to the output NPZ file</p></li>
+<li><p><strong>practiceVersion</strong> (<em>bool</em>) – Use a practice version?</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="eigenspectra.noise.noise_on_input_lc">
+<code class="sig-prename descclassname">eigenspectra.noise.</code><code class="sig-name descname">noise_on_input_lc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">practiceVersion</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/noise.html#noise_on_input_lc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.noise.noise_on_input_lc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="eigenspectra.noise.add_noise">
+<code class="sig-prename descclassname">eigenspectra.noise.</code><code class="sig-name descname">add_noise</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fluxTWave</span></em>, <em class="sig-param"><span class="n">preserveInput</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">nEclipses</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">includeSystematic</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">renormalize</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">doPlots</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">writeCSVs</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/noise.html#add_noise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.noise.add_noise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a series of light curves (one per wavelength) and
+Adds noise to them. First it bins to the integration time in the data
+Then it creates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fluxTWave</strong> (<em>numpy.array</em>) – <p>A 3D array with z,y,x axes as n_columns x n_times x wavelength
+The 4 n_columns are</p>
+<blockquote>
+<div><ul>
+<li><p>wavelength in microns (repeated)</p></li>
+<li><p>wavelength width in microns (repeated)</p></li>
+<li><p>time (seconds)</p></li>
+<li><p>flux in Fp/F* (ppm)</p></li>
+</ul>
+</div></blockquote>
+<p>There are t rows</p>
+</p></li>
+<li><p><strong>preserveInput</strong> (<em>bool</em>) – Preserve the input array? Default is true. This will not add any
+random noise to the data and just preserve the input
+The rationale is that this way your posteriors should have a median close to the
+true Input. Otherwise, you’d have to run the fits multiple times to test if the
+median posterior was centered on your true input solution</p></li>
+<li><p><strong>nEclipses</strong> (<em>int</em>) – How many eclipses are combined together?</p></li>
+<li><p><strong>renormalize</strong> (<em>bool</em>) – Renormalize the time series so that the minimum flux is 1.0?
+This was designed to match the Spiderman normalization</p></li>
+<li><p><strong>doPlots</strong> (<em>bool</em>) – Save plots of the light curves? Makes one light curve per wavelength</p></li>
+<li><p><strong>writeCSVs</strong> (<em>bool</em>) – Save the light curves as CSVs?</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dictionary of information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="eigenspectra.noise.sum_spectrum">
+<code class="sig-prename descclassname">eigenspectra.noise.</code><code class="sig-name descname">sum_spectrum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">ap</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">center</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/noise.html#sum_spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.noise.sum_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simply sums the spectrum along spatial direction</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="eigenspectra.noise.make_snr_spectrum">
+<code class="sig-prename descclassname">eigenspectra.noise.</code><code class="sig-name descname">make_snr_spectrum</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/noise.html#make_snr_spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.noise.make_snr_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a SNR spectrum and save an output data file and plot.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="eigencurves.html" class="btn btn-neutral float-right" title="Eigencurves" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="gen_lightcurves.html" class="btn btn-neutral float-left" title="Generate Synthetic Lightcurves" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, MultiDWorlds
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

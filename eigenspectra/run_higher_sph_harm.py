@@ -1,5 +1,6 @@
 """
-
+Run with Higher Order Spherical Harmonics
+=========================================
 """
 # coding: utf-8
 
@@ -11,8 +12,9 @@ import numpy as np
 import matplotlib.pyplot as p
 #get_ipython().run_line_magic('matplotlib', 'inline')
 
-from . import eigensource
-add_noise = eigensource.add_noise
+#from . import eigensource
+#add_noise = eigensource.add_noise
+from . import noise# as add_noise
 from . import eigencurves#_starry
 from . import eigenmaps
 from . import kmeans
@@ -86,8 +88,8 @@ def run_lc_noise_and_fit(norder=3,
         # ### Add Noise
 
         # In[12]:
-        inputLC3D = add_noise.get_lc(inputFile=usePath)
-        noiseDict = add_noise.add_noise(inputLC3D)
+        inputLC3D = noise.get_lc(inputFile=usePath)
+        noiseDict = noise.add_noise(inputLC3D)
 
 
         # ### Fit eigencurves to lightcurve

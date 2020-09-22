@@ -18,5 +18,6 @@ if not __EIGENSPECTRA_SETUP__:
     from . import kmeans
     from . import bin_eigenspectra
     from . import run_higher_sph_harm
-    from . import eigensource
+    from . import noise#eigensource
     from . import colormap2d
+    from . import plot_utils

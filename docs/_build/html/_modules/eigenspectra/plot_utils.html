@@ -1,0 +1,786 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>eigenspectra.plot_utils &mdash; eigenspectra 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> eigenspectra
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">eigenspectra</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>eigenspectra.plot_utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for eigenspectra.plot_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Plotting Utilities</span>
+<span class="sd">------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">p</span>
+
+<span class="c1">#import eigencurves</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">gen_lightcurves</span>
+<span class="kn">from</span> <span class="nn">.colormap2d</span> <span class="kn">import</span> <span class="n">generate_map2d</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">eigenmaps</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">kmeans</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">bin_eigenspectra</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+<span class="kn">import</span> <span class="nn">spiderman</span> <span class="k">as</span> <span class="nn">sp</span>
+
+<span class="kn">import</span> <span class="nn">healpy</span> <span class="k">as</span> <span class="nn">hp</span>
+
+<span class="kn">import</span> <span class="nn">colorcet</span> <span class="k">as</span> <span class="nn">cc</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colorbar</span><span class="p">,</span> <span class="n">cm</span><span class="p">,</span> <span class="n">rc</span>
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">BoundaryNorm</span><span class="p">,</span> <span class="n">Normalize</span>
+<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">FormatStrFormatter</span><span class="p">,</span> <span class="n">ScalarFormatter</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
+
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+
+<div class="viewcode-block" id="plot_setup"><a class="viewcode-back" href="../../api/plot_utils.html#eigenspectra.plot_utils.plot_setup">[docs]</a><span class="k">def</span> <span class="nf">plot_setup</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set some default plotting parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">rcParams</span>
+    <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;savefig.dpi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.dpi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.figsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+    <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;sans-serif&quot;</span>
+    <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.sans-serif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Computer Modern Sans Serif&quot;</span><span class="p">]</span>
+    <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;text.usetex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="create_linear_colormap"><a class="viewcode-back" href="../../api/plot_utils.html#eigenspectra.plot_utils.create_linear_colormap">[docs]</a><span class="k">def</span> <span class="nf">create_linear_colormap</span><span class="p">(</span><span class="n">c1</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">c2</span> <span class="o">=</span> <span class="s2">&quot;C4&quot;</span><span class="p">,</span> <span class="n">c3</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">cmap_name</span> <span class="o">=</span> <span class="s2">&quot;custom_cmap&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a colormap with a linear gradient between two user-specified colors</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    c1 : str</span>
+<span class="sd">        Color of the smallest value</span>
+<span class="sd">    c2 : str</span>
+<span class="sd">        Color of the largest/middle value</span>
+<span class="sd">    c3 : str</span>
+<span class="sd">        Color of the largest value</span>
+<span class="sd">    N : int</span>
+<span class="sd">        Color resolution</span>
+<span class="sd">    cmap_name : str</span>
+<span class="sd">        Name of new colormap</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cm : matplotlib.colors.LinearSegmentedColormap</span>
+<span class="sd">        New colormap</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LinearSegmentedColormap</span><span class="p">,</span> <span class="n">colorConverter</span>
+
+    <span class="c1"># If a third color was not specified</span>
+    <span class="k">if</span> <span class="n">c3</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="c1"># Create list with two end-member RGBA color tuples</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="n">colorConverter</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="n">c1</span><span class="p">),</span> <span class="n">colorConverter</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="n">c2</span><span class="p">)]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="c1"># Create list with two end-member RGBA color tuples</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="n">colorConverter</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="n">c1</span><span class="p">),</span> <span class="n">colorConverter</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="n">c2</span><span class="p">),</span> <span class="n">colorConverter</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="n">c3</span><span class="p">)]</span>
+
+    <span class="c1"># Create the colormap</span>
+    <span class="n">cm</span> <span class="o">=</span> <span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">cmap_name</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">N</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cm</span></div>
+
+<div class="viewcode-block" id="show_orig_map"><a class="viewcode-back" href="../../api/plot_utils.html#eigenspectra.plot_utils.show_orig_map">[docs]</a><span class="k">def</span> <span class="nf">show_orig_map</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span><span class="n">spaxels</span><span class="p">,</span><span class="n">waveInd</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span><span class="c1">#testNum=1):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Show the original map at a given wavelength</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    waveInd: int</span>
+<span class="sd">        The wavelength index</span>
+<span class="sd">    testNum: int</span>
+<span class="sd">        The test Number (ie. lightcurve number)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#origData = np.load(&quot;data/maps/mystery_map{}.npz&quot;.format(testNum))</span>
+    <span class="n">lammin1</span> <span class="o">=</span> <span class="mf">2.41</span><span class="p">;</span> <span class="n">lammax1</span> <span class="o">=</span> <span class="mf">3.98</span><span class="p">;</span> <span class="n">dlam1</span> <span class="o">=</span> <span class="mf">0.18</span>
+    <span class="c1">#spaxels = origData[&quot;spaxels&quot;]</span>
+    <span class="c1">#lam = origData[&quot;wl&quot;]</span>
+    <span class="n">lamlo</span><span class="p">,</span> <span class="n">dlamlo</span> <span class="o">=</span> <span class="n">gen_lightcurves</span><span class="o">.</span><span class="n">construct_lam</span><span class="p">(</span><span class="n">lammin1</span><span class="p">,</span> <span class="n">lammax1</span><span class="p">,</span> <span class="n">dlam</span><span class="o">=</span><span class="n">dlam1</span><span class="p">)</span>
+    <span class="n">Nlamlo</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lamlo</span><span class="p">)</span>
+
+    <span class="c1"># Set HealPy pixel numbers</span>
+    <span class="n">Npix</span> <span class="o">=</span> <span class="n">spaxels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Define empty 2d array for spaxels</span>
+    <span class="n">spec2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Npix</span><span class="p">,</span> <span class="n">Nlamlo</span><span class="p">))</span>
+
+    <span class="c1"># Loop over pixels filling with spectra</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Npix</span><span class="p">):</span>
+        <span class="c1"># Degrade the spectra to lower resolution</span>
+        <span class="n">spec2d</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">gen_lightcurves</span><span class="o">.</span><span class="n">downbin_spec</span><span class="p">(</span><span class="n">spaxels</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">lam</span><span class="p">,</span> <span class="n">lamlo</span><span class="p">,</span> <span class="n">dlam</span> <span class="o">=</span> <span class="n">dlamlo</span><span class="p">)</span>
+
+
+    <span class="n">hp</span><span class="o">.</span><span class="n">mollview</span><span class="p">(</span><span class="n">spec2d</span><span class="p">[:,</span><span class="n">waveInd</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;</span><span class="si">%0.2f</span><span class="s2"> $\mu$m&quot;</span> <span class="o">%</span><span class="n">lamlo</span><span class="p">[</span><span class="n">waveInd</span><span class="p">])</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">spec2d</span></div>
+
+<div class="viewcode-block" id="retrieve_map_full_samples"><a class="viewcode-back" href="../../api/plot_utils.html#eigenspectra.plot_utils.retrieve_map_full_samples">[docs]</a><span class="k">def</span> <span class="nf">retrieve_map_full_samples</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">dataDir</span><span class="o">=</span><span class="s2">&quot;data/sph_harmonic_coefficients_full_samples/hotspot/&quot;</span><span class="p">,</span><span class="n">isspider</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">spherearray_deg_</span><span class="si">{}</span><span class="s2">.npz&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dataDir</span><span class="p">,</span><span class="n">degree</span><span class="p">),</span> <span class="n">allow_pickle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;latin1&quot;</span><span class="p">)</span>
+    <span class="n">outDictionary</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;arr_0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="n">londim</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">latdim</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="n">outDictionary</span><span class="p">[</span><span class="s1">&#39;spherical coefficients&#39;</span><span class="p">]</span> <span class="c1"># output from eigencurves</span>
+    <span class="n">waves</span> <span class="o">=</span> <span class="n">outDictionary</span><span class="p">[</span><span class="s1">&#39;wavelength (um)&#39;</span><span class="p">]</span>
+    <span class="n">bestsamples</span><span class="o">=</span><span class="n">outDictionary</span><span class="p">[</span><span class="s1">&#39;best fit coefficients&#39;</span><span class="p">]</span> <span class="c1"># best fit sample from eigencurves</span>
+
+    <span class="n">randomIndices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">),</span><span class="mi">39</span><span class="p">)</span>
+    <span class="n">nRandom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">randomIndices</span><span class="p">)</span>
+
+    <span class="n">fullMapArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">nRandom</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">waves</span><span class="p">),</span><span class="n">londim</span><span class="p">,</span><span class="n">latdim</span><span class="p">])</span>
+    <span class="n">bestMapArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">waves</span><span class="p">),</span><span class="n">londim</span><span class="p">,</span><span class="n">latdim</span><span class="p">])</span>
+    <span class="c1">#SPIDERMAN stuff added by Megan</span>
+    <span class="k">if</span> <span class="n">isspider</span><span class="p">:</span>
+        <span class="n">params0</span><span class="o">=</span><span class="n">sp</span><span class="o">.</span><span class="n">ModelParams</span><span class="p">(</span><span class="n">brightness_model</span><span class="o">=</span><span class="s1">&#39;spherical&#39;</span><span class="p">)</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">nlayers</span><span class="o">=</span><span class="mi">20</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">t0</span><span class="o">=-</span><span class="mf">2.21857</span><span class="o">/</span><span class="mf">2.</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">per</span><span class="o">=</span><span class="mf">2.21857567</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">a_abs</span><span class="o">=</span><span class="mf">0.0313</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">inc</span><span class="o">=</span><span class="mf">85.71</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">ecc</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">w</span><span class="o">=</span><span class="mf">90.</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">rp</span><span class="o">=</span><span class="mf">0.155313</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">a</span><span class="o">=</span><span class="mf">8.863</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">p_u1</span><span class="o">=</span><span class="mf">0.</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">p_u2</span><span class="o">=</span><span class="mf">0.</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">degree</span><span class="o">=</span><span class="n">degree</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">la0</span><span class="o">=</span><span class="mf">0.</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">lo0</span><span class="o">=</span><span class="mf">0.</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isspider</span><span class="p">:</span>
+        <span class="n">inputArr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">waves</span><span class="p">),</span><span class="n">bestsamples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">inputArr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">waves</span>
+        <span class="n">inputArr</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">bestsamples</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="n">wavelengths</span><span class="p">,</span> <span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">,</span> <span class="n">maps</span> <span class="o">=</span> <span class="n">eigenmaps</span><span class="o">.</span><span class="n">generate_maps</span><span class="p">(</span><span class="n">inputArr</span><span class="p">,</span><span class="n">N_lon</span><span class="o">=</span><span class="n">londim</span><span class="p">,</span> <span class="n">N_lat</span><span class="o">=</span><span class="n">latdim</span><span class="p">)</span>
+        <span class="n">bestMapArray</span><span class="o">=</span><span class="n">maps</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">params0</span><span class="o">.</span><span class="n">sph</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">bestsamples</span><span class="p">[:,</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">nla</span><span class="o">=</span><span class="n">latdim</span>
+            <span class="n">nlo</span><span class="o">=</span><span class="n">londim</span>
+            <span class="n">las</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">nla</span><span class="p">)</span>
+            <span class="n">los</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span><span class="n">nlo</span><span class="p">)</span>
+            <span class="n">fluxes</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">la</span> <span class="ow">in</span> <span class="n">las</span><span class="p">:</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">lo</span> <span class="ow">in</span> <span class="n">los</span><span class="p">:</span>
+                    <span class="n">flux</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">call_map_model</span><span class="p">(</span><span class="n">params0</span><span class="p">,</span><span class="n">la</span><span class="p">,</span><span class="n">lo</span><span class="p">)</span>
+                    <span class="n">row</span> <span class="o">+=</span> <span class="p">[</span><span class="n">flux</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">fluxes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">row</span><span class="p">]</span>
+            <span class="n">fluxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fluxes</span><span class="p">)</span>
+            <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">los</span><span class="p">,</span><span class="n">las</span><span class="p">)</span>
+            <span class="n">bestMapArray</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">fluxes</span>
+
+
+    <span class="k">for</span> <span class="n">drawInd</span><span class="p">,</span> <span class="n">draw</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">randomIndices</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isspider</span><span class="p">:</span>
+            <span class="n">inputArr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">waves</span><span class="p">),</span><span class="n">samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">inputArr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">waves</span>
+            <span class="n">inputArr</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+
+            <span class="n">wavelengths</span><span class="p">,</span> <span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">,</span> <span class="n">maps</span> <span class="o">=</span> <span class="n">eigenmaps</span><span class="o">.</span><span class="n">generate_maps</span><span class="p">(</span><span class="n">inputArr</span><span class="p">,</span>
+                                                                <span class="n">N_lon</span><span class="o">=</span><span class="n">londim</span><span class="p">,</span> <span class="n">N_lat</span><span class="o">=</span><span class="n">latdim</span><span class="p">)</span>
+            <span class="n">fullMapArray</span><span class="p">[</span><span class="n">drawInd</span><span class="p">,:,:,:]</span> <span class="o">=</span> <span class="n">maps</span>
+            <span class="c1">#MEGAN ADDED STUFF</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">params0</span><span class="o">.</span><span class="n">sph</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">drawInd</span><span class="p">,:,</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">nla</span><span class="o">=</span><span class="n">latdim</span>
+                <span class="n">nlo</span><span class="o">=</span><span class="n">londim</span>
+                <span class="n">las</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">nla</span><span class="p">)</span>
+                <span class="n">los</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span><span class="n">nlo</span><span class="p">)</span>
+                <span class="n">fluxes</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">la</span> <span class="ow">in</span> <span class="n">las</span><span class="p">:</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">lo</span> <span class="ow">in</span> <span class="n">los</span><span class="p">:</span>
+                        <span class="n">flux</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">call_map_model</span><span class="p">(</span><span class="n">params0</span><span class="p">,</span><span class="n">la</span><span class="p">,</span><span class="n">lo</span><span class="p">)</span>
+                        <span class="n">row</span> <span class="o">+=</span> <span class="p">[</span><span class="n">flux</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                    <span class="n">fluxes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">row</span><span class="p">]</span>
+                <span class="n">fluxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fluxes</span><span class="p">)</span>
+                <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">los</span><span class="p">,</span><span class="n">las</span><span class="p">)</span>
+            <span class="c1">#print(np.min(lats),np.min(lons),np.min(las),np.min(los))</span>
+            <span class="c1">#lats, lons, maps = testgenmaps.spmap(inputArr,londim, latdim)</span>
+                <span class="n">fullMapArray</span><span class="p">[</span><span class="n">drawInd</span><span class="p">,</span><span class="n">i</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">fluxes</span>
+
+        <span class="c1">## note that the maps have the origin at the top</span>
+        <span class="c1">## so we have to flip the latitude array</span>
+        <span class="c1">#print(lats)</span>
+        <span class="c1">#lats = np.flip(lats,axis=0) #getting rid of this doesn&#39;t change anything!!!!</span>
+        <span class="c1">#print(lats)</span>
+        <span class="c1">#lons = np.flip(lons,axis=0) #added in to see if this fixes our maps</span>
+
+    <span class="k">return</span> <span class="n">fullMapArray</span><span class="p">,</span> <span class="n">bestMapArray</span><span class="p">,</span> <span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">,</span> <span class="n">waves</span></div>
+
+
+
+<div class="viewcode-block" id="plot_retrieved_map"><a class="viewcode-back" href="../../api/plot_utils.html#eigenspectra.plot_utils.plot_retrieved_map">[docs]</a><span class="k">def</span> <span class="nf">plot_retrieved_map</span><span class="p">(</span><span class="n">fullMapArray</span><span class="p">,</span><span class="n">bestMapArray</span><span class="p">,</span><span class="n">lats</span><span class="p">,</span><span class="n">lons</span><span class="p">,</span><span class="n">waves</span><span class="p">,</span><span class="n">waveInd</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">degree</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                       <span class="n">saveName</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">percentiles</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">95</span><span class="p">]</span>
+    <span class="n">mapLowMedHigh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">fullMapArray</span><span class="p">,</span><span class="n">percentiles</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">minflux</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">mapLowMedHigh</span><span class="p">[:,</span><span class="n">waveInd</span><span class="p">,:,:])</span>
+    <span class="n">maxflux</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">mapLowMedHigh</span><span class="p">[:,</span><span class="n">waveInd</span><span class="p">,:,:])</span>
+    <span class="n">londim</span> <span class="o">=</span> <span class="n">fullMapArray</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1">#replace the median map with the best fit map</span>
+    <span class="n">mapLowMedHigh</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">bestMapArray</span>
+
+    <span class="c1"># fig, axArr = p.subplots(1,3,figsize=(22,5))</span>
+    <span class="c1"># for ind,onePercentile in enumerate(percentiles):</span>
+    <span class="c1">#     map_day = mapLowMedHigh[ind][waveInd][:,londim//4:-londim//4]</span>
+    <span class="c1">#     extent = np.array([np.min(lons)/np.pi/2.*180,np.max(lons)/np.pi/2.*180,np.min(lats)/np.pi*180,np.max(lats)/np.pi*180])</span>
+    <span class="c1">#     plotData = axArr[ind].imshow(map_day, extent=extent,vmin=minflux,vmax=maxflux)</span>
+    <span class="c1">#     cbar = fig.colorbar(plotData,ax=axArr[ind])</span>
+    <span class="c1">#     cbar.set_label(&#39;Brightness&#39;)</span>
+    <span class="c1">#     axArr[ind].set_ylabel(&#39;Latitude&#39;)</span>
+    <span class="c1">#     axArr[ind].set_xlabel(&#39;Longitude&#39;)</span>
+    <span class="c1">#     axArr[ind].set_title(&quot;{} %&quot;.format(onePercentile))</span>
+    <span class="c1">#     #axArr[ind].show()</span>
+
+    <span class="n">rc</span><span class="p">(</span><span class="s1">&#39;axes&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">map_day</span> <span class="o">=</span> <span class="n">mapLowMedHigh</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">waveInd</span><span class="p">][:,</span><span class="n">londim</span><span class="o">//</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="n">londim</span><span class="o">//</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">extent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">lons</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.</span><span class="o">*</span><span class="mi">180</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">lons</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.</span><span class="o">*</span><span class="mi">180</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">lats</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">180</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">lats</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">180</span><span class="p">])</span>
+    <span class="n">plotData</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">map_day</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span><span class="n">vmin</span><span class="o">=</span><span class="n">minflux</span><span class="p">,</span><span class="n">vmax</span><span class="o">=</span><span class="n">maxflux</span><span class="p">)</span>
+    <span class="n">cbar</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">plotData</span><span class="p">)</span>
+    <span class="n">cbar</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s1">&#39;Brightness&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Latitude&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Longitude&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span><span class="n">top</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">)</span>
+    <span class="c1">#axArr[ind].set_title(&quot;{} %&quot;.format(onePercentile))</span>
+    <span class="c1">#axArr[ind].show()</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.2f}</span><span class="s1">$\mu$m&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">waves</span><span class="p">[</span><span class="n">waveInd</span><span class="p">]),</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="c1">#fig.suptitle(&#39;Retrieved group map, n={}, {:.2f}$\mu$m&#39;.format(degree,waves[waveInd]))</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;plots/retrieved_maps/retrieved_map_</span><span class="si">{}</span><span class="s1">_deg_</span><span class="si">{}</span><span class="s1">_waveInd_</span><span class="si">{}</span><span class="s1">.pdf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">saveName</span><span class="p">,</span><span class="n">degree</span><span class="p">,</span><span class="n">waveInd</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_map_and_plot"><a class="viewcode-back" href="../../api/plot_utils.html#eigenspectra.plot_utils.get_map_and_plot">[docs]</a><span class="k">def</span> <span class="nf">get_map_and_plot</span><span class="p">(</span><span class="n">waveInd</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">degree</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">dataDir</span><span class="o">=</span><span class="s2">&quot;data/sph_harmonic_coefficients_full_samples/hotspot/&quot;</span><span class="p">,</span>
+                     <span class="n">saveName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">isspider</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Plots spherical harmonic maps at one wavelength for 5th, 50th, and 95th percentile posterior samples</span>
+
+<span class="sd">    Inputs</span>
+<span class="sd">    ----------</span>
+<span class="sd">    waveInd: int</span>
+<span class="sd">        Index of the wavelength for which a map will be created</span>
+<span class="sd">    degree: int</span>
+<span class="sd">        Spherical harmonic degree to draw samples from</span>
+<span class="sd">    dataDir: str</span>
+<span class="sd">        Path to the directory containing the spherical harmonic coefficients</span>
+
+<span class="sd">    Outputs</span>
+<span class="sd">    -----------</span>
+<span class="sd">    waves: array</span>
+<span class="sd">        Wavelengths for the eigenspectra</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">fullMapArray</span><span class="p">,</span> <span class="n">bestMapArray</span><span class="p">,</span> <span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">,</span> <span class="n">waves</span> <span class="o">=</span> <span class="n">retrieve_map_full_samples</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="n">degree</span><span class="p">,</span><span class="n">dataDir</span><span class="o">=</span><span class="n">dataDir</span><span class="p">,</span><span class="n">isspider</span><span class="o">=</span><span class="n">isspider</span><span class="p">)</span>
+    <span class="n">plot_retrieved_map</span><span class="p">(</span><span class="n">fullMapArray</span><span class="p">,</span><span class="n">bestMapArray</span><span class="p">,</span><span class="n">lats</span><span class="p">,</span><span class="n">lons</span><span class="p">,</span><span class="n">waves</span><span class="p">,</span><span class="n">degree</span><span class="o">=</span><span class="n">degree</span><span class="p">,</span><span class="n">waveInd</span><span class="o">=</span><span class="n">waveInd</span><span class="p">,</span>
+                       <span class="n">saveName</span><span class="o">=</span><span class="n">saveName</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">waves</span><span class="p">,</span> <span class="n">lats</span><span class="p">,</span> <span class="n">lons</span></div>
+
+<div class="viewcode-block" id="all_sph_degrees"><a class="viewcode-back" href="../../api/plot_utils.html#eigenspectra.plot_utils.all_sph_degrees">[docs]</a><span class="k">def</span> <span class="nf">all_sph_degrees</span><span class="p">(</span><span class="n">waveInd</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">oneDegree</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">):</span>
+        <span class="n">get_map_and_plot</span><span class="p">(</span><span class="n">waveInd</span><span class="o">=</span><span class="n">waveInd</span><span class="p">,</span><span class="n">degree</span><span class="o">=</span><span class="n">oneDegree</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="find_groups"><a class="viewcode-back" href="../../api/plot_utils.html#eigenspectra.plot_utils.find_groups">[docs]</a><span class="k">def</span> <span class="nf">find_groups</span><span class="p">(</span><span class="n">dataDir</span><span class="p">,</span><span class="n">ngroups</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span><span class="n">degree</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">londim</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">latdim</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                <span class="n">trySamples</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span><span class="n">extent</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">sortMethod</span><span class="o">=</span><span class="s1">&#39;avg&#39;</span><span class="p">,</span><span class="n">isspider</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the eigenspectra using k means clustering</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ngroups: int</span>
+<span class="sd">        Number of eigenspectra to group results into</span>
+<span class="sd">    degree: int</span>
+<span class="sd">        Spherical harmonic degree to draw samples from</span>
+<span class="sd">    testNum: int</span>
+<span class="sd">        Test number (ie. lightcurve number 1,2, etc.)</span>
+<span class="sd">    trySamples: int</span>
+<span class="sd">        Number of samples to find groups with</span>
+<span class="sd">        All samples take a long time so this takes a random</span>
+<span class="sd">        subset of samples from which to draw posteriors</span>
+<span class="sd">    sortMethod: str</span>
+<span class="sd">        Method to sort the groups returned by K means clustering</span>
+<span class="sd">        None, will not sort the output</span>
+<span class="sd">        &#39;avg&#39; will sort be the average of the spectrum</span>
+<span class="sd">        &#39;middle&#39; will sort by the flux in the middle of the spectrum</span>
+<span class="sd">    extent: time covered by the eclipse/phase curve.</span>
+<span class="sd">        Sets what portion of the map is used for clustering (e.g. full planet or dayside only)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#samplesDir = &quot;data/sph_harmonic_coefficients_full_samples&quot;</span>
+    <span class="c1">#dataDir = &quot;{}/eclipse_lightcurve_test{}/&quot;.format(samplesDir,testNum)</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">spherearray_deg_</span><span class="si">{}</span><span class="s2">.npz&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dataDir</span><span class="p">,</span><span class="n">degree</span><span class="p">),</span> <span class="n">allow_pickle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;latin1&quot;</span><span class="p">)</span>
+    <span class="n">outDictionary</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;arr_0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="n">outDictionary</span><span class="p">[</span><span class="s1">&#39;spherical coefficients&#39;</span><span class="p">]</span> <span class="c1"># output from eigencurves</span>
+
+    <span class="k">if</span> <span class="n">trySamples</span><span class="o">&gt;</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+    	<span class="k">assert</span><span class="p">(</span><span class="n">trySamples</span><span class="o">&lt;=</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)),(</span><span class="s2">&quot;trySamples must be less than the total number of MCMC samples, &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)))</span>
+
+    <span class="n">eigenspectra_draws</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">kgroup_draws</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">uber_eigenlist</span><span class="o">=</span><span class="p">[[[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ngroups</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trySamples</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">isspider</span><span class="p">:</span>
+        <span class="n">params0</span><span class="o">=</span><span class="n">sp</span><span class="o">.</span><span class="n">ModelParams</span><span class="p">(</span><span class="n">brightness_model</span><span class="o">=</span><span class="s1">&#39;spherical&#39;</span><span class="p">)</span> <span class="c1">#megan added stuff</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">nlayers</span><span class="o">=</span><span class="mi">20</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">t0</span><span class="o">=-</span><span class="mf">2.21857</span><span class="o">/</span><span class="mf">2.</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">per</span><span class="o">=</span><span class="mf">2.21857567</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">a_abs</span><span class="o">=</span><span class="mf">0.0313</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">inc</span><span class="o">=</span><span class="mf">85.71</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">ecc</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">w</span><span class="o">=</span><span class="mf">90.</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">rp</span><span class="o">=</span><span class="mf">0.155313</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">a</span><span class="o">=</span><span class="mf">8.863</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">p_u1</span><span class="o">=</span><span class="mf">0.</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">p_u2</span><span class="o">=</span><span class="mf">0.</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">degree</span><span class="o">=</span><span class="n">degree</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">la0</span><span class="o">=</span><span class="mf">0.</span>
+        <span class="n">params0</span><span class="o">.</span><span class="n">lo0</span><span class="o">=</span><span class="mf">0.</span>
+        <span class="n">waves</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.41</span><span class="p">,</span><span class="mf">2.59</span><span class="p">,</span><span class="mf">2.77</span><span class="p">,</span><span class="mf">2.95</span><span class="p">,</span><span class="mf">3.13</span><span class="p">,</span><span class="mf">3.31</span><span class="p">,</span><span class="mf">3.49</span><span class="p">,</span><span class="mf">3.67</span><span class="p">,</span><span class="mf">3.85</span><span class="p">,</span><span class="mf">4.03</span><span class="p">])</span>
+    <span class="n">minlon</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">extent</span><span class="o">/</span><span class="mf">2.</span><span class="o">*</span><span class="n">londim</span><span class="p">)</span>
+    <span class="c1">#print(minlon)</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">randomIndices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">),</span><span class="n">trySamples</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">drawInd</span><span class="p">,</span><span class="n">draw</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">randomIndices</span><span class="p">]):</span>
+        <span class="c1">## Re-formatting here into a legacy system</span>
+        <span class="c1">## 1st dimension is wavelength</span>
+        <span class="c1">## 2nd dimensions is data (0th element = wavelength)</span>
+        <span class="c1">##                        (1: elements are spherical harmonic coefficients)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isspider</span><span class="p">:</span>
+            <span class="n">inputArr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span><span class="n">samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">inputArr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.41</span><span class="p">,</span><span class="mf">2.59</span><span class="p">,</span><span class="mf">2.77</span><span class="p">,</span><span class="mf">2.95</span><span class="p">,</span><span class="mf">3.13</span><span class="p">,</span><span class="mf">3.31</span><span class="p">,</span><span class="mf">3.49</span><span class="p">,</span><span class="mf">3.67</span><span class="p">,</span><span class="mf">3.85</span><span class="p">,</span><span class="mf">4.03</span><span class="p">])</span>
+            <span class="n">inputArr</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+
+            <span class="n">waves</span><span class="p">,</span> <span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">,</span> <span class="n">maps</span> <span class="o">=</span> <span class="n">eigenmaps</span><span class="o">.</span><span class="n">generate_maps</span><span class="p">(</span><span class="n">inputArr</span><span class="p">,</span> <span class="n">N_lon</span><span class="o">=</span><span class="n">londim</span><span class="p">,</span> <span class="n">N_lat</span><span class="o">=</span><span class="n">latdim</span><span class="p">)</span>
+            <span class="n">maps</span><span class="o">=</span><span class="n">maps</span><span class="p">[:,:,</span><span class="nb">int</span><span class="p">(</span><span class="n">londim</span><span class="o">/</span><span class="mf">2.</span><span class="o">-</span><span class="n">minlon</span><span class="p">):</span><span class="nb">int</span><span class="p">(</span><span class="n">londim</span><span class="o">/</span><span class="mf">2.</span><span class="o">+</span><span class="n">minlon</span><span class="p">)]</span>
+
+        <span class="c1">#maps=np.zeros((np.shape(waves)[0],londim,latdim)) #full map</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">maps</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="n">latdim</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">minlon</span><span class="o">*</span><span class="mi">2</span><span class="p">)))</span> <span class="c1">#only dayside</span>
+        <span class="c1">#print(np.shape(maps))</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">params0</span><span class="o">.</span><span class="n">sph</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">drawInd</span><span class="p">,:,</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">nla</span><span class="o">=</span><span class="n">latdim</span>
+                <span class="n">nlo</span><span class="o">=</span><span class="n">londim</span>
+                <span class="n">las</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">nla</span><span class="p">)</span>
+                <span class="n">los</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span><span class="n">nlo</span><span class="p">)</span>
+                <span class="n">fluxes</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">la</span> <span class="ow">in</span> <span class="n">las</span><span class="p">:</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">lo</span> <span class="ow">in</span> <span class="n">los</span><span class="p">:</span>
+                        <span class="n">flux</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">call_map_model</span><span class="p">(</span><span class="n">params0</span><span class="p">,</span><span class="n">la</span><span class="p">,</span><span class="n">lo</span><span class="p">)</span>
+                        <span class="n">row</span> <span class="o">+=</span> <span class="p">[</span><span class="n">flux</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                    <span class="n">fluxes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">row</span><span class="p">]</span>
+                <span class="n">fluxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fluxes</span><span class="p">)</span>
+                <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">los</span><span class="p">,</span><span class="n">las</span><span class="p">)</span>
+                <span class="c1">#print(np.min(lats),np.min(lons),np.min(las),np.min(los))</span>
+                <span class="c1">#lats, lons, maps = testgenmaps.spmap(inputArr,londim, latdim)</span>
+                <span class="c1">#pdb.set_trace()</span>
+                <span class="n">maps</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">fluxes</span><span class="p">[:,</span><span class="nb">int</span><span class="p">(</span><span class="n">londim</span><span class="o">/</span><span class="mf">2.</span><span class="o">-</span><span class="n">minlon</span><span class="p">):</span><span class="nb">int</span><span class="p">(</span><span class="n">londim</span><span class="o">/</span><span class="mf">2.</span><span class="o">+</span><span class="n">minlon</span><span class="p">)]</span>
+
+        <span class="n">kgroups</span> <span class="o">=</span> <span class="n">kmeans</span><span class="o">.</span><span class="n">kmeans</span><span class="p">(</span><span class="n">maps</span><span class="p">,</span> <span class="n">ngroups</span><span class="p">)</span>
+
+        <span class="n">eigenspectra</span><span class="p">,</span><span class="n">eigenlist</span> <span class="o">=</span> <span class="n">bin_eigenspectra</span><span class="o">.</span><span class="n">bin_eigenspectra</span><span class="p">(</span><span class="n">maps</span><span class="p">,</span> <span class="n">kgroups</span><span class="p">)</span>
+
+        <span class="n">eigenspectra_draws</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eigenspectra</span><span class="p">)</span>
+        <span class="n">kgroup_draws</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kgroups</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">groupind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ngroups</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">waveind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+                <span class="n">uber_eigenlist</span><span class="p">[</span><span class="n">drawInd</span><span class="p">][</span><span class="n">groupind</span><span class="p">][</span><span class="n">waveind</span><span class="p">]</span><span class="o">=</span><span class="n">eigenlist</span><span class="p">[</span><span class="n">groupind</span><span class="p">][</span><span class="n">waveind</span><span class="p">,:]</span>
+
+    <span class="k">if</span> <span class="n">sortMethod</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">eigenspectra_draws_final</span><span class="p">,</span> <span class="n">kgroup_draws_final</span><span class="p">,</span><span class="n">uber_eigenlist_final</span> <span class="o">=</span> <span class="n">kmeans</span><span class="o">.</span><span class="n">sort_draws</span><span class="p">(</span><span class="n">eigenspectra_draws</span><span class="p">,</span>
+                                                                         <span class="n">kgroup_draws</span><span class="p">,</span><span class="n">uber_eigenlist</span><span class="p">,</span>
+                                                                         <span class="n">method</span><span class="o">=</span><span class="n">sortMethod</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">eigenspectra_draws_final</span><span class="p">,</span> <span class="n">kgroup_draws_final</span><span class="p">,</span><span class="n">uber_eigenlist_final</span> <span class="o">=</span> <span class="n">eigenspectra_draws</span><span class="p">,</span> <span class="n">kgroup_draws</span><span class="p">,</span><span class="n">uber_eigenlist</span>
+    <span class="k">return</span> <span class="n">eigenspectra_draws_final</span><span class="p">,</span> <span class="n">kgroup_draws_final</span><span class="p">,</span><span class="n">uber_eigenlist_final</span><span class="p">,</span> <span class="n">maps</span></div>
+
+<div class="viewcode-block" id="show_spectra_of_groups"><a class="viewcode-back" href="../../api/plot_utils.html#eigenspectra.plot_utils.show_spectra_of_groups">[docs]</a><span class="k">def</span> <span class="nf">show_spectra_of_groups</span><span class="p">(</span><span class="n">eigenspectra_draws</span><span class="p">,</span><span class="n">kgroup_draws</span><span class="p">,</span><span class="n">uber_eigenlist</span><span class="p">,</span><span class="n">waves</span><span class="p">,</span>
+                           <span class="n">saveName</span><span class="o">=</span><span class="s1">&#39;kmeans&#39;</span><span class="p">,</span><span class="n">degree</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">returnFig</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the mean and standard deviation of the spectra</span>
+<span class="sd">    as well as the kgroups map</span>
+<span class="sd">    Plot the mean and standard deviations of the spectra</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#eigenspectra = np.mean(eigenspectra_draws, axis=0)</span>
+    <span class="c1">#eigenerrs = np.std(eigenspectra_draws, axis=0)</span>
+    <span class="n">kgroups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">kgroup_draws</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">allsamples</span><span class="o">=</span><span class="p">[[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">])]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">uber_eigenlist</span><span class="p">)[</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">uber_eigenlist</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">uber_eigenlist</span><span class="p">)[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">uber_eigenlist</span><span class="p">)[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="n">allsamples</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">z</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">allsamples</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">z</span><span class="p">],</span><span class="n">uber_eigenlist</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">][</span><span class="n">z</span><span class="p">]))</span>
+
+    <span class="n">eigenspectra</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">allsamples</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">allsamples</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">eigenerrs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">allsamples</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">allsamples</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">allsamples</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">allsamples</span><span class="p">)[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">eigenspectra</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">allsamples</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">])</span>
+            <span class="n">eigenerrs</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">allsamples</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">])</span>
+
+    <span class="c1">#print(np.shape(kgroups))</span>
+    <span class="c1">#waves=np.array([2.41,2.59,2.77,2.95,3.13,3.31,3.49,3.67,3.85,4.03])</span>
+    <span class="c1">#print(kgroups)</span>
+    <span class="c1">#print(np.min(kgroups),np.max(kgroups))</span>
+    <span class="c1">#print(np.around(np.min(kgroups)),np.around(np.max(kgroups)))</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;isolum&#39;</span><span class="p">]</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">cmap</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">eigenspectra</span><span class="p">)[</span><span class="mi">0</span><span class="p">])]</span>
+    <span class="n">counter</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">spec</span><span class="p">,</span> <span class="n">err</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">eigenspectra</span><span class="p">,</span> <span class="n">eigenerrs</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">waves</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Group &#39;</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)),</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span><span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">counter</span><span class="p">])</span>
+        <span class="n">counter</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="c1">#for i in np.arange(np.shape(waves)[0]):</span>
+        <span class="c1">#    print(waves[i],spec[i],err[i],file=outfile)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Wavelength ($\mu$m)&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;F$_p$/F$_*$&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span><span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">top</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span><span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Eigenspectra&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">returnFig</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Skipping legend so it can be added later&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+
+    <span class="c1">#outfile.close()</span>
+    <span class="n">Ngroup</span> <span class="o">=</span> <span class="n">eigenspectra_draws</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;plots/eigenmap_and_spec/</span><span class="si">{}</span><span class="s1">_spectra_deg</span><span class="si">{}</span><span class="s1">_grp_</span><span class="si">{}</span><span class="s1">.pdf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">saveName</span><span class="p">,</span><span class="n">degree</span><span class="p">,</span><span class="n">Ngroup</span><span class="p">),</span><span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">returnFig</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fig</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">kgroups</span></div>
+
+
+
+<div class="viewcode-block" id="do_hue_maps"><a class="viewcode-back" href="../../api/plot_utils.html#eigenspectra.plot_utils.do_hue_maps">[docs]</a><span class="k">def</span> <span class="nf">do_hue_maps</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span><span class="n">maps</span><span class="p">,</span><span class="n">lons</span><span class="p">,</span><span class="n">lats</span><span class="p">,</span><span class="n">kgroups</span><span class="p">,</span><span class="n">ngroups</span><span class="p">,</span><span class="n">hueType</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span><span class="n">saveName</span><span class="o">=</span><span class="s1">&#39;mystery1_eigenbest&#39;</span><span class="p">):</span>
+    <span class="c1">#full_extent = np.array([np.min(lons),np.max(lons),np.min(lats),np.max(lats)])/np.pi*180 #for full map</span>
+    <span class="c1">#full_extent = np.array([-90.,90.,-90.,90.]) #for dayside only</span>
+    <span class="n">full_extent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">extent</span><span class="o">/</span><span class="mf">2.</span><span class="o">*</span><span class="mf">360.</span><span class="p">,</span><span class="n">extent</span><span class="o">/</span><span class="mf">2.</span><span class="o">*</span><span class="mf">360.</span><span class="p">,</span><span class="o">-</span><span class="mf">90.</span><span class="p">,</span><span class="mf">90.</span><span class="p">])</span>
+    <span class="c1"># londim, latdim = np.shape(maps)[1:]</span>
+
+    <span class="n">maps_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">maps</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">maps_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">maps</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;isolum&#39;</span><span class="p">]</span>
+    <span class="n">cmap_grey</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;linear_grey_10_95_c0&#39;</span><span class="p">]</span>
+    <span class="n">cmap_grey_r</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;linear_grey_10_95_c0_r&#39;</span><span class="p">]</span>
+    <span class="c1"># norm = Normalize(vmin=np.min(maps_mean), vmax=np.max(maps_mean))</span>
+    <span class="n">londim</span><span class="o">=</span><span class="mi">100</span>
+
+    <span class="n">kround</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">kgroups</span><span class="p">)</span>
+    <span class="n">minlon</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">extent</span><span class="o">/</span><span class="mf">2.</span><span class="o">*</span><span class="n">londim</span><span class="p">)</span>
+
+    <span class="n">contlons</span><span class="o">=</span><span class="n">lons</span><span class="p">[:,</span><span class="nb">int</span><span class="p">(</span><span class="n">londim</span><span class="o">/</span><span class="mf">2.</span><span class="o">-</span><span class="n">minlon</span><span class="p">):</span><span class="nb">int</span><span class="p">(</span><span class="n">londim</span><span class="o">/</span><span class="mf">2.</span><span class="o">+</span><span class="n">minlon</span><span class="p">)]</span>
+    <span class="n">contlats</span><span class="o">=</span><span class="n">lats</span><span class="p">[:,</span><span class="nb">int</span><span class="p">(</span><span class="n">londim</span><span class="o">/</span><span class="mf">2.</span><span class="o">-</span><span class="n">minlon</span><span class="p">):</span><span class="nb">int</span><span class="p">(</span><span class="n">londim</span><span class="o">/</span><span class="mf">2.</span><span class="o">+</span><span class="n">minlon</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">hueType</span> <span class="o">==</span> <span class="s1">&#39;group&#39;</span><span class="p">:</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mf">6.5</span><span class="p">))</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Eigengroups&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
+
+        <span class="n">group_map</span> <span class="o">=</span> <span class="n">generate_map2d</span><span class="p">(</span><span class="n">hue_quantity</span><span class="o">=</span><span class="n">kround</span><span class="p">,</span>
+                                   <span class="n">lightness_quantity</span><span class="o">=</span><span class="n">maps_mean</span><span class="p">,</span>
+                                   <span class="n">hue_cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+                                   <span class="n">scale_min</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                   <span class="n">scale_max</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">group_map</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">full_extent</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">)</span>
+        <span class="n">CS</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">contlons</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">180</span><span class="p">,</span> <span class="n">contlats</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">180</span><span class="p">,</span> <span class="n">kround</span><span class="p">,</span>
+                       <span class="n">levels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ngroups</span><span class="p">),</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyles</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="s1">&#39;dashed&#39;</span><span class="p">,</span> <span class="s1">&#39;dotted&#39;</span><span class="p">])</span>
+
+        <span class="n">p</span><span class="o">.</span><span class="n">clabel</span><span class="p">(</span><span class="n">CS</span><span class="p">,</span> <span class="n">inline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%1.0f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+        <span class="n">p</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Longitude ($^\circ$)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Latitude ($^\circ$)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">(),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">(),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+
+        <span class="n">cmap_group</span> <span class="o">=</span> <span class="n">cmap</span>
+        <span class="n">cNorm_group</span>  <span class="o">=</span> <span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">ngroups</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">scalarMap_group</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">cNorm_group</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap_group</span><span class="p">)</span>
+
+        <span class="n">cmap_flux</span> <span class="o">=</span> <span class="n">cmap_grey</span>
+        <span class="n">cNorm_flux</span>  <span class="o">=</span> <span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">maps_mean</span><span class="p">))</span>
+        <span class="n">scalarMap_flux</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">cNorm_flux</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap_flux</span><span class="p">)</span>
+
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ngroups</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ngroups</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">norm_group</span> <span class="o">=</span> <span class="n">BoundaryNorm</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">cmap_group</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+
+        <span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">())</span>
+        <span class="n">ax2</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;7.5%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">cb</span> <span class="o">=</span> <span class="n">colorbar</span><span class="o">.</span><span class="n">ColorbarBase</span><span class="p">(</span><span class="n">ax2</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap_group</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm_group</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="s2">&quot;proportional&quot;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">ticks</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ngroups</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">boundaries</span><span class="o">=</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_formatter</span><span class="p">(</span><span class="n">FormatStrFormatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.1g</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;inout&#39;</span><span class="p">,</span>  <span class="n">top</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">,</span>
+                          <span class="n">labeltop</span><span class="o">=</span><span class="s1">&#39;on&#39;</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span> <span class="n">pad</span><span class="o">=-</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.35</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span>
+
+        <span class="n">ax3</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;7.5%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+        <span class="n">cb</span> <span class="o">=</span> <span class="n">colorbar</span><span class="o">.</span><span class="n">ColorbarBase</span><span class="p">(</span><span class="n">ax3</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap_flux</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">cNorm_flux</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Flux&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.35</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">filetype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="s1">&#39;pdf&#39;</span><span class="p">]:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;HUEgroup_LUMflux_</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">saveName</span><span class="p">,</span><span class="n">filetype</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">hueType</span> <span class="o">==</span> <span class="s1">&#39;flux&#39;</span><span class="p">:</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mf">6.5</span><span class="p">))</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Flux&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
+
+        <span class="n">group_map</span> <span class="o">=</span> <span class="n">generate_map2d</span><span class="p">(</span><span class="n">hue_quantity</span><span class="o">=</span><span class="p">(</span><span class="n">maps_mean</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">maps_mean</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">maps_mean</span><span class="p">),</span>
+                                   <span class="n">lightness_quantity</span><span class="o">=</span><span class="mi">1</span><span class="o">-</span><span class="p">((</span><span class="n">maps_error</span><span class="o">*</span><span class="mf">100.</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">maps_error</span><span class="o">*</span><span class="mf">100.</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">maps_error</span><span class="o">*</span><span class="mf">100.</span><span class="p">)),</span>
+                                   <span class="n">hue_cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+                                   <span class="n">scale_min</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                   <span class="n">scale_max</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">group_map</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">full_extent</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">)</span>
+        <span class="n">CS</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">contlons</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">180</span><span class="p">,</span> <span class="n">contlats</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">180</span><span class="p">,</span> <span class="n">kround</span><span class="p">,</span>
+                       <span class="n">levels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ngroups</span><span class="p">),</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyles</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="s1">&#39;dashed&#39;</span><span class="p">,</span> <span class="s1">&#39;dotted&#39;</span><span class="p">])</span>
+
+        <span class="n">p</span><span class="o">.</span><span class="n">clabel</span><span class="p">(</span><span class="n">CS</span><span class="p">,</span> <span class="n">inline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%1.0f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+        <span class="n">p</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Longitude ($^\circ$)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Latitude ($^\circ$)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">(),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">(),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+
+        <span class="n">cmap_flux</span> <span class="o">=</span> <span class="n">cmap</span>
+        <span class="n">cNorm_flux</span> <span class="o">=</span> <span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">maps_mean</span><span class="p">))</span>
+        <span class="n">scalarMap_flux</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">cNorm_flux</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap_flux</span><span class="p">)</span>
+
+        <span class="n">cmap_stdev</span> <span class="o">=</span> <span class="n">cmap_grey_r</span>
+        <span class="n">cNorm_stdev</span>  <span class="o">=</span> <span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">maps_error</span><span class="o">*</span><span class="mf">100.</span><span class="p">))</span>
+        <span class="n">scalarMap_stdev</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">cNorm_stdev</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap_stdev</span><span class="p">)</span>
+
+        <span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">())</span>
+        <span class="n">ax2</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;7.5%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">cb</span> <span class="o">=</span> <span class="n">colorbar</span><span class="o">.</span><span class="n">ColorbarBase</span><span class="p">(</span><span class="n">ax2</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap_flux</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">cNorm_flux</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Flux&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.35</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span>
+
+        <span class="n">ax3</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;7.5%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+        <span class="n">cb</span> <span class="o">=</span> <span class="n">colorbar</span><span class="o">.</span><span class="n">ColorbarBase</span><span class="p">(</span><span class="n">ax3</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap_stdev</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">cNorm_stdev</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Uncertainty [%]&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.35</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">filetype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="s1">&#39;pdf&#39;</span><span class="p">]:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;HUEflux_LUMstdev_</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">saveName</span><span class="p">,</span><span class="n">filetype</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unrecognized hueType </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hueType</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, MultiDWorlds
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

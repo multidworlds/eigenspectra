@@ -1,14 +1,9 @@
-
-# coding: utf-8
-
-# In[19]:
-
-
 # Import the libraries
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from astropy.table import Table, vstack
+import os
 
 try:
     import pynrc
@@ -18,9 +13,10 @@ except ModuleNotFoundError:
 from copy import deepcopy
 import pysynphot as S
 
+HERE = os.path.abspath(os.path.split(__file__)[0])
 
 def sum_spectrum(img,ap=4,center=None):
-    " Simply sums the spectrum along spatial direction"
+    """Simply sums the spectrum along spatial direction"""
     if center is None:
         center = img.shape[0]/2
     subImg = img[(center-ap):(center+ap),:]
@@ -29,7 +25,9 @@ def sum_spectrum(img,ap=4,center=None):
 
 
 def make_snr_spectrum():
-    ###
+    """
+    Make a SNR spectrum and save an output data file and plot.
+    """
 
     bp_k = S.ObsBandpass('johnson,k')
     sp = pynrc.stellar_spectrum('K0V',5.541,'vegamag',bp_k,)
@@ -54,12 +52,12 @@ def make_snr_spectrum():
     tSpec2 = tSpec[keepWave]
 
     tSpec2.meta = {'filter':'F322W2W','TEXP':det.time_total}
-    tSpec2.write('data/instrument/snr_spec_f322w2.fits',overwrite=True)
-    tSpec2.write('data/instrument/snr_spec_f322w2.csv',overwrite=True)
+    tSpec2.write(os.path.join(HERE, '../../data/instrument/snr_spec_f322w2.fits'),overwrite=True)
+    tSpec2.write(os.path.join(HERE, '../../data/instrument/snr_spec_f322w2.csv'),overwrite=True)
 
     fig, ax = plt.subplots()
 
     plt.plot(tSpec2['wave'],tSpec2['sigma_ppm'])
     plt.ylim(300,900)
 
-    fig.savefig('data/instrument/snr_spectrum.pdf')
+    fig.savefig(os.path.join(HERE, '../../data/instrument/snr_spectrum.pdf'))

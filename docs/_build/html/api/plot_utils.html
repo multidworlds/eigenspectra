@@ -196,6 +196,33 @@
 <span class="target" id="module-eigenspectra.plot_utils"></span><div class="section" id="plotting-utilities">
 <h1>Plotting Utilities<a class="headerlink" href="#plotting-utilities" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
+<dt id="eigenspectra.plot_utils.generate_map2d">
+<code class="sig-prename descclassname">eigenspectra.plot_utils.</code><code class="sig-name descname">generate_map2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hue_quantity</span></em>, <em class="sig-param"><span class="n">lightness_quantity</span></em>, <em class="sig-param"><span class="n">hue_cmap</span></em>, <em class="sig-param"><span class="n">hue_range</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lightness_range</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">scale_min</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">scale_max</span><span class="o">=</span><span class="default_value">100</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/plot_utils.html#generate_map2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.plot_utils.generate_map2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an existing color map, and two ranges of values, map the first range
+to hue, and the second to lightness by scaling the first component of the
+CIELab expression for the colors representing each hue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hue_quantity</strong> (<em>array of floats</em>) – values to map to hue</p></li>
+<li><p><strong>lightness_quantity</strong> (<em>array of floats</em>) – values to map to lightness</p></li>
+<li><p><strong>hue_cmap</strong> (<em>colormap object</em>) – gradient of colors defining the range of hues</p></li>
+<li><p><strong>hue_range</strong> (<em>list</em>) – minimum and maximum of normalization for hue mapping</p></li>
+<li><p><strong>lightness_range</strong> (<em>list</em>) – minimum and maximum of normalization for hue mapping</p></li>
+<li><p><strong>scale_min</strong> (<em>float</em>) – minimum perceived lightness (0-100)</p></li>
+<li><p><strong>scale_max</strong> (<em>float</em>) – maximum perceived lightness (0-100)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>rgb_maps</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array of RGB colors, same shape as quantity</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt id="eigenspectra.plot_utils.plot_setup">
 <code class="sig-prename descclassname">eigenspectra.plot_utils.</code><code class="sig-name descname">plot_setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/plot_utils.html#plot_setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.plot_utils.plot_setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set some default plotting parameters</p>

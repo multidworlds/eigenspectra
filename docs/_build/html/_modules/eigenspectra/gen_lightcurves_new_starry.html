@@ -1,0 +1,990 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>eigenspectra.gen_lightcurves_new_starry &mdash; eigenspectra 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> eigenspectra
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">eigenspectra</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>eigenspectra.gen_lightcurves_new_starry</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for eigenspectra.gen_lightcurves_new_starry</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Generate Synthetic Lightcurves</span>
+<span class="sd">------------------------------</span>
+<span class="sd">Methods for generating synthetic multi-wavelength exoplanet</span>
+<span class="sd">secondary eclipse lightcurves. </span>
+
+<span class="sd">Example</span>
+<span class="sd">-------</span>
+<span class="sd">&gt;&gt;&gt; from gen_lightcurves import *</span>
+<span class="sd">&gt;&gt;&gt; lamhr, spaxels = prep_spectral_hotspot_map()</span>
+<span class="sd">&gt;&gt;&gt; time, lam, dlam, lcurves = create_lightcurves_with_starry(lamhr, spaxels)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">binned_statistic</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">signal</span>
+<span class="kn">import</span> <span class="nn">healpy</span> <span class="k">as</span> <span class="nn">hp</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">starry</span>
+<span class="n">starry</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">lazy</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">starry</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">quiet</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="n">HERE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+
+<div class="viewcode-block" id="expand_hp"><a class="viewcode-back" href="../../api/gen_lightcurves.html#eigenspectra.gen_lightcurves_new_starry.expand_hp">[docs]</a><span class="k">def</span> <span class="nf">expand_hp</span><span class="p">(</span><span class="n">healpix_map</span><span class="p">,</span> <span class="n">lmax</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Expand a Healpix ring-ordered map in spherical harmonics up to degree `lmax`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get the complex spherical harmonic coefficients</span>
+    <span class="n">alm</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">sphtfunc</span><span class="o">.</span><span class="n">map2alm</span><span class="p">(</span><span class="n">healpix_map</span><span class="p">,</span> <span class="n">lmax</span><span class="o">=</span><span class="n">lmax</span><span class="p">)</span>
+
+    <span class="c1"># Convert them to real coefficients</span>
+    <span class="n">ylm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">lmax</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">lmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">lmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">l</span><span class="p">,</span> <span class="n">l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">sphtfunc</span><span class="o">.</span><span class="n">Alm</span><span class="o">.</span><span class="n">getidx</span><span class="p">(</span><span class="n">lmax</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ylm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="n">m</span> <span class="o">*</span> <span class="n">alm</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span>
+            <span class="k">elif</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ylm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">alm</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ylm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="n">m</span> <span class="o">*</span> <span class="n">alm</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Instantiate a starry map so we can rotate it to the</span>
+    <span class="c1"># correct orientation</span>
+    <span class="nb">map</span> <span class="o">=</span> <span class="n">starry</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">ymax</span><span class="o">=</span><span class="n">lmax</span><span class="p">)</span>
+    <span class="nb">map</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">ylm</span>
+    <span class="nb">map</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="nb">map</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mf">90.0</span><span class="p">);</span>
+    <span class="nb">map</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="nb">map</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mf">180.0</span><span class="p">);</span>
+    <span class="nb">map</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="nb">map</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mf">90.0</span><span class="p">);</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">map</span><span class="o">.</span><span class="n">y</span> <span class="o">/</span> <span class="n">norm</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="downbin_spec"><a class="viewcode-back" href="../../api/gen_lightcurves.html#eigenspectra.gen_lightcurves_new_starry.downbin_spec">[docs]</a><span class="k">def</span> <span class="nf">downbin_spec</span><span class="p">(</span><span class="n">specHR</span><span class="p">,</span> <span class="n">lamHR</span><span class="p">,</span> <span class="n">lamLR</span><span class="p">,</span> <span class="n">dlam</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Re-bin spectum to lower resolution using :py:obj:`scipy.binned_statistic`</span>
+<span class="sd">    with ``statistic = &#39;mean&#39;``. This is a &quot;top-hat&quot; convolution.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function is from `coronagraph` (https://jlustigy.github.io/coronagraph/),</span>
+<span class="sd">    developed by J. Lustig-Yaeger.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    specHR : array-like</span>
+<span class="sd">        Spectrum to be degraded</span>
+<span class="sd">    lamHR : array-like</span>
+<span class="sd">        High-res wavelength grid</span>
+<span class="sd">    lamLR : array-like</span>
+<span class="sd">        Low-res wavelength grid</span>
+<span class="sd">    dlam : array-like, optional</span>
+<span class="sd">        Low-res wavelength width grid</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    specLR : :py:obj:`numpy.ndarray`</span>
+<span class="sd">        Low-res spectrum</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">dlam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please supply dlam in downbin_spec()&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Reverse ordering if wl vector is decreasing with index</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lamLR</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">lamHR</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">lamHR</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">lamHI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lamHR</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">specHR</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">lamLR</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">lamLR</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">lamLO</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lamLR</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">dlamLO</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dlam</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Calculate bin edges</span>
+    <span class="n">LRedges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">lamLR</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">dlam</span><span class="p">,</span> <span class="n">lamLR</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dlam</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+
+    <span class="c1"># Call scipy.stats.binned_statistic()</span>
+    <span class="n">specLR</span> <span class="o">=</span> <span class="n">binned_statistic</span><span class="p">(</span><span class="n">lamHR</span><span class="p">,</span> <span class="n">specHR</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">LRedges</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">specLR</span></div>
+
+<div class="viewcode-block" id="planck"><a class="viewcode-back" href="../../api/gen_lightcurves.html#eigenspectra.gen_lightcurves_new_starry.planck">[docs]</a><span class="k">def</span> <span class="nf">planck</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the Planck blackbody radiance</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temp : float or array-like</span>
+<span class="sd">        Temperature [K]</span>
+<span class="sd">    lam : array-like or float</span>
+<span class="sd">        Wavelength(s) [um]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Blam : float or array-like</span>
+<span class="sd">        Blackbody radiance [W/m**2/um/sr]</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    Multiply by :math:`\pi` to get spectral flux density</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="mf">6.62607e-34</span>       <span class="c1"># Planck constant (J * s)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="mf">2.998e8</span>           <span class="c1"># Speed of light (m / s)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="mf">1.3807e-23</span>        <span class="c1"># Boltzmann constant (J / K)</span>
+    <span class="n">wav</span> <span class="o">=</span> <span class="n">lam</span> <span class="o">*</span> <span class="mf">1e-6</span>
+    <span class="c1"># Returns B_lambda [W/m^2/um/sr]</span>
+    <span class="k">return</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">h</span> <span class="o">*</span> <span class="n">c</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">wav</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="n">wav</span> <span class="o">*</span> <span class="n">k</span> <span class="o">*</span> <span class="n">temp</span><span class="p">))</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="construct_lam"><a class="viewcode-back" href="../../api/gen_lightcurves.html#eigenspectra.gen_lightcurves_new_starry.construct_lam">[docs]</a><span class="k">def</span> <span class="nf">construct_lam</span><span class="p">(</span><span class="n">lammin</span><span class="p">,</span> <span class="n">lammax</span><span class="p">,</span> <span class="n">Res</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dlam</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct a wavelength grid by specifying either a resolving power (`Res`)</span>
+<span class="sd">    or a bandwidth (`dlam`)</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function is from `coronagraph` (https://coronagraph.readthedocs.io/en/latest/index.html),</span>
+<span class="sd">    developed by J. Lustig-Yaeger.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lammin : float</span>
+<span class="sd">        Minimum wavelength [microns]</span>
+<span class="sd">    lammax : float</span>
+<span class="sd">        Maximum wavelength [microns]</span>
+<span class="sd">    Res : float, optional</span>
+<span class="sd">        Resolving power (lambda / delta-lambda)</span>
+<span class="sd">    dlam : float, optional</span>
+<span class="sd">        Spectral element width for evenly spaced grid [microns]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    lam : float or array-like</span>
+<span class="sd">        Wavelength [um]</span>
+<span class="sd">    dlam : float or array-like</span>
+<span class="sd">        Spectral element width [um]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Keyword catching logic</span>
+    <span class="n">goR</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">goL</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">Res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dlam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="n">Res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dlam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error in construct_lam: Must specify either Res or dlam, but not both&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">Res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">goR</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">dlam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">goL</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error in construct_lam: Should not enter this else statment! :)&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="c1"># If Res is provided, generate equal resolving power wavelength grid</span>
+    <span class="k">if</span> <span class="n">goR</span><span class="p">:</span>
+
+        <span class="c1"># Set wavelength grid</span>
+        <span class="n">dlam0</span> <span class="o">=</span> <span class="n">lammin</span><span class="o">/</span><span class="n">Res</span>
+        <span class="n">dlam1</span> <span class="o">=</span> <span class="n">lammax</span><span class="o">/</span><span class="n">Res</span>
+        <span class="n">lam</span>  <span class="o">=</span> <span class="n">lammin</span> <span class="c1">#in [um]</span>
+        <span class="n">Nlam</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">lammax</span> <span class="o">+</span> <span class="n">dlam1</span><span class="p">):</span>
+            <span class="n">lam</span>  <span class="o">=</span> <span class="n">lam</span> <span class="o">+</span> <span class="n">lam</span><span class="o">/</span><span class="n">Res</span>
+            <span class="n">Nlam</span> <span class="o">=</span> <span class="n">Nlam</span> <span class="o">+</span><span class="mi">1</span>
+        <span class="n">lam</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nlam</span><span class="p">)</span>
+        <span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lammin</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">Nlam</span><span class="p">):</span>
+            <span class="n">lam</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">lam</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">lam</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">Res</span>
+        <span class="n">Nlam</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
+        <span class="n">dlam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nlam</span><span class="p">)</span> <span class="c1">#grid widths (um)</span>
+
+        <span class="c1"># Set wavelength widths</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">Nlam</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">dlam</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">lam</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">lam</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">lam</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">lam</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+        <span class="c1">#Set edges to be same as neighbor</span>
+        <span class="n">dlam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">dlam0</span><span class="c1">#dlam[1]</span>
+        <span class="n">dlam</span><span class="p">[</span><span class="n">Nlam</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">dlam1</span><span class="c1">#dlam[Nlam-2]</span>
+
+        <span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">dlam</span> <span class="o">=</span> <span class="n">dlam</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># If dlam is provided, generate evenly spaced grid</span>
+    <span class="k">if</span> <span class="n">goL</span><span class="p">:</span>
+        <span class="n">lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">lammin</span><span class="p">,</span> <span class="n">lammax</span><span class="o">+</span><span class="n">dlam</span><span class="p">,</span> <span class="n">dlam</span><span class="p">)</span>
+        <span class="n">dlam</span> <span class="o">=</span> <span class="n">dlam</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lam</span><span class="p">,</span> <span class="n">dlam</span></div>
+
+<div class="viewcode-block" id="prep_map1"><a class="viewcode-back" href="../../api/gen_lightcurves.html#eigenspectra.gen_lightcurves_new_starry.prep_map1">[docs]</a><span class="k">def</span> <span class="nf">prep_map1</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prepare toy map #1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Load in 3D data from Kat</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HERE</span><span class="p">,</span> <span class="s2">&quot;data/maps/mystery_map1.npz&quot;</span><span class="p">)</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1"># Same file but w/wl included</span>
+    <span class="n">spaxels</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;spaxels&quot;</span><span class="p">]</span>
+    <span class="n">lam</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;wl&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">lam</span><span class="p">,</span> <span class="n">spaxels</span></div>
+
+<div class="viewcode-block" id="prep_map2"><a class="viewcode-back" href="../../api/gen_lightcurves.html#eigenspectra.gen_lightcurves_new_starry.prep_map2">[docs]</a><span class="k">def</span> <span class="nf">prep_map2</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prepare toy map #2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Load in 3D data from Kat</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HERE</span><span class="p">,</span> <span class="s2">&quot;data/maps/mystery_map2.npz&quot;</span><span class="p">)</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1"># Same file but w/wl included</span>
+    <span class="n">spaxels</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;spaxels&quot;</span><span class="p">]</span>
+    <span class="n">lam</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;wl&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">lam</span><span class="p">,</span> <span class="n">spaxels</span></div>
+
+<div class="viewcode-block" id="prep_blackbody_hotspot_map"><a class="viewcode-back" href="../../api/gen_lightcurves.html#eigenspectra.gen_lightcurves_new_starry.prep_blackbody_hotspot_map">[docs]</a><span class="k">def</span> <span class="nf">prep_blackbody_hotspot_map</span><span class="p">(</span><span class="n">phi0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">theta0</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">ds</span> <span class="o">=</span> <span class="mf">25.0</span><span class="p">,</span>
+                               <span class="n">Tp1</span> <span class="o">=</span> <span class="mf">900.</span><span class="p">,</span> <span class="n">Tp2</span> <span class="o">=</span> <span class="mf">1200.</span><span class="p">,</span> <span class="n">Ts</span> <span class="o">=</span> <span class="mf">2550.</span><span class="p">,</span> <span class="n">RpRs</span> <span class="o">=</span> <span class="mf">0.155313</span><span class="p">,</span>
+                               <span class="n">lammin</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">lammax</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
+                               <span class="n">Nlam</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">Nside</span> <span class="o">=</span> <span class="mi">16</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a toy spaxel map with a hotspot</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    phi0 : float</span>
+<span class="sd">        Latitude of hot spot center [radians]</span>
+<span class="sd">    theta0 : float</span>
+<span class="sd">        Longitude of hot spot center [radians]</span>
+<span class="sd">    ds : float</span>
+<span class="sd">        Angular radius of hotspot [degrees]</span>
+<span class="sd">    Tp1 : float</span>
+<span class="sd">        Temperature outside hotspot [K]</span>
+<span class="sd">    Tp2 : float</span>
+<span class="sd">        Temperature inside hotspot [K]</span>
+<span class="sd">    Ts : float</span>
+<span class="sd">        Stellar effective temperature [K]</span>
+<span class="sd">    RpRs : float</span>
+<span class="sd">        Planet radius relative to stellar radius</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    lamhr : numpy.array</span>
+<span class="sd">        Wavelength grid [microns]</span>
+<span class="sd">    spaxels : numpy.ndarray</span>
+<span class="sd">        Pixel spectra (2d)</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; lam, spaxels = prep_blackbody_hotspot_map()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Create hi-res wavelength grid</span>
+    <span class="n">lamhr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lammin</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">lammax</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">Nlam</span><span class="p">)</span>
+
+    <span class="c1"># Create blackbody spectra at two temperatures</span>
+    <span class="n">Bp1</span> <span class="o">=</span> <span class="n">planck</span><span class="p">(</span><span class="n">Tp1</span><span class="p">,</span> <span class="n">lamhr</span><span class="p">)</span>     <span class="c1"># Blackbody 1</span>
+    <span class="n">Bp2</span> <span class="o">=</span> <span class="n">planck</span><span class="p">(</span><span class="n">Tp2</span><span class="p">,</span> <span class="n">lamhr</span><span class="p">)</span>     <span class="c1"># Blackbody 2</span>
+    <span class="n">Bs</span> <span class="o">=</span> <span class="n">planck</span><span class="p">(</span><span class="n">Ts</span><span class="p">,</span> <span class="n">lamhr</span><span class="p">)</span>       <span class="c1"># Stellar blackbody</span>
+
+    <span class="c1"># Calculate the planet-star flux ratio for both &quot;surfaces&quot;</span>
+    <span class="n">FpFs1</span> <span class="o">=</span> <span class="p">(</span><span class="n">RpRs</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Bp1</span> <span class="o">/</span> <span class="n">Bs</span><span class="p">)</span>
+    <span class="n">FpFs2</span> <span class="o">=</span> <span class="p">(</span><span class="n">RpRs</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Bp2</span> <span class="o">/</span> <span class="n">Bs</span><span class="p">)</span>
+
+    <span class="c1"># Get number of pixels/spaxels</span>
+    <span class="n">Npix</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">nside2npix</span><span class="p">(</span><span class="n">Nside</span><span class="p">)</span>
+
+    <span class="c1"># Calc the latitude and longitude of each hpix</span>
+    <span class="n">thetas</span><span class="p">,</span> <span class="n">phis</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">pix2ang</span><span class="p">(</span><span class="n">Nside</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Npix</span><span class="p">))</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="n">thetas</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">phis</span> <span class="o">=</span> <span class="n">phis</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+    <span class="c1"># Define empty 2d array for spaxels</span>
+    <span class="n">spaxels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Npix</span><span class="p">,</span> <span class="n">Nlam</span><span class="p">))</span>
+
+    <span class="c1"># Loop over pixels filling with blackbody</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">hp</span><span class="o">.</span><span class="n">nside2npix</span><span class="p">(</span><span class="n">Nside</span><span class="p">)):</span>
+
+        <span class="c1"># Relabel variables for below equation</span>
+        <span class="n">phi1</span><span class="p">,</span> <span class="n">theta1</span> <span class="o">=</span>  <span class="n">thetas</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">phis</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">dtheta</span> <span class="o">=</span> <span class="n">theta0</span> <span class="o">-</span> <span class="n">theta1</span>
+
+        <span class="c1"># Calculate the angular distance between two points on sphere</span>
+        <span class="n">ang</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi0</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi0</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">dtheta</span><span class="p">))</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+        <span class="c1"># Use a different spectrum inside and outside of the great circle defined by dang</span>
+        <span class="k">if</span> <span class="n">ang</span> <span class="o">&gt;</span> <span class="n">ds</span><span class="p">:</span>
+            <span class="c1"># Outside hotspot</span>
+            <span class="n">spaxels</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">FpFs1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Within hotspot</span>
+            <span class="n">spaxels</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">FpFs2</span>
+
+    <span class="k">return</span> <span class="n">lamhr</span><span class="p">,</span> <span class="n">spaxels</span></div>
+
+<div class="viewcode-block" id="prep_spectral_hotspot_map"><a class="viewcode-back" href="../../api/gen_lightcurves.html#eigenspectra.gen_lightcurves_new_starry.prep_spectral_hotspot_map">[docs]</a><span class="k">def</span> <span class="nf">prep_spectral_hotspot_map</span><span class="p">(</span><span class="n">phi0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">theta0</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">ds</span> <span class="o">=</span> <span class="mf">25.0</span><span class="p">,</span>
+                              <span class="n">Nside</span> <span class="o">=</span> <span class="mi">16</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a toy spaxel map with a hotspot</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    phi0 : float</span>
+<span class="sd">        Latitude of hot spot center [radians]</span>
+<span class="sd">    theta0 : float</span>
+<span class="sd">        Longitude of hot spot center [radians]</span>
+<span class="sd">    ds : float</span>
+<span class="sd">        Angular radius of hotspot [degrees]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    lamhr : numpy.array</span>
+<span class="sd">        Wavelength grid [microns]</span>
+<span class="sd">    spaxels : numpy.ndarray</span>
+<span class="sd">        Pixel spectra (2d)</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; lam, spaxels = prep_spectral_hotspot_map()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Start with toy map 2, which has modeled FpFs&#39;s for HD189</span>
+    <span class="n">lamhr</span><span class="p">,</span> <span class="n">spaxin</span> <span class="o">=</span> <span class="n">prep_map2</span><span class="p">()</span>
+
+    <span class="c1"># Parse into the 4 different FpFs</span>
+    <span class="n">FpFsA</span> <span class="o">=</span> <span class="n">spaxin</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span>
+    <span class="n">FpFsB</span> <span class="o">=</span> <span class="n">spaxin</span><span class="p">[</span><span class="mi">100</span><span class="p">,:]</span>
+    <span class="n">FpFsC</span> <span class="o">=</span> <span class="n">spaxin</span><span class="p">[</span><span class="mi">150</span><span class="p">,:]</span>
+    <span class="n">FpFsD</span> <span class="o">=</span> <span class="n">spaxin</span><span class="p">[</span><span class="mi">450</span><span class="p">,:]</span>
+
+    <span class="c1"># Outside hotspot</span>
+    <span class="n">FpFs1</span> <span class="o">=</span> <span class="n">FpFsD</span>
+
+    <span class="c1"># Inside hotspot</span>
+    <span class="n">FpFs2</span> <span class="o">=</span> <span class="n">FpFsC</span>
+
+    <span class="c1"># Get number of pixels/spaxels</span>
+    <span class="n">Npix</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">nside2npix</span><span class="p">(</span><span class="n">Nside</span><span class="p">)</span>
+
+    <span class="c1"># Calc the latitude and longitude of each hpix</span>
+    <span class="n">thetas</span><span class="p">,</span> <span class="n">phis</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">pix2ang</span><span class="p">(</span><span class="n">Nside</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Npix</span><span class="p">))</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="n">thetas</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">phis</span> <span class="o">=</span> <span class="n">phis</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+    <span class="c1"># Define empty 2d array for spaxels</span>
+    <span class="n">Nlam</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lamhr</span><span class="p">)</span>
+    <span class="n">spaxels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Npix</span><span class="p">,</span> <span class="n">Nlam</span><span class="p">))</span>
+
+    <span class="c1"># Loop over pixels filling with blackbody</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">hp</span><span class="o">.</span><span class="n">nside2npix</span><span class="p">(</span><span class="n">Nside</span><span class="p">)):</span>
+
+        <span class="c1"># Relabel variables for below equation</span>
+        <span class="n">phi1</span><span class="p">,</span> <span class="n">theta1</span> <span class="o">=</span>  <span class="n">thetas</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">phis</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">dtheta</span> <span class="o">=</span> <span class="n">theta0</span> <span class="o">-</span> <span class="n">theta1</span>
+
+        <span class="c1"># Calculate the angular distance between two points on sphere</span>
+        <span class="n">ang</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi0</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi0</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">dtheta</span><span class="p">))</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+        <span class="c1"># Use a different spectrum inside and outside of the great circle defined by dang</span>
+        <span class="k">if</span> <span class="n">ang</span> <span class="o">&gt;</span> <span class="n">ds</span><span class="p">:</span>
+            <span class="c1"># Outside hotspot</span>
+            <span class="n">spaxels</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">FpFs1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Within hotspot</span>
+            <span class="n">spaxels</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">FpFs2</span>
+
+    <span class="k">return</span> <span class="n">lamhr</span><span class="p">,</span> <span class="n">spaxels</span></div>
+
+
+
+<div class="viewcode-block" id="create_quadrant_map"><a class="viewcode-back" href="../../api/gen_lightcurves.html#eigenspectra.gen_lightcurves_new_starry.create_quadrant_map">[docs]</a><span class="k">def</span> <span class="nf">create_quadrant_map</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="n">f3</span><span class="p">,</span> <span class="n">f4</span><span class="p">,</span> <span class="n">lat0</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">lon0</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">Nside</span> <span class="o">=</span> <span class="mi">16</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a quadrant map with different spectra &#39;painted on the surface&#39;.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    f1 : array</span>
+<span class="sd">        Planet-star flux ratio 1 (upper/north left/west)</span>
+<span class="sd">    f2 : array</span>
+<span class="sd">        Planet-star flux ratio 2 (lower/south left/west)</span>
+<span class="sd">    f3 : array</span>
+<span class="sd">        Planet-star flux ratio 3 (upper/north right/east)</span>
+<span class="sd">    f4 : array</span>
+<span class="sd">        Planet-star flux ratio 4 (lower/south right/east)</span>
+<span class="sd">    lat0 : float</span>
+<span class="sd">        Latitude demarcation between north and south</span>
+<span class="sd">    lon0 : float</span>
+<span class="sd">        Longitude demarcation between east and west</span>
+<span class="sd">    Nside : int</span>
+<span class="sd">        Healpix NSIDE paramater</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    spaxels : numpy.ndarray</span>
+<span class="sd">        Two-dimensional array of pixels by wavelengths</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Fluxes must be on same wavelength grid</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">f1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">f2</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">f3</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">f4</span><span class="p">)</span>
+
+    <span class="c1"># Get number of pixels/spaxels</span>
+    <span class="n">Npix</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">nside2npix</span><span class="p">(</span><span class="n">Nside</span><span class="p">)</span>
+
+    <span class="c1"># Calc the latitude and longitude of each hpix</span>
+    <span class="n">thetas</span><span class="p">,</span> <span class="n">phis</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">pix2ang</span><span class="p">(</span><span class="n">Nside</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Npix</span><span class="p">),</span> <span class="n">lonlat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Latitudes are the phis</span>
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">phis</span>
+    <span class="c1"># Convert to west (0 to -180) and east (0 to +180) longitudes</span>
+    <span class="n">lon</span> <span class="o">=</span> <span class="p">(</span><span class="n">thetas</span> <span class="o">-</span> <span class="mf">180.0</span><span class="p">)</span>
+
+    <span class="c1"># Define empty 2d array for spaxels</span>
+    <span class="n">Nlam</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">f1</span><span class="p">)</span>
+    <span class="n">spaxels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Npix</span><span class="p">,</span> <span class="n">Nlam</span><span class="p">))</span>
+
+    <span class="c1"># Loop over pixels filling with spectra</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Npix</span><span class="p">):</span>
+
+        <span class="c1"># Latitudes north of demarcation</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">lat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">lat0</span><span class="p">):</span>
+
+            <span class="c1"># Longitudes west of demarcation</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">lon</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">lon0</span><span class="p">):</span>
+
+                <span class="c1"># Set flux 1</span>
+                <span class="n">spaxels</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">f1</span>
+
+            <span class="c1"># Longitudes east of demarcation</span>
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="c1"># Set flux 2</span>
+                <span class="n">spaxels</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">f2</span>
+
+        <span class="c1"># Latitudes south of demarcation</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="c1"># Longitudes west of demarcation</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">lon</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">lon0</span><span class="p">):</span>
+
+                <span class="c1"># Set flux 3</span>
+                <span class="n">spaxels</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">f3</span>
+
+            <span class="c1"># Longitudes east of demarcation</span>
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="c1"># Set flux 4</span>
+                <span class="n">spaxels</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">f4</span>
+
+    <span class="k">return</span> <span class="n">spaxels</span></div>
+
+<div class="viewcode-block" id="spec_flat_with_gaussian"><a class="viewcode-back" href="../../api/gen_lightcurves.html#eigenspectra.gen_lightcurves_new_starry.spec_flat_with_gaussian">[docs]</a><span class="k">def</span> <span class="nf">spec_flat_with_gaussian</span><span class="p">(</span><span class="n">lamhr</span><span class="p">,</span> <span class="n">A</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">xroll</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a toy flat spectrum with a Gaussian spike.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lamhr : array</span>
+<span class="sd">        Wavelength array</span>
+<span class="sd">    A : float</span>
+<span class="sd">        Flat line continuum value</span>
+<span class="sd">    B : float</span>
+<span class="sd">        Amplitude of Gaussian spike (added to continuum)</span>
+<span class="sd">    std : float</span>
+<span class="sd">        Standard deviation of Gaussian relative to the wavelength range</span>
+<span class="sd">    xroll : float</span>
+<span class="sd">        Fractional amount to shift location of Gaussian spike left (negative)</span>
+<span class="sd">        or right (positive) from the central wavelength relative to the</span>
+<span class="sd">        wavelength bounds (e.g. `xroll = 0.0` places Gaussian spike at the center,</span>
+<span class="sd">        while `xroll = -0.25` shifts the spike halfway to the left bound).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    FpFs : array</span>
+<span class="sd">        Mock planet-to-star flux ratio with flat continuum and Gaussian spike</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Flat continuum</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lamhr</span><span class="p">))</span>
+
+    <span class="c1"># Gaussian spike</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lamhr</span><span class="p">),</span> <span class="n">std</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">lamhr</span><span class="p">))</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">xroll</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">lamhr</span><span class="p">)))</span>
+
+    <span class="c1"># Add spike to continuum</span>
+    <span class="n">FpFs</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">B</span><span class="o">*</span><span class="n">g</span>
+
+    <span class="k">return</span> <span class="n">FpFs</span></div>
+
+<div class="viewcode-block" id="create_lightcurves_with_starry"><a class="viewcode-back" href="../../api/gen_lightcurves.html#eigenspectra.gen_lightcurves_new_starry.create_lightcurves_with_starry">[docs]</a><span class="k">def</span> <span class="nf">create_lightcurves_with_starry</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">spaxels</span><span class="p">,</span> <span class="n">lammin</span> <span class="o">=</span> <span class="mf">2.41</span><span class="p">,</span> <span class="n">lammax</span> <span class="o">=</span> <span class="mf">3.98</span><span class="p">,</span>
+                                   <span class="n">dlam</span> <span class="o">=</span> <span class="mf">0.18</span><span class="p">,</span> <span class="n">lmax</span> <span class="o">=</span> <span class="mi">18</span><span class="p">,</span>
+                                   <span class="n">plot_input_hp_maps</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                   <span class="n">plot_lightcurves</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">plot_points_on_map_spec</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                   <span class="n">points_on_map</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)],</span>
+                                   <span class="n">plot_diagnostic</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">save_output</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                   <span class="n">save_tag</span> <span class="o">=</span> <span class="s2">&quot;eclipse_lightcurve_test2&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates toy multi-wavelength secondary eclipse lightcurves of HD189733 b</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lam : numpy.array</span>
+<span class="sd">        High-res model wavelength grid [microns]</span>
+<span class="sd">    spaxels : numpy.ndarray</span>
+<span class="sd">        2D array of HealPix number vs wavelength</span>
+<span class="sd">    lammin : float</span>
+<span class="sd">        Minimum wavelength</span>
+<span class="sd">    lammax : float</span>
+<span class="sd">        Maximum wavelength</span>
+<span class="sd">    dlam : float</span>
+<span class="sd">        Wavelength bin width</span>
+<span class="sd">    lmax : int</span>
+<span class="sd">        Largest spherical harmonic degree in the surface map</span>
+<span class="sd">    plot_input_hp_maps : bool</span>
+<span class="sd">        Plot the input HEALPix map</span>
+<span class="sd">    plot_lightcurves : bool</span>
+<span class="sd">        Plot the output lightcurves computed by `starry`</span>
+<span class="sd">    plot_points_on_map_spec : bool</span>
+<span class="sd">        Plot points on the visible map with the corresponding spectrum at</span>
+<span class="sd">        each point</span>
+<span class="sd">    points_on_map : list of (x,y) tuple</span>
+<span class="sd">        Points to plot on map if `plot_points_on_map_spec` is set to True. Note</span>
+<span class="sd">        that (0,0) is the center of the planet at secondary eclipse with the</span>
+<span class="sd">        radius normalized to unity.</span>
+<span class="sd">    plot_diagnostic : bool</span>
+<span class="sd">        Make a diagnostic plot of many random spectra drawn from the visible</span>
+<span class="sd">        disk of the planet to compare against the input spectra. This shows</span>
+<span class="sd">        roughly how information is lost transforming the input spectral map to</span>
+<span class="sd">        spherical harmonics.</span>
+<span class="sd">    save_output : bool</span>
+<span class="sd">        Set to save the output to a npz</span>
+<span class="sd">    save_tag : str</span>
+<span class="sd">        Name of file to save output to</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    time : numpy.array</span>
+<span class="sd">        1d array of lightcurve times in days</span>
+<span class="sd">    lamlo : numpy.array</span>
+<span class="sd">        1d array of wavelengths in microns</span>
+<span class="sd">    dlamlo : numpy.array</span>
+<span class="sd">        1d array of wavelength bin widths</span>
+<span class="sd">    lightcurve : numpy.ndarray</span>
+<span class="sd">        2d array of multi-wavelength lightcurves with</span>
+<span class="sd">        shape ``(len(time), len(lamlo))``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Construct low res wavelength grid</span>
+    <span class="n">lamlo</span><span class="p">,</span> <span class="n">dlamlo</span> <span class="o">=</span> <span class="n">construct_lam</span><span class="p">(</span><span class="n">lammin</span><span class="p">,</span> <span class="n">lammax</span><span class="p">,</span> <span class="n">dlam</span><span class="o">=</span><span class="n">dlam</span><span class="p">)</span>
+    <span class="n">Nlamlo</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lamlo</span><span class="p">)</span>
+
+    <span class="c1"># Set HealPy pixel numbers</span>
+    <span class="n">Npix</span> <span class="o">=</span> <span class="n">spaxels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Define empty 2d array for spaxels</span>
+    <span class="n">spec2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Npix</span><span class="p">,</span> <span class="n">Nlamlo</span><span class="p">))</span>
+
+    <span class="c1"># Loop over pixels filling with spectra</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Npix</span><span class="p">):</span>
+
+        <span class="c1"># Degrade the spectra to lower resolution</span>
+        <span class="n">spec2d</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">downbin_spec</span><span class="p">(</span><span class="n">spaxels</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">lam</span><span class="p">,</span> <span class="n">lamlo</span><span class="p">,</span> <span class="n">dlam</span> <span class="o">=</span> <span class="n">dlamlo</span><span class="p">)</span>
+
+    <span class="c1"># Make diagnostic plots</span>
+    <span class="k">if</span> <span class="n">plot_input_hp_maps</span><span class="p">:</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+            <span class="n">hp</span><span class="o">.</span><span class="n">mollview</span><span class="p">(</span><span class="n">spec2d</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;</span><span class="si">%0.2f</span><span class="s2"> $\mu$m&quot;</span> <span class="o">%</span><span class="n">lamlo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="c1"># Planet luminosity</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="mf">0.00344</span>
+
+    <span class="c1"># Create starry planet map</span>
+    <span class="nb">map</span> <span class="o">=</span> <span class="n">starry</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">ydeg</span><span class="o">=</span><span class="n">lmax</span><span class="p">,</span> <span class="n">nw</span><span class="o">=</span><span class="n">Nlamlo</span><span class="p">,</span> <span class="n">amp</span> <span class="o">=</span> <span class="n">L</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">Nlamlo</span><span class="p">))</span>
+
+    <span class="c1"># Create starry planet w/ map and HD189 parameters</span>
+    <span class="n">planet</span> <span class="o">=</span> <span class="n">starry</span><span class="o">.</span><span class="n">Secondary</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span>
+                              <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>      <span class="c1"># mass in solar masses</span>
+                              <span class="n">r</span><span class="o">=</span><span class="mf">0.155313</span><span class="p">,</span>    <span class="c1"># radius in solar radii</span>
+                              <span class="n">a</span><span class="o">=</span><span class="mf">8.863</span><span class="p">,</span>       <span class="c1"># a/rstar</span>
+                              <span class="n">porb</span><span class="o">=</span><span class="mf">2.21857567</span><span class="p">,</span>  <span class="c1"># orbital period in days</span>
+                              <span class="n">prot</span><span class="o">=</span><span class="mf">2.21857567</span><span class="p">,</span>  <span class="c1"># rotation period in days (synchronous)</span>
+                              <span class="c1">#Omega=30,  # longitude of ascending node in degrees</span>
+                              <span class="n">ecc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>  <span class="c1"># eccentricity</span>
+                              <span class="n">w</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>  <span class="c1"># longitude of pericenter in degrees</span>
+                              <span class="n">t0</span><span class="o">=-</span><span class="mf">2.21857567</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span>  <span class="c1"># time of transit in days</span>
+    <span class="p">)</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # HD189 parameters</span>
+<span class="sd">    planet.r = 0.155313</span>
+<span class="sd">    L = 0.00344</span>
+<span class="sd">    planet.L = L * np.ones(Nlamlo)</span>
+<span class="sd">    planet.inc = 85.71</span>
+<span class="sd">    planet.a = 8.863</span>
+<span class="sd">    planet.prot = 2.21857567</span>
+<span class="sd">    planet.porb = 2.21857567</span>
+<span class="sd">    planet.tref = -2.21857567 / 2.</span>
+<span class="sd">    planet.ecc = 0.0</span>
+<span class="sd">    planet.w = 90</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Calculate disk-integrated Fp/Fs -- This should be the secondary eclipse depth,</span>
+    <span class="c1"># but it must be consistent with the individual map fluxes</span>
+    <span class="n">FpFslr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">spec2d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # Rodrigo Luger&#39;s fix for starry spectral map normalization:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # Loop over wavelengths loading map into starry</span>
+<span class="sd">    y = np.zeros_like(planet.y)</span>
+<span class="sd">    for i in range(Nlamlo):</span>
+<span class="sd">        # Expand a Healpix ring-ordered map in spherical harmonics</span>
+<span class="sd">        # up to degree `lmax`</span>
+<span class="sd">        y[:, i] = expand_hp(spec2d[:, i], lmax=lmax)</span>
+<span class="sd">    # Renormalize planet map and luminosity accordingly</span>
+<span class="sd">    planet.map[:, :] = y / y[0]</span>
+<span class="sd">    planet.L = y[0]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get the map intensity across the planet</span>
+    <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">300</span>
+    <span class="c1">#x0 = np.linspace(-1, 1, nx)</span>
+    <span class="c1">#y0 = np.linspace(-1, 1, ny)</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">nx</span><span class="p">)</span>
+    <span class="n">y0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">ny</span><span class="p">)</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">Nlamlo</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nx</span><span class="p">):</span>
+        <span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">planet</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">intensity</span><span class="p">(</span><span class="n">lat</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lon</span><span class="o">=</span><span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="c1"># Plot the starry map during secondary eclipse</span>
+    <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">iwavelength</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">I</span><span class="p">[:,:,</span><span class="n">iwavelength</span><span class="p">],</span><span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="c1"># Create a generic star with starry</span>
+    <span class="c1">#r = 0.805</span>
+    <span class="c1">#m = 0.846</span>
+    <span class="n">star</span> <span class="o">=</span> <span class="n">starry</span><span class="o">.</span><span class="n">Primary</span><span class="p">(</span><span class="n">starry</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">ydeg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">nw</span><span class="o">=</span><span class="n">Nlamlo</span><span class="p">),</span> <span class="n">m</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">prot</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="c1"># Set wavelength-dependent limb darkening params, which don&#39;t matter in</span>
+    <span class="c1"># Secondary eclipse</span>
+    <span class="n">star</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.40</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">Nlamlo</span><span class="p">)</span>
+    <span class="n">star</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.26</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">Nlamlo</span><span class="p">)</span>
+
+    <span class="c1"># Create starry system with star and planet</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="n">starry</span><span class="o">.</span><span class="n">System</span><span class="p">(</span><span class="n">star</span><span class="p">,</span> <span class="n">planet</span><span class="p">)</span>
+
+    <span class="c1"># Create time grid in days (secondary eclipse is at 0.0)</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
+
+    <span class="c1"># Calculate lightcurve in starry</span>
+    <span class="c1">#system.compute(time)</span>
+    <span class="c1">#lightcurve = system.lightcurve / system.lightcurve[0]</span>
+    <span class="n">flux</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">flux</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">lightcurve</span> <span class="o">=</span> <span class="n">flux</span> <span class="o">/</span> <span class="n">flux</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Apply vertical shift so the bottom of the eclipse is at 0.0</span>
+    <span class="n">lightcurve</span> <span class="o">=</span> <span class="n">lightcurve</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">lightcurve</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">plot_lightcurves</span><span class="p">:</span>
+        <span class="c1"># Make Plot</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [days]&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Relative Flux&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nlamlo</span><span class="p">):</span>
+            <span class="c1"># Subtract off minimum (which is the bottom of the eclipse) to look</span>
+            <span class="c1"># like traditional form</span>
+            <span class="n">lc</span> <span class="o">=</span> <span class="n">lightcurve</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">lightcurve</span><span class="p">[:,</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">lc</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="s2">&quot;C</span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="mi">9</span><span class="p">),</span> <span class="n">label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2"> $\mu$m&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">lamlo</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncol</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">plot_points_on_map_spec</span><span class="p">:</span>
+
+        <span class="c1"># Which wavelength to plot map at</span>
+        <span class="n">iwavelength</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Wavelength [$\mu$m]&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Relative Flux&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">I</span><span class="p">[:,:,</span><span class="n">iwavelength</span><span class="p">],</span><span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Loop over points to plot</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points_on_map</span><span class="p">)):</span>
+
+            <span class="c1"># Get ith point</span>
+            <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="o">=</span> <span class="n">points_on_map</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="c1"># Scale point to array indices</span>
+            <span class="n">ix</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">nx</span><span class="o">*</span><span class="p">(</span><span class="n">xi</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)))</span>
+            <span class="n">iy</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="p">(</span><span class="n">yi</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)))</span>
+
+            <span class="c1"># Plot point on map</span>
+            <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ix</span><span class="p">,</span><span class="n">iy</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;C</span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="mi">10</span><span class="p">),</span> <span class="n">ms</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+
+            <span class="c1"># Plot spectrum at point</span>
+            <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lamlo</span><span class="p">,</span> <span class="n">I</span><span class="p">[</span><span class="n">iy</span><span class="p">,</span><span class="n">ix</span><span class="p">,:],</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;C</span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="mi">10</span><span class="p">))</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">plot_diagnostic</span><span class="p">:</span>
+
+        <span class="c1"># Create figure</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Fp/Fs&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Wavelength [$\mu$m]&quot;</span><span class="p">)</span>
+
+        <span class="n">draws</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="c1"># Loop over number of draws</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">draws</span><span class="p">):</span>
+            <span class="c1"># Draw a random intensity from the planet</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">high</span><span class="o">=</span><span class="n">nx</span><span class="p">)</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">high</span><span class="o">=</span><span class="n">nx</span><span class="p">)</span>
+            <span class="c1"># Plot it</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lamlo</span><span class="p">,</span> <span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,:]</span> <span class="o">*</span> <span class="n">planet</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">lw</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+                        <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;starry samples&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lamlo</span><span class="p">,</span> <span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,:]</span> <span class="o">*</span> <span class="n">planet</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">lw</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+                        <span class="n">zorder</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Loop over input spaxels plotting each spectrum (creates thick lines as</span>
+        <span class="c1"># they overplot)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Npix</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lamlo</span><span class="p">,</span> <span class="n">spec2d</span><span class="p">[</span><span class="n">i</span><span class="p">,:],</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Inputs&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lamlo</span><span class="p">,</span> <span class="n">spec2d</span><span class="p">[</span><span class="n">i</span><span class="p">,:],</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;k&quot;</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">save_output</span><span class="p">:</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="s2">&quot;data/input_lightcurves&quot;</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">save_tag</span><span class="o">+</span><span class="s2">&quot;.npz&quot;</span><span class="p">)</span>
+        <span class="c1"># Save generated lightcurve</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savez</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="n">time</span><span class="p">,</span> <span class="n">wl</span> <span class="o">=</span> <span class="n">lamlo</span><span class="p">,</span>
+                                    <span class="n">dwl</span> <span class="o">=</span> <span class="n">dlamlo</span><span class="p">,</span> <span class="n">lightcurve</span> <span class="o">=</span> <span class="n">lightcurve</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">time</span><span class="p">,</span> <span class="n">lamlo</span><span class="p">,</span> <span class="n">dlamlo</span><span class="p">,</span> <span class="n">lightcurve</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="c1"># Get wavelength-dependent healpix map</span>
+    <span class="n">lamhr</span><span class="p">,</span> <span class="n">spaxels</span> <span class="o">=</span> <span class="n">prep_spectral_hotspot_map</span><span class="p">()</span>
+
+    <span class="c1"># Create mock lightcurves</span>
+    <span class="n">time</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">dlam</span><span class="p">,</span> <span class="n">lcurves</span> <span class="o">=</span> <span class="n">create_lightcurves_with_starry</span><span class="p">(</span><span class="n">lamhr</span><span class="p">,</span> <span class="n">spaxels</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, MultiDWorlds
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

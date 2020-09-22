@@ -1,0 +1,368 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>eigenspectra.eigenmaps &mdash; eigenspectra 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> eigenspectra
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">eigenspectra</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>eigenspectra.eigenmaps</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for eigenspectra.eigenmaps</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Eigenmaps</span>
+<span class="sd">---------</span>
+
+<span class="sd">The input sph array will have the last two dimensions be (wavelengths,</span>
+<span class="sd">harmonic coefficients + 1). The first entry in each row is assumed to be</span>
+<span class="sd">the wavelength (in nm) corresponding to the spherical harmonic coefficients</span>
+<span class="sd">in that row. Note that the input array can have any dimensions prior to the</span>
+<span class="sd">last two.</span>
+
+<span class="sd">The returned array has dimensions (..., wavelengths, latitudes, longitudes),</span>
+<span class="sd">where the ellipses denote any extra dimensions from the input array.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">sph_harm</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">p</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+
+<div class="viewcode-block" id="generate_maps"><a class="viewcode-back" href="../../api/eigenmaps.html#eigenspectra.eigenmaps.generate_maps">[docs]</a><span class="k">def</span> <span class="nf">generate_maps</span><span class="p">(</span><span class="n">sph</span><span class="p">,</span> <span class="n">N_lon</span><span class="p">,</span> <span class="n">N_lat</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Compute brightness map on a grid using spherical harmonic coefficients.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sph : array</span>
+<span class="sd">        spherical harmonic coefficients (axes: ..., wavelengths, SH coeffs)</span>
+<span class="sd">    N_lon : int</span>
+<span class="sd">        number of gridpoints in longitude</span>
+<span class="sd">    N_lat : int</span>
+<span class="sd">        number of gridpoints in latitude</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    wavelengths : array containing wavelength of each map</span>
+<span class="sd">    lats : array of latitudes (radians)</span>
+<span class="sd">    lons : array of longitudes (radians)</span>
+<span class="sd">    fluxes : array of brightness maps at each wavelength, computed on grid</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">wavelengths</span> <span class="o">=</span> <span class="n">sph</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">harmonics</span> <span class="o">=</span> <span class="n">sph</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span>
+    <span class="n">degree</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">harmonics</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="c1"># The scipy spherical harmonic routine requires coordinates in polar form.</span>
+    <span class="n">las</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">N_lat</span><span class="p">)</span>
+    <span class="n">los</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">N_lon</span><span class="p">)</span>
+
+    <span class="n">sph_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">l</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">degree</span><span class="p">)])</span>
+    <span class="n">sph_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">l</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">degree</span><span class="p">)])</span>
+
+    <span class="n">base_harmonics</span> <span class="o">=</span> <span class="n">sph_harm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">sph_m</span><span class="p">,</span> <span class="p">(</span><span class="n">N_lon</span><span class="p">,</span> <span class="n">N_lat</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+                              <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">sph_l</span><span class="p">,</span> <span class="p">(</span><span class="n">N_lon</span><span class="p">,</span> <span class="n">N_lat</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+                              <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">los</span><span class="p">,</span> <span class="n">las</span><span class="p">))</span>
+
+    <span class="n">fluxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;m...wvu,m-&gt;...wvu&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...wx,xvu-&gt;...wvu&#39;</span><span class="p">,</span>
+                                   <span class="n">harmonics</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">l</span><span class="o">*</span><span class="p">(</span><span class="n">l</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">m</span><span class="p">,</span> <span class="o">-</span><span class="n">m</span><span class="p">])],</span>
+                                   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">base_harmonics</span><span class="p">[</span><span class="n">l</span><span class="o">*</span><span class="p">(</span><span class="n">l</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">,</span>
+                                             <span class="n">base_harmonics</span><span class="p">[</span><span class="n">l</span><span class="o">*</span><span class="p">(</span><span class="n">l</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span>
+                                             <span class="p">]))</span>
+                            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">l</span><span class="o">+</span><span class="mi">1</span><span class="p">)]),</span>
+                        <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">l</span> <span class="o">*</span> <span class="p">[((</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="n">l</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)])</span>
+                <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">degree</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Here we convert to (-pi, pi) in longitude, and (-pi/2, pi/2) in latitude,</span>
+    <span class="c1"># and multiply by the factor that normalizes the harmonics.</span>
+    <span class="n">fluxes</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> \
+        <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">fluxes</span><span class="p">,</span> <span class="n">N_lon</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">los</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">las</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">fluxes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">fluxes</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">wavelengths</span><span class="p">,</span> <span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">,</span> <span class="n">fluxes</span></div>
+
+<div class="viewcode-block" id="show_group_histos"><a class="viewcode-back" href="../../api/eigenmaps.html#eigenspectra.eigenmaps.show_group_histos">[docs]</a><span class="k">def</span> <span class="nf">show_group_histos</span><span class="p">(</span><span class="n">input_map</span><span class="p">,</span><span class="n">lons</span><span class="p">,</span><span class="n">lats</span><span class="p">,</span><span class="n">kgroup_draws</span><span class="p">,</span>
+                      <span class="n">xLons</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+                      <span class="n">xLats</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">],</span>
+                      <span class="n">alreadyTrimmed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">lonsTrimmed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                      <span class="n">input_map_units</span><span class="o">=</span><span class="s1">&#39;Mean Group&#39;</span><span class="p">,</span>
+                      <span class="n">saveName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Show histograms of the groups for specific regions of the map</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_map: 2D numpy array</span>
+<span class="sd">        Global map of brightness or another quantity</span>
+<span class="sd">        Latitudes x Longitudes</span>
+<span class="sd">    lats: 2D numpy array</span>
+<span class="sd">        Latitudes for the input_map grid in radians</span>
+<span class="sd">    lons: 2D numpy array</span>
+<span class="sd">        Longitudes for the input_map grid in radians</span>
+<span class="sd">    kgroup_draws: 3D numpy array</span>
+<span class="sd">        Kgroup draws from k Means Nsamples x Latitudes? x Longitudes?</span>
+
+<span class="sd">    xLons: 4 element list or numpy array</span>
+<span class="sd">        longitudes of points to show histograms in radians</span>
+<span class="sd">    xLats: 4 element list or numpy array</span>
+<span class="sd">        latitudes of points to show histograms in radians</span>
+<span class="sd">    input_map_units: str</span>
+<span class="sd">        Label for the global map units</span>
+<span class="sd">    saveName: str or None</span>
+<span class="sd">        Name of plot to save</span>
+<span class="sd">    alreadyTrimmed: bool</span>
+<span class="sd">        Is the input map already trimmed to the dayside?</span>
+<span class="sd">        If false, it will trim the global map</span>
+<span class="sd">    lonsTrimmed: bool</span>
+<span class="sd">        Is the longitude array already trimmed?</span>
+<span class="sd">        If false, it will trim the longitude array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">londim</span> <span class="o">=</span> <span class="n">input_map</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">alreadyTrimmed</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">map_day</span> <span class="o">=</span> <span class="n">input_map</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">map_day</span> <span class="o">=</span> <span class="n">input_map</span><span class="p">[:,</span><span class="n">londim</span><span class="o">//</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="n">londim</span><span class="o">//</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">lonsTrimmed</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">useLons</span> <span class="o">=</span> <span class="n">lons</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">useLons</span> <span class="o">=</span> <span class="n">lons</span><span class="p">[:,</span><span class="n">londim</span><span class="o">//</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="n">londim</span><span class="o">//</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="n">plotData</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">map_day</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span><span class="mi">90</span><span class="p">,</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span><span class="mi">90</span><span class="p">])</span>
+    <span class="n">cbar</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">plotData</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="n">cbar</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="n">input_map_units</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Latitude&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Longitude&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">figsize</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">windowLocationsX</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.16</span><span class="p">,</span><span class="o">-</span><span class="mf">0.16</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+        <span class="n">windowLocationsY</span> <span class="o">=</span> <span class="p">[</span> <span class="mf">0.1</span><span class="p">,</span>  <span class="mf">0.6</span> <span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">windowLocationsX</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.26</span><span class="p">,</span><span class="o">-</span><span class="mf">0.26</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">]</span>
+        <span class="n">windowLocationsY</span> <span class="o">=</span> <span class="p">[</span> <span class="mf">0.1</span><span class="p">,</span>  <span class="mf">0.7</span> <span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
+
+    <span class="n">windowLabels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="s1">&#39;B&#39;</span><span class="p">,</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="s1">&#39;D&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xLons</span><span class="p">)):</span>
+        <span class="n">xLon</span><span class="p">,</span> <span class="n">xLat</span> <span class="o">=</span> <span class="n">xLons</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">xLats</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="p">[</span><span class="n">windowLocationsX</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">windowLocationsY</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]</span>
+        <span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">])</span>
+        <span class="n">iLon</span><span class="p">,</span> <span class="n">iLat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">useLons</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">-</span> <span class="n">xLon</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">lats</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">xLat</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">useLons</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">iLon</span><span class="p">]</span><span class="o">*</span> <span class="mf">180.</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span><span class="n">lats</span><span class="p">[</span><span class="n">iLat</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span> <span class="mf">180.</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span><span class="n">windowLabels</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">windowLabels</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Group&#39;</span><span class="p">)</span>
+
+        <span class="n">ax2</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">kgroup_draws</span><span class="p">[:,</span><span class="n">iLat</span><span class="p">,</span><span class="n">iLon</span><span class="p">])</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">kgroup_draws</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">kgroup_draws</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">saveName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">saveName</span><span class="p">,</span><span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span></div>
+
+    <span class="c1">#fig.suptitle(&#39;Retrieved group map, n={}, {:.2f}$\mu$m&#39;.format(degree,waves[waveInd]))</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, MultiDWorlds
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

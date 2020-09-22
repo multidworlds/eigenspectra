@@ -1,0 +1,570 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>eigenspectra.eigencurves_starry &mdash; eigenspectra 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> eigenspectra
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">eigenspectra</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>eigenspectra.eigencurves_starry</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for eigenspectra.eigencurves_starry</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Eigencurves</span>
+<span class="sd">-----------</span>
+<span class="sd">Functions to fit a map at each wavelength using Eigencurves.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#Function to fit a map at each wavelength using Eigencurves</span>
+
+<span class="c1">#THINGS THAT WILL BE UPDATED IN FUTURE VERSIONS:</span>
+<span class="c1">#	1. Right now it just loads in a single file, and for the entire pipeline it will load in a file for each wavelength and run the fit for each wavelength</span>
+<span class="c1">#	2. It will eventually output wavelengths in addition to the spherical harmonic coefficients</span>
+<span class="c1">#	3. Right now it just selects a number of eigencurves to include. Will eventually optimize this from chi-squared.</span>
+
+<span class="c1">#INPUTS:</span>
+<span class="c1">#	Secondary eclipse light curves at each wavelength (csv for each wavelength)</span>
+
+<span class="c1">#OUTPUTS:</span>
+<span class="c1">#	Coefficients for each of the spherical harmonics</span>
+<span class="kn">from</span> <span class="nn">.lightcurves_sh_starry</span> <span class="kn">import</span> <span class="n">sh_lcs</span>
+<span class="c1">#from lightcurves_sh import sh_lcs</span>
+<span class="kn">from</span> <span class="nn">.pca_eig</span> <span class="kn">import</span> <span class="n">princomp</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">emcee</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">spiderman</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">leastsq</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">least_squares</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">special</span>
+
+<div class="viewcode-block" id="mpmodel"><a class="viewcode-back" href="../../api/eigencurves.html#eigenspectra.eigencurves_starry.mpmodel">[docs]</a><span class="k">def</span> <span class="nf">mpmodel</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">escore</span><span class="p">,</span><span class="n">nparams</span><span class="p">):</span><span class="c1">#fjac=None,x=None,y=None,err=None):</span>
+	<span class="n">model</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">elc</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+	<span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">nparams</span><span class="p">):</span> <span class="c1">#FINDME changed to go to nparams+1</span>
+		<span class="n">model</span> <span class="o">=</span> <span class="n">model</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">*</span> <span class="n">escore</span><span class="p">[</span><span class="n">ind</span><span class="o">-</span><span class="mi">2</span><span class="p">,:]</span>
+	<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">model</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="lnprob"><a class="viewcode-back" href="../../api/eigencurves.html#eigenspectra.eigencurves_starry.lnprob">[docs]</a><span class="k">def</span> <span class="nf">lnprob</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">yerr</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">escore</span><span class="p">,</span><span class="n">nparams</span><span class="p">):</span>
+	<span class="n">lp</span><span class="o">=</span><span class="n">lnprior</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">nparams</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">lp</span><span class="o">+</span><span class="n">lnlike</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">yerr</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">escore</span><span class="p">,</span><span class="n">nparams</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="lnlike"><a class="viewcode-back" href="../../api/eigencurves.html#eigenspectra.eigencurves_starry.lnlike">[docs]</a><span class="k">def</span> <span class="nf">lnlike</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">yerr</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">escore</span><span class="p">,</span><span class="n">nparams</span><span class="p">):</span>
+	<span class="n">model</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">elc</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">+</span> <span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+	<span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">nparams</span><span class="p">):</span> <span class="c1">#FINDME changed to go to nparams+1</span>
+		<span class="n">model</span> <span class="o">=</span> <span class="n">model</span> <span class="o">+</span> <span class="n">theta</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">*</span> <span class="n">escore</span><span class="p">[</span><span class="n">ind</span><span class="o">-</span><span class="mi">2</span><span class="p">,:]</span>
+	<span class="n">resid</span><span class="o">=</span><span class="n">y</span><span class="o">-</span><span class="n">model</span>
+	<span class="n">chi2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">resid</span><span class="o">/</span><span class="n">yerr</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+	<span class="n">dof</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">y</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">1.</span>
+	<span class="n">chi2red</span><span class="o">=</span><span class="n">chi2</span><span class="o">/</span><span class="n">dof</span>
+	<span class="n">ln_likelihood</span><span class="o">=-</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">resid</span><span class="o">/</span><span class="n">yerr</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">yerr</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+	<span class="k">return</span> <span class="n">ln_likelihood</span></div>
+
+<div class="viewcode-block" id="lnprior"><a class="viewcode-back" href="../../api/eigencurves.html#eigenspectra.eigencurves_starry.lnprior">[docs]</a><span class="k">def</span> <span class="nf">lnprior</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">nparams</span><span class="p">):</span>
+	<span class="n">lnpriorprob</span><span class="o">=</span><span class="mf">0.</span>
+	<span class="n">c0</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">fstar</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+	<span class="k">if</span> <span class="n">fstar</span><span class="o">&lt;</span><span class="mf">0.</span><span class="p">:</span>
+		<span class="n">lnpriorprob</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+	<span class="k">elif</span> <span class="n">c0</span><span class="o">&lt;</span><span class="mf">0.</span><span class="p">:</span>
+		<span class="n">lnpriorprob</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+	<span class="k">return</span> <span class="n">lnpriorprob</span></div>
+
+<div class="viewcode-block" id="eigencurves"><a class="viewcode-back" href="../../api/eigencurves.html#eigenspectra.eigencurves_starry.eigencurves">[docs]</a><span class="k">def</span> <span class="nf">eigencurves</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span><span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">degree</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">afew</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+	<span class="n">waves</span><span class="o">=</span><span class="nb">dict</span><span class="p">[</span><span class="s1">&#39;wavelength (um)&#39;</span><span class="p">]</span>
+	<span class="n">times</span><span class="o">=</span><span class="nb">dict</span><span class="p">[</span><span class="s1">&#39;time (days)&#39;</span><span class="p">]</span>
+	<span class="n">fluxes</span><span class="o">=</span><span class="nb">dict</span><span class="p">[</span><span class="s1">&#39;flux (ppm)&#39;</span><span class="p">]</span>	<span class="c1">#2D array times, waves</span>
+	<span class="n">errors</span><span class="o">=</span><span class="nb">dict</span><span class="p">[</span><span class="s1">&#39;flux err (ppm)&#39;</span><span class="p">]</span>
+
+	<span class="n">burnin</span><span class="o">=</span><span class="mi">200</span>
+	<span class="n">nsteps</span><span class="o">=</span><span class="mi">1000</span>
+	<span class="n">nwalkers</span><span class="o">=</span><span class="mi">32</span> <span class="c1">#number of walkers</span>
+	<span class="n">maxparams</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">((</span><span class="n">degree</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="o">-</span><span class="mf">1.</span><span class="p">))</span>
+
+
+	<span class="c1">#This file is going to be a 3D numpy array</span>
+	<span class="c1">## The shape is (nsamples,n parameters,n waves)</span>
+	<span class="c1">## where nsamples is the number of posterior MCMC samples</span>
+	<span class="c1">## n parameters is the number of parameters</span>
+	<span class="c1">## and n waves is the number of wavelengths looped over</span>
+
+	<span class="n">alltheoutput</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(((</span><span class="n">nsteps</span><span class="o">-</span><span class="n">burnin</span><span class="p">)</span><span class="o">*</span><span class="n">nwalkers</span><span class="p">,</span><span class="nb">int</span><span class="p">((</span><span class="n">degree</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
+	<span class="n">bestfitoutput</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">int</span><span class="p">((</span><span class="n">degree</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
+
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">fluxes</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+		<span class="n">rows</span><span class="o">=</span><span class="kc">True</span>
+	<span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">fluxes</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">times</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+		<span class="n">rows</span><span class="o">=</span><span class="kc">False</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">assert</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">fluxes</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">times</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">|</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">fluxes</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">]),</span><span class="s2">&quot;Flux array dimension must match wavelength and time arrays.&quot;</span>
+
+	<span class="n">nParamsUsed</span><span class="p">,</span> <span class="n">ecoeffList</span><span class="p">,</span> <span class="n">escoreList</span><span class="p">,</span><span class="n">elatentList</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+	<span class="c1">#elcList = []</span>
+	<span class="n">eigencurvecoeffList</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="n">counter</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+		<span class="n">wavelength</span><span class="o">=</span><span class="n">waves</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span> <span class="c1">#wavelength this secondary eclipse is for</span>
+		<span class="n">eclipsetimes</span><span class="o">=</span><span class="n">times</span>	<span class="c1">#in days</span>
+		<span class="k">if</span> <span class="n">rows</span><span class="p">:</span>
+			<span class="n">eclipsefluxes</span><span class="o">=</span><span class="n">fluxes</span><span class="p">[</span><span class="n">counter</span><span class="p">,:]</span><span class="o">*</span><span class="mf">10.</span><span class="o">**-</span><span class="mf">6.</span>
+			<span class="n">eclipseerrors</span><span class="o">=</span><span class="n">errors</span><span class="p">[</span><span class="n">counter</span><span class="p">,:]</span><span class="o">*</span><span class="mf">10.</span><span class="o">**-</span><span class="mf">6.</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">eclipsefluxes</span><span class="o">=</span><span class="n">fluxes</span><span class="p">[:,</span><span class="n">counter</span><span class="p">]</span><span class="o">*</span><span class="mf">10.</span><span class="o">**-</span><span class="mf">6.</span>
+			<span class="n">eclipseerrors</span><span class="o">=</span><span class="n">errors</span><span class="p">[:,</span><span class="n">counter</span><span class="p">]</span><span class="o">*</span><span class="mf">10.</span><span class="o">**-</span><span class="mf">6.</span>
+
+		<span class="c1">#alltheoutput[counter,0]=wavelength</span>
+
+		<span class="c1">#	Calculate spherical harmonic maps using SPIDERMAN</span>
+
+		<span class="n">lc</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="n">sh_lcs</span><span class="p">(</span><span class="n">t0</span><span class="o">=-</span><span class="mf">2.21857</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span><span class="n">ntimes</span><span class="o">=</span><span class="n">eclipsetimes</span><span class="p">,</span><span class="n">degree</span><span class="o">=</span><span class="n">degree</span><span class="p">)</span><span class="c1">#degree=lmax+1)#	#model it for the times of the observations</span>
+		<span class="c1"># for i in range(16):</span>
+		<span class="c1"># 	plt.figure()</span>
+		<span class="c1"># 	plt.plot(t,lc[i,:])</span>
+		<span class="c1"># 	plt.show()</span>
+		<span class="c1"># pdb.set_trace()</span>
+		<span class="c1">#print(np.shape(lc),np.shape(t))</span>
+		<span class="c1">#Optional add-on above: test whether we want to include higher-order spherical harmonics when making our eigencurves?</span>
+
+		<span class="c1"># subtract off stellar flux</span>
+		<span class="c1">#lc = lc-1</span>
+
+		<span class="c1"># just analyze time around secondary eclipse (from start to end of observations)</span>
+		<span class="n">starttime</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">eclipsetimes</span><span class="p">)</span>
+		<span class="n">endtime</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">eclipsetimes</span><span class="p">)</span>
+		<span class="n">ok</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">t</span><span class="o">&gt;=</span><span class="n">starttime</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;=</span><span class="n">endtime</span><span class="p">))</span>
+		<span class="n">et</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">ok</span><span class="p">]</span>
+		<span class="n">elc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">lc</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ok</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">lc</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+			<span class="n">elc</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">lc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ok</span><span class="p">]</span>
+
+		<span class="c1">#  PCA</span>
+		<span class="n">ecoeff</span><span class="p">,</span><span class="n">escore</span><span class="p">,</span><span class="n">elatent</span> <span class="o">=</span> <span class="n">princomp</span><span class="p">(</span><span class="n">elc</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+		<span class="n">escore</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">escore</span><span class="p">)</span>
+		<span class="c1"># for i in range(16):</span>
+		<span class="c1"># 	plt.figure()</span>
+		<span class="c1"># 	plt.plot(t,escore[i,:])</span>
+		<span class="c1"># 	plt.show()</span>
+		<span class="c1"># pdb.set_trace()</span>
+
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">afew</span><span class="p">,</span><span class="nb">list</span><span class="p">):</span><span class="c1">#np.shape(afew)[0]==10:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Gave an array of afew values&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">afew</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+				<span class="k">assert</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">afew</span><span class="p">)[</span><span class="mi">0</span><span class="p">]),</span> <span class="s2">&quot;Array of afew values must be the same length as the number of wavelength bins, which is&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">waves</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+			<span class="n">nparams</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">afew</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">afew</span><span class="p">,</span><span class="nb">int</span><span class="p">):</span>
+				<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">afew</span><span class="p">,</span><span class="nb">int</span><span class="p">),</span> <span class="s2">&quot;afew must be an integer &gt;=1!&quot;</span>
+			<span class="k">elif</span> <span class="n">afew</span><span class="o">&gt;=</span><span class="n">maxparams</span><span class="p">:</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Performing fit for best number of eigencurves to use.&#39;</span><span class="p">)</span>
+				<span class="n">delbic</span><span class="o">=</span><span class="mf">20.</span>
+				<span class="n">nparams</span><span class="o">=</span><span class="mi">4</span>
+				<span class="n">params0</span><span class="o">=</span><span class="mf">10.</span><span class="o">**-</span><span class="mf">4.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nparams</span><span class="p">)</span>
+				<span class="n">boundsup</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="n">nparams</span>
+				<span class="n">boundsdown</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">nparams</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+				<span class="c1">#mpfit=leastsq(mpmodel,params0,bounds=,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))</span>
+				<span class="n">mpfit</span><span class="o">=</span><span class="n">least_squares</span><span class="p">(</span><span class="n">mpmodel</span><span class="p">,</span><span class="n">params0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">boundsdown</span><span class="p">,</span><span class="n">boundsup</span><span class="p">),</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">eclipsetimes</span><span class="p">,</span><span class="n">eclipsefluxes</span><span class="p">,</span><span class="n">eclipseerrors</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">escore</span><span class="p">),</span><span class="n">nparams</span><span class="p">))</span>
+				<span class="c1">#resid=mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)</span>
+				<span class="n">resid</span><span class="o">=</span><span class="n">mpmodel</span><span class="p">(</span><span class="n">mpfit</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">eclipsetimes</span><span class="p">,</span><span class="n">eclipsefluxes</span><span class="p">,</span><span class="n">eclipseerrors</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">escore</span><span class="p">),</span><span class="n">nparams</span><span class="p">)</span>
+				<span class="n">chi2i</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">resid</span><span class="o">//</span><span class="n">eclipseerrors</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">)</span>
+				<span class="n">loglike</span><span class="o">=-</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">resid</span><span class="o">//</span><span class="n">eclipseerrors</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">eclipseerrors</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+				<span class="n">bici</span><span class="o">=-</span><span class="mf">2.</span><span class="o">*</span><span class="n">loglike</span> <span class="o">+</span> <span class="n">nparams</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">eclipseerrors</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+			<span class="c1">#print(nparams,chi2i,bici,mpfit[0])</span>
+				<span class="c1">#tempparams=mpfit[0]</span>
+				<span class="n">tempparams</span><span class="o">=</span><span class="n">mpfit</span><span class="o">.</span><span class="n">x</span>
+			<span class="c1">#pdb.set_trace()</span>
+				<span class="k">while</span> <span class="n">delbic</span><span class="o">&gt;</span><span class="mf">10.</span><span class="p">:</span><span class="c1">#sf&gt;0.00001:</span>
+					<span class="n">nparams</span><span class="o">+=</span><span class="mi">1</span>
+					<span class="k">if</span> <span class="n">nparams</span><span class="o">==</span><span class="nb">int</span><span class="p">(</span><span class="n">maxparams</span><span class="o">+</span><span class="mi">2</span><span class="p">):</span>
+						<span class="n">params0</span><span class="o">=</span><span class="mf">10.</span><span class="o">**-</span><span class="mf">4.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nparams</span><span class="p">)</span>
+						<span class="n">boundsup</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="n">nparams</span>
+						<span class="n">boundsdown</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">nparams</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+						<span class="c1">#mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))</span>
+						<span class="n">mpfit</span><span class="o">=</span><span class="n">least_squares</span><span class="p">(</span><span class="n">mpmodel</span><span class="p">,</span><span class="n">params0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">boundsdown</span><span class="p">,</span><span class="n">boundsup</span><span class="p">),</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">eclipsetimes</span><span class="p">,</span><span class="n">eclipsefluxes</span><span class="p">,</span><span class="n">eclipseerrors</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">escore</span><span class="p">),</span><span class="n">nparams</span><span class="p">))</span>
+						<span class="c1">#chi2f=np.sum((mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)//eclipseerrors)**2.)</span>
+						<span class="n">chi2f</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">mpmodel</span><span class="p">(</span><span class="n">mpfit</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">eclipsetimes</span><span class="p">,</span><span class="n">eclipsefluxes</span><span class="p">,</span><span class="n">eclipseerrors</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">escore</span><span class="p">),</span><span class="n">nparams</span><span class="p">)</span><span class="o">//</span><span class="n">eclipseerrors</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">)</span>
+						<span class="c1">#dof=np.shape(eclipseerrors)[0]-nparams</span>
+						<span class="c1">#Fval=(chi2i-chi2f)/(chi2f/dof)</span>
+						<span class="c1">#sf=0.00000001</span>
+						<span class="n">delbic</span><span class="o">=</span><span class="mf">5.</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="n">params0</span><span class="o">=</span><span class="mf">10.</span><span class="o">**-</span><span class="mf">4.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nparams</span><span class="p">)</span>
+						<span class="n">boundsup</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="n">nparams</span>
+						<span class="n">boundsdown</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">nparams</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+						<span class="c1">#mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))</span>
+						<span class="n">mpfit</span><span class="o">=</span><span class="n">least_squares</span><span class="p">(</span><span class="n">mpmodel</span><span class="p">,</span><span class="n">params0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">boundsdown</span><span class="p">,</span><span class="n">boundsup</span><span class="p">),</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">eclipsetimes</span><span class="p">,</span><span class="n">eclipsefluxes</span><span class="p">,</span><span class="n">eclipseerrors</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">escore</span><span class="p">),</span><span class="n">nparams</span><span class="p">))</span>
+						<span class="c1">#resid=mpmodel(mpfit[0],eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams)</span>
+						<span class="n">resid</span><span class="o">=</span><span class="n">mpmodel</span><span class="p">(</span><span class="n">mpfit</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">eclipsetimes</span><span class="p">,</span><span class="n">eclipsefluxes</span><span class="p">,</span><span class="n">eclipseerrors</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">escore</span><span class="p">),</span><span class="n">nparams</span><span class="p">)</span>
+						<span class="n">chi2f</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">resid</span><span class="o">//</span><span class="n">eclipseerrors</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">)</span>
+						<span class="c1">#dof=np.shape(eclipseerrors)[0]-nparams</span>
+						<span class="c1">#Fval=(chi2i-chi2f)/(chi2f/dof)</span>
+						<span class="c1">#sf=stats.f.sf(Fval,nparams-1,nparams)</span>
+						<span class="n">loglike</span><span class="o">=-</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">resid</span><span class="o">//</span><span class="n">eclipseerrors</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">eclipseerrors</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+						<span class="n">bicf</span><span class="o">=-</span><span class="mf">2.</span><span class="o">*</span><span class="n">loglike</span> <span class="o">+</span> <span class="n">nparams</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">eclipseerrors</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+						<span class="n">delbic</span><span class="o">=</span><span class="n">bici</span><span class="o">-</span><span class="n">bicf</span>
+						<span class="c1">#pdb.set_trace()</span>
+						<span class="c1">#print(np.sum((resid//eclipseerrors)**2),loglike)</span>
+						<span class="c1">#print(chi2i,chi2f,bici,bicf)</span>
+						<span class="nb">print</span><span class="p">(</span><span class="n">nparams</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">bicf</span><span class="o">-</span><span class="n">bici</span><span class="p">)</span><span class="c1">#,chi2f-chi2i,bicf-bici)</span>
+						<span class="c1">#print(mpfit[0])</span>
+						<span class="nb">print</span><span class="p">(</span><span class="n">mpfit</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+						<span class="c1">#print(mpfit[0][:-1]-tempparams)</span>
+						<span class="nb">print</span><span class="p">(</span><span class="n">mpfit</span><span class="o">.</span><span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">tempparams</span><span class="p">)</span>
+						<span class="n">chi2i</span><span class="o">=</span><span class="n">chi2f</span>
+						<span class="n">bici</span><span class="o">=</span><span class="n">bicf</span>
+						<span class="c1">#tempparams=mpfit[0]</span>
+						<span class="n">tempparams</span><span class="o">=</span><span class="n">mpfit</span><span class="o">.</span><span class="n">x</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;BIC criterion says the best number of eigencurves to use is &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">nparams</span><span class="o">-</span><span class="mi">3</span><span class="p">))</span>
+
+			<span class="c1">#pdb.set_trace()</span>
+				<span class="n">nparams</span><span class="o">-=</span><span class="mi">1</span>	<span class="c1">#need this line back when I change back again</span>
+
+			<span class="k">elif</span> <span class="p">((</span><span class="n">afew</span><span class="o">&lt;</span><span class="n">maxparams</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">afew</span><span class="o">&gt;=</span><span class="mi">1</span><span class="p">)):</span>
+				<span class="n">nparams</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">afew</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+
+			<span class="k">else</span><span class="p">:</span>	<span class="c1">#assert afew is an integer here</span>
+				<span class="k">assert</span> <span class="n">afew</span><span class="o">&gt;=</span><span class="mi">1</span> <span class="p">,</span><span class="s2">&quot;afew must be an integer 1&lt;=afew&lt;=&quot;</span><span class="o">+</span><span class="n">maxparams</span><span class="o">+</span><span class="s2">&quot;!&quot;</span>
+		<span class="c1">#nparams=5</span>
+		<span class="n">params0</span><span class="o">=</span><span class="mf">10.</span><span class="o">**-</span><span class="mf">4.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nparams</span><span class="p">)</span>
+		<span class="n">boundsup</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="n">nparams</span>
+		<span class="n">boundsdown</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">nparams</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+
+		<span class="c1">#pdb.set_trace()</span>
+		<span class="c1">#mpfit=leastsq(mpmodel,params0,args=(eclipsetimes,eclipsefluxes,eclipseerrors,elc,np.array(escore),nparams))</span>
+		<span class="n">mpfit</span><span class="o">=</span><span class="n">least_squares</span><span class="p">(</span><span class="n">mpmodel</span><span class="p">,</span><span class="n">params0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">boundsdown</span><span class="p">,</span><span class="n">boundsup</span><span class="p">),</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">eclipsetimes</span><span class="p">,</span><span class="n">eclipsefluxes</span><span class="p">,</span><span class="n">eclipseerrors</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">escore</span><span class="p">),</span><span class="n">nparams</span><span class="p">))</span>
+		<span class="c1">#format parameters for mcmc fit</span>
+		<span class="c1">#theta=mpfit[0]</span>
+		<span class="n">theta</span><span class="o">=</span><span class="n">mpfit</span><span class="o">.</span><span class="n">x</span>
+		<span class="n">ndim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">theta</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>	<span class="c1">#set number of dimensions</span>
+		<span class="c1">#print(mpfit[0])</span>
+		<span class="n">sampler</span> <span class="o">=</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">(</span><span class="n">nwalkers</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">lnprob</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">eclipsetimes</span><span class="p">,</span><span class="n">eclipsefluxes</span><span class="p">,</span><span class="n">eclipseerrors</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">escore</span><span class="p">,</span><span class="n">nparams</span><span class="p">),</span><span class="n">threads</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+		<span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">theta</span> <span class="o">+</span> <span class="mf">1e-5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nwalkers</span><span class="p">)]</span>
+
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running MCMC at </span><span class="si">{}</span><span class="s2"> um&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">waves</span><span class="p">[</span><span class="n">counter</span><span class="p">]))</span>
+
+		<span class="n">bestfit</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ndim</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">bestfit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">10.</span><span class="o">**</span><span class="mi">8</span>
+
+		<span class="c1">#sampler.run_mcmc(pos,nsteps)</span>
+		<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sampler</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="n">nsteps</span><span class="p">)):</span>
+			<span class="k">if</span> <span class="n">i</span><span class="o">&gt;</span><span class="n">burnin</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">guy</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nwalkers</span><span class="p">):</span>
+					<span class="n">resid</span><span class="o">=</span><span class="n">mpmodel</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">guy</span><span class="p">],</span><span class="n">eclipsetimes</span><span class="p">,</span><span class="n">eclipsefluxes</span><span class="p">,</span><span class="n">eclipseerrors</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">escore</span><span class="p">),</span><span class="n">nparams</span><span class="p">)</span>
+					<span class="n">chi2val</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">resid</span><span class="o">//</span><span class="n">eclipseerrors</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">)</span>
+					<span class="k">if</span> <span class="n">chi2val</span><span class="o">&lt;</span><span class="n">bestfit</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+						<span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">guy</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="mf">0.</span><span class="p">:</span>
+							<span class="n">bestfit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">chi2val</span>
+							<span class="n">bestfit</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">guy</span><span class="p">]</span>
+
+		<span class="n">resid</span><span class="o">=</span><span class="n">mpmodel</span><span class="p">(</span><span class="n">bestfit</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span><span class="n">eclipsetimes</span><span class="p">,</span><span class="n">eclipsefluxes</span><span class="p">,</span><span class="n">eclipseerrors</span><span class="p">,</span><span class="n">elc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">escore</span><span class="p">),</span><span class="n">nparams</span><span class="p">)</span>
+		<span class="n">chi2f</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">resid</span><span class="o">//</span><span class="n">eclipseerrors</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">)</span>
+		<span class="n">loglike</span><span class="o">=-</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">resid</span><span class="o">//</span><span class="n">eclipseerrors</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">eclipseerrors</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+		<span class="n">bicf</span><span class="o">=-</span><span class="mf">2.</span><span class="o">*</span><span class="n">loglike</span> <span class="o">+</span> <span class="n">nparams</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">eclipseerrors</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+		<span class="n">samples</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">chain</span><span class="p">[:,</span> <span class="n">burnin</span><span class="p">:,</span> <span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ndim</span><span class="p">))</span>
+		<span class="c1">#pdb.set_trace()</span>
+		<span class="k">def</span> <span class="nf">quantile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+			<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="mf">100.</span> <span class="o">*</span> <span class="n">qi</span> <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">q</span><span class="p">])</span>
+
+		<span class="c1"># bestcoeffs=np.zeros(np.shape(samples)[1])</span>
+		<span class="c1"># for i in np.arange(np.shape(bestcoeffs)[0]):</span>
+		<span class="c1"># 	bestcoeffs[i]=quantile(samples[:,i],[0.5])</span>
+		<span class="n">bestcoeffs</span><span class="o">=</span><span class="n">bestfit</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+		<span class="c1"># plt.figure()</span>
+		<span class="c1"># plt.plot(eclipsetimes,bestcoeffs[2]*escore[0,:])</span>
+		<span class="c1"># plt.plot(eclipsetimes,bestcoeffs[3]*escore[1,:])</span>
+		<span class="c1"># plt.plot(eclipsetimes,bestcoeffs[4]*escore[2,:])</span>
+		<span class="c1"># plt.show()</span>
+		<span class="c1">#print(bestcoeffs)</span>
+		<span class="c1">#pdb.set_trace()</span>
+
+		<span class="c1"># translate coefficients</span>
+		<span class="n">fcoeffbest</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">ecoeff</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">bestcoeffs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span><span class="p">):</span>
+			<span class="n">fcoeffbest</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">bestcoeffs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">ecoeff</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span>
+
+		<span class="c1"># how to go from coefficients to best fit map</span>
+		<span class="n">spheresbest</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">degree</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">))</span> 	<span class="c1">#FINDME: are these equivalent? If not need to figure this out</span>
+		<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">fcoeffbest</span><span class="p">)):</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">int</span><span class="p">((</span><span class="n">degree</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">)):</span>
+				<span class="n">spheresbest</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">fcoeffbest</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">fcoeffbest</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+		<span class="n">spheresbest</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">bestcoeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="c1">#pdb.set_trace()</span>
+		<span class="c1"># spheresbest=np.zeros(int((degree)**2.))</span>
+		<span class="c1"># for j in range(0,len(fcoeffbest)):</span>
+		<span class="c1"># 	shi=0</span>
+		<span class="c1"># 	yi=1</span>
+		<span class="c1"># 	for l in range(1,lmax+1):</span>
+		<span class="c1"># 		for m in range(-1*l,l+1):</span>
+		<span class="c1"># 			spheresbest[yi] = 1.0*fcoeffbest.T[j,shi]-1.0*fcoeffbest.T[j,shi+1]</span>
+		<span class="c1"># 			yi+=1</span>
+		<span class="c1"># 			shi+=2</span>
+
+		<span class="c1">#pdb.set_trace()</span>
+		<span class="c1"># spheresbest=np.zeros(int((lmax+1)**2.))</span>
+		<span class="c1"># for j in range(0,len(fcoeffbest)):</span>
+		<span class="c1"># 	for i in range(1,int((lmax+1)**2.)):</span>
+		<span class="c1"># 		spheresbest[i] += fcoeffbest.T[j,2*i-1]-fcoeffbest.T[j,2*(i-1)]</span>
+		<span class="c1"># spheresbest[0] = bestcoeffs[0]#c0_best</span>
+		<span class="n">bestfitoutput</span><span class="p">[:,</span><span class="n">counter</span><span class="p">]</span><span class="o">=</span><span class="n">spheresbest</span>
+		<span class="c1">#pdb.set_trace()</span>
+		<span class="k">for</span> <span class="n">sampnum</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">samples</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+			<span class="n">fcoeff</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">ecoeff</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">samples</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span><span class="p">):</span>
+				<span class="n">fcoeff</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">sampnum</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">ecoeff</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span>
+
+			<span class="c1"># how to go from coefficients to best fit map</span>
+			<span class="n">spheres</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">degree</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">))</span>
+			<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">fcoeff</span><span class="p">)):</span>
+				<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">int</span><span class="p">((</span><span class="n">degree</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">)):</span>
+					<span class="n">spheres</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">fcoeff</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">fcoeff</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+			<span class="n">spheres</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">sampnum</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="c1">#bestcoeffs[0]#c0_best</span>
+
+			<span class="n">alltheoutput</span><span class="p">[</span><span class="n">sampnum</span><span class="p">,:,</span><span class="n">counter</span><span class="p">]</span><span class="o">=</span><span class="n">spheres</span>
+		<span class="c1">#pdb.set_trace()</span>
+		<span class="c1">#Translate all the coefficients for all of the posterior samples</span>
+		<span class="c1">#alltheoutput[counter,1:]=spheres</span>
+		<span class="c1">#print(spheresbest)</span>
+
+		<span class="c1"># if plot:</span>
+		<span class="c1"># 	params0=sp.ModelParams(brightness_model=&#39;spherical&#39;)	#no offset model</span>
+		<span class="c1"># 	params0.nlayers=20</span>
+
+		<span class="c1"># 	params0.t0=-2.21857/2.				# Central time of PRIMARY transit [days]</span>
+		<span class="c1"># 	params0.per=2.21857567			# Period [days]</span>
+		<span class="c1"># 	params0.a_abs=0.0313			# The absolute value of the semi-major axis [AU]</span>
+		<span class="c1"># 	params0.inc=85.71			# Inclination [degrees]</span>
+		<span class="c1"># 	params0.ecc=0.0			# Eccentricity</span>
+		<span class="c1"># 	params0.w=90.			# Argument of periastron</span>
+		<span class="c1"># 	params0.rp=0.155313				# Planet to star radius ratio</span>
+		<span class="c1"># 	params0.a=8.863				# Semi-major axis scaled by stellar radius</span>
+		<span class="c1"># 	params0.p_u1=0.			# Planetary limb darkening parameter</span>
+		<span class="c1"># 	params0.p_u2=0.			# Planetary limb darkening parameter</span>
+
+		<span class="c1"># 	params0.degree=(lmax+1)	#maximum harmonic degree</span>
+		<span class="c1"># 	params0.la0=0.</span>
+		<span class="c1"># 	params0.lo0=0.</span>
+		<span class="c1"># 	params0.sph=list(spheresbest)</span>
+
+		<span class="c1"># 	times=eclipsetimes</span>
+		<span class="c1"># 	templc=params0.lightcurve(times)</span>
+
+		<span class="c1"># 	params0.plot_square()</span>
+
+		<span class="c1"># 	# doing a test spiderman run to see if the output lightcurve is similar</span>
+		<span class="c1"># 	# #PERSON CHECKING THIS: You can use this to make sure the spherical harmonics fit is doing the right thing!</span>
+
+		<span class="c1"># 	plt.figure()</span>
+		<span class="c1"># 	plt.plot(times,templc,color=&#39;k&#39;)</span>
+		<span class="c1"># 	plt.errorbar(eclipsetimes,eclipsefluxes,yerr=eclipseerrors,linestyle=&#39;none&#39;,color=&#39;r&#39;)</span>
+		<span class="c1"># 	plt.show()</span>
+
+		<span class="n">nParamsUsed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nparams</span><span class="p">)</span>
+		<span class="n">ecoeffList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ecoeff</span><span class="p">)</span>
+		<span class="n">escoreList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">escore</span><span class="p">)</span>
+		<span class="c1">#elcList.append(elc)</span>
+		<span class="n">eigencurvecoeffList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+		<span class="n">elatentList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elatent</span><span class="p">)</span>
+
+
+	<span class="n">finaldict</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;wavelength (um)&#39;</span><span class="p">:</span><span class="n">waves</span><span class="p">,</span><span class="s1">&#39;spherical coefficients&#39;</span><span class="p">:</span><span class="n">alltheoutput</span><span class="p">,</span><span class="s1">&#39;best fit coefficients&#39;</span><span class="p">:</span><span class="n">bestfitoutput</span><span class="p">,</span><span class="s1">&#39;N Params Used&#39;</span><span class="p">:</span><span class="n">nParamsUsed</span><span class="p">,</span>
+				<span class="s1">&#39;ecoeffList&#39;</span><span class="p">:</span> <span class="n">ecoeffList</span><span class="p">,</span><span class="s1">&#39;escoreList&#39;</span><span class="p">:</span> <span class="n">escoreList</span><span class="p">,</span><span class="s1">&#39;elc&#39;</span><span class="p">:</span> <span class="n">elc</span><span class="p">,</span><span class="s1">&#39;eigencurve coefficients&#39;</span><span class="p">:</span><span class="n">eigencurvecoeffList</span><span class="p">,</span><span class="s1">&#39;BIC&#39;</span><span class="p">:</span><span class="n">bicf</span><span class="p">,</span><span class="s1">&#39;elatentList&#39;</span><span class="p">:</span><span class="n">elatentList</span><span class="p">}</span>
+	<span class="k">return</span> <span class="n">finaldict</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, MultiDWorlds
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

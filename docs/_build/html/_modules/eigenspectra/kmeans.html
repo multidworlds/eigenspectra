@@ -1,0 +1,328 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>eigenspectra.kmeans &mdash; eigenspectra 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> eigenspectra
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">eigenspectra</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>eigenspectra.kmeans</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for eigenspectra.kmeans</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">K-Means Clustering</span>
+<span class="sd">------------------</span>
+<span class="sd">Functions to do k-means clustering on Eigenspectra.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+
+<div class="viewcode-block" id="kmeans"><a class="viewcode-back" href="../../api/kmeans.html#eigenspectra.kmeans.kmeans">[docs]</a><span class="k">def</span> <span class="nf">kmeans</span><span class="p">(</span><span class="n">fluxmap</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Compute k-means clustering of spectra for a given number of groups.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fluxmap : array</span>
+<span class="sd">        Fp/Fs (axes: wavelength x latitude x longitude)</span>
+<span class="sd">    k : int</span>
+<span class="sd">        number of groups</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    kgroups: array of group indices (ints) from 0 to k-1 (axes: lat x lon)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+	<span class="c1"># Expects flux maps in the form (lam,lat,long)</span>
+
+    <span class="n">lamdim</span> <span class="o">=</span> <span class="n">fluxmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">latdim</span> <span class="o">=</span> <span class="n">fluxmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">longdim</span> <span class="o">=</span> <span class="n">fluxmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">_fluxmap</span> <span class="o">=</span> <span class="n">fluxmap</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">fluxmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">kmeans</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">_fluxmap</span><span class="p">)</span>
+    <span class="n">kgroups</span> <span class="o">=</span> <span class="p">(</span><span class="n">kmeans</span><span class="o">.</span><span class="n">labels_</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">latdim</span><span class="p">,</span> <span class="n">longdim</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">kgroups</span></div>
+
+
+<div class="viewcode-block" id="kmeansBest"><a class="viewcode-back" href="../../api/kmeans.html#eigenspectra.kmeans.kmeansBest">[docs]</a><span class="k">def</span> <span class="nf">kmeansBest</span><span class="p">(</span><span class="n">fluxmap</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Estimate the number of groups that subdivide an array of spectra.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fluxmap : array</span>
+<span class="sd">        Fp/Fs (axes: wavelength x latitude x longitude)</span>
+<span class="sd">    n : int</span>
+<span class="sd">        maximum number of groups to attempt</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    k : int</span>
+<span class="sd">        optimal number of groups</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">labels</span><span class="p">,</span> <span class="n">score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>  <span class="c1"># try for k values from 0 to n</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">kmeans</span><span class="p">(</span><span class="n">fluxmap</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="n">score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">silhouette_score</span><span class="p">(</span><span class="n">fluxmap</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">)</span>
+
+    <span class="c1"># choose the highest score!</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">k</span></div>
+
+<div class="viewcode-block" id="sort_draws"><a class="viewcode-back" href="../../api/kmeans.html#eigenspectra.kmeans.sort_draws">[docs]</a><span class="k">def</span> <span class="nf">sort_draws</span><span class="p">(</span><span class="n">eigenspectra_draws</span><span class="p">,</span><span class="n">kgroup_draws</span><span class="p">,</span><span class="n">uber_eigenlist</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;avg&#39;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Take the many different draws and sort the groups so that we avoid</span>
+<span class="sd">    the sorting problem where the groups are all mixed up from one</span>
+<span class="sd">    noise instance to another</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    eigenspectra_draws: list or np.array</span>
+<span class="sd">        A 3D array (or list of 2D arrays) that contain the spectra of each group</span>
+
+<span class="sd">    method: str</span>
+<span class="sd">        The name of the method to sort the eigenspectra draws</span>
+<span class="sd">        `&quot;avg&quot;` - the average of each spectrum</span>
+<span class="sd">        `&quot;middle&quot;` - the middle value of each spectrum</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    sortedDraws: a 3D array of spectra for each draw and group</span>
+<span class="sd">        these will be sorted according to the `method` keyword</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">eDraws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">eigenspectra_draws</span><span class="p">)</span>
+    <span class="n">kGroup</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">kgroup_draws</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;avg&#39;</span><span class="p">:</span>
+        <span class="n">sortValue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">eDraws</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;middle&#39;</span><span class="p">:</span>
+        <span class="n">midWaveInd</span> <span class="o">=</span> <span class="n">eDraws</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">middleSpec</span> <span class="o">=</span> <span class="n">eDraws</span><span class="p">[:,:,</span><span class="n">midWaveInd</span><span class="p">]</span>
+        <span class="n">sortValue</span> <span class="o">=</span> <span class="n">middleSpec</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unrecognized sorting method&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="n">sortArg</span> <span class="o">=</span> <span class="n">sortValue</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1">## An ascending order array</span>
+    <span class="n">ascendingOrder</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">sortArg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">sortedDraws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">eDraws</span><span class="p">)</span>
+    <span class="n">sortedKgroups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">kGroup</span><span class="p">)</span>
+    <span class="n">sortedubereigenlist</span><span class="o">=</span><span class="p">[[[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">uber_eigenlist</span><span class="p">)[</span><span class="mi">2</span><span class="p">])]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">uber_eigenlist</span><span class="p">)[</span><span class="mi">1</span><span class="p">])]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">uber_eigenlist</span><span class="p">)[</span><span class="mi">0</span><span class="p">])]</span>
+
+    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span><span class="n">oneDraw</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">eDraws</span><span class="p">):</span>
+        <span class="n">sortedDraws</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">oneDraw</span><span class="p">[</span><span class="n">sortArg</span><span class="p">[</span><span class="n">ind</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">oneGroup</span> <span class="ow">in</span> <span class="n">ascendingOrder</span><span class="p">:</span>
+            <span class="n">pts</span> <span class="o">=</span> <span class="n">kGroup</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">==</span> <span class="n">oneGroup</span>
+            <span class="n">sortedKgroups</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">pts</span><span class="p">]</span> <span class="o">=</span> <span class="n">sortArg</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">oneGroup</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">wavenum</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">uber_eigenlist</span><span class="p">)[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="n">sortedubereigenlist</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sortArg</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">==</span><span class="n">oneGroup</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">wavenum</span><span class="p">]</span> <span class="o">=</span> <span class="n">uber_eigenlist</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">oneGroup</span><span class="p">][</span><span class="n">wavenum</span><span class="p">]</span>
+
+
+    <span class="k">return</span> <span class="n">sortedDraws</span><span class="p">,</span> <span class="n">sortedKgroups</span><span class="p">,</span><span class="n">sortedubereigenlist</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, MultiDWorlds
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

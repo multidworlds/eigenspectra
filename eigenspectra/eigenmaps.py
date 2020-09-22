@@ -1,11 +1,16 @@
-# The input sph array will have the last two dimensions be (wavelengths,
-# harmonic coefficients + 1). The first entry in each row is assumed to be
-# the wavelength (in nm) corresponding to the spherical harmonic coefficients
-# in that row. Note that the input array can have any dimensions prior to the
-# last two.
+"""
+Eigenmaps
+---------
 
-# The returned array has dimensions (..., wavelengths, latitudes, longitudes),
-# where the ellipses denote any extra dimensions from the input array.
+The input sph array will have the last two dimensions be (wavelengths,
+harmonic coefficients + 1). The first entry in each row is assumed to be
+the wavelength (in nm) corresponding to the spherical harmonic coefficients
+in that row. Note that the input array can have any dimensions prior to the
+last two.
+
+The returned array has dimensions (..., wavelengths, latitudes, longitudes),
+where the ellipses denote any extra dimensions from the input array.
+"""
 
 import numpy as np
 from scipy.special import sph_harm
@@ -18,9 +23,12 @@ def generate_maps(sph, N_lon, N_lat):
 
     Parameters
     ----------
-    sph : array of spherical harmonic coefficients (axes: ..., wavelengths, SH coeffs)
-    N_lon : int, number of gridpoints in longitude
-    N_lat : int, number of gridpoints in latitude
+    sph : array
+        spherical harmonic coefficients (axes: ..., wavelengths, SH coeffs)
+    N_lon : int
+        number of gridpoints in longitude
+    N_lat : int
+        number of gridpoints in latitude
 
     Returns
     -------
@@ -75,7 +83,7 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
                       saveName=None,figsize=None):
     """
     Show histograms of the groups for specific regions of the map
-    
+
     Parameters
     ----------
     input_map: 2D numpy array
@@ -87,7 +95,7 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
         Longitudes for the input_map grid in radians
     kgroup_draws: 3D numpy array
         Kgroup draws from k Means Nsamples x Latitudes? x Longitudes?
-    
+
     xLons: 4 element list or numpy array
         longitudes of points to show histograms in radians
     xLats: 4 element list or numpy array
@@ -103,34 +111,34 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
         Is the longitude array already trimmed?
         If false, it will trim the longitude array
     """
-    
-    
+
+
     londim = input_map.shape[1]
-    
+
     fig, ax = p.subplots(figsize=figsize)
     if alreadyTrimmed == True:
         map_day = input_map
     else:
         map_day = input_map[:,londim//4:-londim//4]
-        
+
     if lonsTrimmed == True:
         useLons = lons
     else:
         useLons = lons[:,londim//4:-londim//4]
-    
+
     plotData = ax.imshow(map_day, extent=[-90,90,-90,90])
     cbar = fig.colorbar(plotData,ax=ax)
     cbar.set_label(input_map_units)
     ax.set_ylabel('Latitude')
     ax.set_xlabel('Longitude')
-    
+
     if figsize is None:
         windowLocationsX = [-0.16,-0.16, 1.0, 1.0]
         windowLocationsY = [ 0.1,  0.6 , 0.6, 0.1]
     else:
         windowLocationsX = [-0.26,-0.26, 1.1, 1.1]
         windowLocationsY = [ 0.1,  0.7 , 0.7, 0.1]
-    
+
     windowLabels = ['A','B','C','D']
     for ind in np.arange(len(xLons)):
         xLon, xLat = xLons[ind], xLats[ind]
@@ -139,16 +147,15 @@ def show_group_histos(input_map,lons,lats,kgroup_draws,
         iLon, iLat = np.argmin(np.abs(useLons[0,:] - xLon)), np.argmin(np.abs(lats[:,0] - xLat))
         ax.text(useLons[0,iLon]* 180./np.pi,lats[iLat,0]* 180./np.pi,windowLabels[ind],
                 color='red')
-        
+
         ax2.set_title(windowLabels[ind])
         ax2.set_xlabel('Group')
-        
+
         ax2.hist(kgroup_draws[:,iLat,iLon])
         ax2.set_xlim(-0.5,np.max(kgroup_draws) + 0.5)
         ax2.set_xticks(np.arange(np.max(kgroup_draws) + 1))
-        
+
     if saveName is not None:
         fig.savefig(saveName,bbox_inches='tight')
-        
-    #fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))
 
+    #fig.suptitle('Retrieved group map, n={}, {:.2f}$\mu$m'.format(degree,waves[waveInd]))

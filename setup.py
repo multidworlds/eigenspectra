@@ -46,7 +46,10 @@ setup(name='eigenspectra',
                         'xarray==0.16.0', # TODO: This is a hack fix b/c 0.16.1 introduced a bug
                         'spiderman-package',
                         'colormath',
-                        'colorcet'
+                        'colorcet',
+                        'sphinx',
+                        'sphinx-rtd-theme',
+                        'nbsphinx', 
                         ],
       dependency_links=[],
       scripts=[],

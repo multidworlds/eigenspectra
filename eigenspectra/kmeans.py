@@ -1,5 +1,7 @@
-
-"""Functions to do k-means clustering on Eigenspectra
+"""
+K-Means Clustering
+------------------
+Functions to do k-means clustering on Eigenspectra.
 """
 
 import numpy as np
@@ -16,8 +18,10 @@ def kmeans(fluxmap, k, labels=False):
 
     Parameters
     ----------
-    fluxmap : array of Fp/Fs (axes: wavelength x latitude x longitude)
-    k : int, number of groups
+    fluxmap : array
+        Fp/Fs (axes: wavelength x latitude x longitude)
+    k : int
+        number of groups
 
     Returns
     -------
@@ -41,12 +45,15 @@ def kmeansBest(fluxmap, n=10):
 
     Parameters
     ----------
-    fluxmap : array of Fp/Fs (axes: wavelength x latitude x longitude)
-    n : int, maximum number of groups to attempt
+    fluxmap : array
+        Fp/Fs (axes: wavelength x latitude x longitude)
+    n : int
+        maximum number of groups to attempt
 
     Returns
     -------
-    k : int, optimal number of groups
+    k : int
+        optimal number of groups
     '''
 
     labels, score = np.zeros(n), np.zeros(n)
@@ -63,19 +70,19 @@ def kmeansBest(fluxmap, n=10):
 def sort_draws(eigenspectra_draws,kgroup_draws,uber_eigenlist,method='avg'):
     '''
     Take the many different draws and sort the groups so that we avoid
-    the sorting problem where the groups are all mixed up from one 
+    the sorting problem where the groups are all mixed up from one
     noise instance to another
-    
+
     Parameters
     ----------
     eigenspectra_draws: list or np.array
         A 3D array (or list of 2D arrays) that contain the spectra of each group
-    
+
     method: str
         The name of the method to sort the eigenspectra draws
-        `avg` - the average of each spectrum
-        `middle` - the middle value of each spectrum
-    
+        `"avg"` - the average of each spectrum
+        `"middle"` - the middle value of each spectrum
+
     Returns
     --------
     sortedDraws: a 3D array of spectra for each draw and group
@@ -83,7 +90,7 @@ def sort_draws(eigenspectra_draws,kgroup_draws,uber_eigenlist,method='avg'):
     '''
     eDraws = np.array(eigenspectra_draws)
     kGroup = np.array(kgroup_draws)
-    
+
     if method == 'avg':
         sortValue = np.mean(eDraws,axis=2)
     elif method == 'middle':
@@ -93,15 +100,15 @@ def sort_draws(eigenspectra_draws,kgroup_draws,uber_eigenlist,method='avg'):
     else:
         print("Unrecognized sorting method")
         return 0
-    
+
     sortArg = sortValue.argsort(axis=1)
     ## An ascending order array
     ascendingOrder = np.arange(sortArg.shape[1])
-    
+
     sortedDraws = np.zeros_like(eDraws)
     sortedKgroups = np.zeros_like(kGroup)
     sortedubereigenlist=[[[[] for i in range(np.shape(uber_eigenlist)[2])] for i in range(np.shape(uber_eigenlist)[1])] for i in range(np.shape(uber_eigenlist)[0])]
-    
+
     for ind,oneDraw in enumerate(eDraws):
         sortedDraws[ind] = oneDraw[sortArg[ind]]
         for oneGroup in ascendingOrder:
@@ -109,7 +116,6 @@ def sort_draws(eigenspectra_draws,kgroup_draws,uber_eigenlist,method='avg'):
             sortedKgroups[ind][pts] = sortArg[ind][oneGroup]
             for wavenum in range(np.shape(uber_eigenlist)[2]):
                 sortedubereigenlist[ind][np.where(sortArg[ind]==oneGroup)[0][0]][wavenum] = uber_eigenlist[ind][oneGroup][wavenum]
-    
+
 
     return sortedDraws, sortedKgroups,sortedubereigenlist
-    

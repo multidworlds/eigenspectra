@@ -1,8 +1,8 @@
 """
-gen_lightcurves.py
-------------------
+Generate Synthetic Lightcurves
+------------------------------
 Methods for generating synthetic multi-wavelength exoplanet
-secondary eclipse lightcurves
+secondary eclipse lightcurves. 
 
 Example
 -------

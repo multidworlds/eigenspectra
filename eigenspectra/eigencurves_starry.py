@@ -1,3 +1,9 @@
+"""
+Eigencurves
+-----------
+Functions to fit a map at each wavelength using Eigencurves.
+"""
+
 #Function to fit a map at each wavelength using Eigencurves
 
 #THINGS THAT WILL BE UPDATED IN FUTURE VERSIONS:

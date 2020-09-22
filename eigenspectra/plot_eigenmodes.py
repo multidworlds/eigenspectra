@@ -143,7 +143,7 @@ def make_eigenplots(output_file, degree, wave_idx, save_name=None):
 
     return fig, axes
 
-  
+
 map_problem = 1
 degree = 3
 wave_idx = 0

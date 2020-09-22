@@ -5,7 +5,9 @@ from sklearn.decomposition import PCA
 import numpy as np
 
 def getEigenSpec(X,n_comp):
-	#Returns the Eigen Spectra for the dataset
+    """
+	Returns the Eigen Spectra for the dataset
+    """
 
 	#Expects flux maps in the form (lam,lat,long)
 	lamdim=X.shape[0]
@@ -26,7 +28,9 @@ def getEigenSpec(X,n_comp):
 	return pca.components_
 
 def getPCArepresentation(X,n_comp):
-	#Returns map projected in lower dimensional spectral space using Eigen Spectra
+    """
+	Returns map projected in lower dimensional spectral space using Eigen Spectra
+    """
 
 	#Expects flux maps in the form (lam,lat,long)
 	lamdim=X.shape[0]
@@ -46,4 +50,3 @@ def getPCArepresentation(X,n_comp):
 	fullModel = scaler.inverse_transform(modelPCA_unscaled)
 	#Reshape model to Spectrum(lam,lat,long)
 	return fullModel.transpose(1,0).reshape(lamdim,latdim,longdim)
-

@@ -431,7 +431,7 @@ div.rendered_html tbody tr:hover {
 </style><div class="section" id="Generate-Synthetic-Lightcurves-for-Input">
 <h1>Generate Synthetic Lightcurves for Input<a class="headerlink" href="#Generate-Synthetic-Lightcurves-for-Input" title="Permalink to this headline">¶</a></h1>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -450,7 +450,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -460,12 +460,12 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Get wavelength-dependent healpix map</span>
-<span class="n">lamhr</span><span class="p">,</span> <span class="n">spaxels</span> <span class="o">=</span> <span class="n">gen_lightcurves</span><span class="o">.</span><span class="n">prep_spectral_hotspot_map</span><span class="p">(</span><span class="n">Nside</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">lamhr</span><span class="p">,</span> <span class="n">spaxels</span> <span class="o">=</span> <span class="n">gen_lightcurves</span><span class="o">.</span><span class="n">prep_spectral_hotspot_map</span><span class="p">(</span><span class="n">Nside</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
 
 <span class="c1"># Let&#39;s inspect the shapes of these two arrays</span>
 <span class="n">lamhr</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">spaxels</span><span class="o">.</span><span class="n">shape</span>
@@ -473,24 +473,28 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-((417,), (3072, 417))
+((417,), (12288, 417))
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span></span><span class="c1"># Find the index of the spectrum inside and outside the hotspot (cheap hack for this map case)</span>
+<span class="n">imin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">spaxels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">imax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">spaxels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Wavelength ($\mu$m)&quot;</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Eclipse Depth $(F_p / F_s)$&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lamhr</span><span class="p">,</span> <span class="n">spaxels</span><span class="o">.</span><span class="n">T</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]);</span>   <span class="c1"># Arbitrary 1st index</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lamhr</span><span class="p">,</span> <span class="n">spaxels</span><span class="o">.</span><span class="n">T</span><span class="p">[:,</span><span class="mi">927</span><span class="p">]);</span> <span class="c1"># Arbitrary 2nd index</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lamhr</span><span class="p">,</span> <span class="n">spaxels</span><span class="o">.</span><span class="n">T</span><span class="p">[:,</span><span class="n">imin</span><span class="p">]);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lamhr</span><span class="p">,</span> <span class="n">spaxels</span><span class="o">.</span><span class="n">T</span><span class="p">[:,</span><span class="n">imax</span><span class="p">]);</span>
 </pre></div>
 </div>
 </div>
@@ -502,7 +506,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -546,7 +550,7 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Use-starry-to-make-eclipse-lightcurves">
 <h2>Use <code class="docutils literal notranslate"><span class="pre">starry</span></code> to make eclipse lightcurves<a class="headerlink" href="#Use-starry-to-make-eclipse-lightcurves" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -569,7 +573,7 @@ Saved file with tag = &#39;example1&#39;
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -594,7 +598,7 @@ Saved file with tag = &#39;example1&#39;
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -634,6 +638,15 @@ Saved file with tag = &#39;example1&#39;
 </div>
 <div class="output_area docutils container">
 <img alt="../_images/notebooks_make_hot_spot_input_lightcurves_9_0.png" class="no-scaled-link" src="../_images/notebooks_make_hot_spot_input_lightcurves_9_0.png" style="width: 587px; height: 998px;" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
 </div>
 </div>
 </div>

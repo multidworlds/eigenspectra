@@ -1,3 +1,3 @@
-.. automodule:: eigenspectra.gen_lightcurves_new_starry
+.. automodule:: eigenspectra.gen_lightcurves
    :members:
    :undoc-members:

@@ -158,10 +158,10 @@
             
   <h1>Source code for eigenspectra.gen_lightcurves</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">gen_lightcurves.py</span>
-<span class="sd">------------------</span>
+<span class="sd">Generate Synthetic Lightcurves</span>
+<span class="sd">------------------------------</span>
 <span class="sd">Methods for generating synthetic multi-wavelength exoplanet</span>
-<span class="sd">secondary eclipse lightcurves</span>
+<span class="sd">secondary eclipse lightcurves.</span>
 
 <span class="sd">Example</span>
 <span class="sd">-------</span>
@@ -377,7 +377,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Load in 3D data from Kat</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HERE</span><span class="p">,</span> <span class="s2">&quot;data/maps/mystery_map1.npz&quot;</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HERE</span><span class="p">,</span> <span class="s2">&quot;../data/maps/mystery_map1.npz&quot;</span><span class="p">)</span>
     <span class="n">file</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1"># Same file but w/wl included</span>
     <span class="n">spaxels</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;spaxels&quot;</span><span class="p">]</span>
     <span class="n">lam</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;wl&quot;</span><span class="p">]</span>
@@ -390,7 +390,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Load in 3D data from Kat</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HERE</span><span class="p">,</span> <span class="s2">&quot;data/maps/mystery_map2.npz&quot;</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HERE</span><span class="p">,</span> <span class="s2">&quot;../data/maps/mystery_map2.npz&quot;</span><span class="p">)</span>
     <span class="n">file</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1"># Same file but w/wl included</span>
     <span class="n">spaxels</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;spaxels&quot;</span><span class="p">]</span>
     <span class="n">lam</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;wl&quot;</span><span class="p">]</span>
@@ -901,11 +901,12 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">save_output</span><span class="p">:</span>
-        <span class="n">pre</span> <span class="o">=</span> <span class="s2">&quot;data/input_lightcurves&quot;</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HERE</span><span class="p">,</span> <span class="s2">&quot;../data/input_lightcurves&quot;</span><span class="p">)</span>
         <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">save_tag</span><span class="o">+</span><span class="s2">&quot;.npz&quot;</span><span class="p">)</span>
         <span class="c1"># Save generated lightcurve</span>
         <span class="n">np</span><span class="o">.</span><span class="n">savez</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="n">time</span><span class="p">,</span> <span class="n">wl</span> <span class="o">=</span> <span class="n">lamlo</span><span class="p">,</span>
                                     <span class="n">dwl</span> <span class="o">=</span> <span class="n">dlamlo</span><span class="p">,</span> <span class="n">lightcurve</span> <span class="o">=</span> <span class="n">lightcurve</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saved file with tag = &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span><span class="n">save_tag</span><span class="p">)</span>
 
 
     <span class="k">return</span> <span class="n">time</span><span class="p">,</span> <span class="n">lamlo</span><span class="p">,</span> <span class="n">dlamlo</span><span class="p">,</span> <span class="n">lightcurve</span></div>

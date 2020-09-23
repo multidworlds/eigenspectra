@@ -7,7 +7,7 @@ import matplotlib.pyplot as p
 
 #import eigencurves
 from . import gen_lightcurves
-from .colormap2d import generate_map2d
+#from .colormap2d import generate_map2d
 from . import eigenmaps
 from . import kmeans
 from . import bin_eigenspectra

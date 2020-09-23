@@ -12,8 +12,8 @@ except NameError:
 
 if not __EIGENSPECTRA_SETUP__:
     # This is a regular import
-    from . import gen_lightcurves_new_starry
-    from . import eigencurves_starry
+    from . import gen_lightcurves#_new_starry
+    from . import eigencurves#_starry
     from . import eigenmaps
     from . import kmeans
     from . import bin_eigenspectra

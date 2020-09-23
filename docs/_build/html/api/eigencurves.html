@@ -41,7 +41,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Eigenmaps" href="eigenmaps.html" />
-    <link rel="prev" title="Generate Synthetic Lightcurves" href="gen_lightcurves.html" /> 
+    <link rel="prev" title="Make Noise" href="noise.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -92,11 +92,15 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="gen_lightcurves.html">Generate Synthetic Lightcurves</a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html">Noise</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Eigencurves</a></li>
 <li class="toctree-l2"><a class="reference internal" href="eigenmaps.html">Eigenmaps</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kmeans.html">K-Means Clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_utils.html">Plotting Utilities</a></li>
 </ul>
 </li>
 </ul>
@@ -190,32 +194,32 @@
     text-align: unset;
 }
 </style>
-<span class="target" id="module-eigenspectra.eigencurves_starry"></span><div class="section" id="eigencurves">
+<span class="target" id="module-eigenspectra.eigencurves"></span><div class="section" id="eigencurves">
 <h1>Eigencurves<a class="headerlink" href="#eigencurves" title="Permalink to this headline">¶</a></h1>
 <p>Functions to fit a map at each wavelength using Eigencurves.</p>
 <dl class="py function">
-<dt id="eigenspectra.eigencurves_starry.mpmodel">
-<code class="sig-prename descclassname">eigenspectra.eigencurves_starry.</code><code class="sig-name descname">mpmodel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">z</span></em>, <em class="sig-param"><span class="n">elc</span></em>, <em class="sig-param"><span class="n">escore</span></em>, <em class="sig-param"><span class="n">nparams</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/eigencurves_starry.html#mpmodel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.eigencurves_starry.mpmodel" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.eigencurves.mpmodel">
+<code class="sig-prename descclassname">eigenspectra.eigencurves.</code><code class="sig-name descname">mpmodel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">z</span></em>, <em class="sig-param"><span class="n">elc</span></em>, <em class="sig-param"><span class="n">escore</span></em>, <em class="sig-param"><span class="n">nparams</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/eigencurves.html#mpmodel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.eigencurves.mpmodel" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.eigencurves_starry.lnprob">
-<code class="sig-prename descclassname">eigenspectra.eigencurves_starry.</code><code class="sig-name descname">lnprob</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">yerr</span></em>, <em class="sig-param"><span class="n">elc</span></em>, <em class="sig-param"><span class="n">escore</span></em>, <em class="sig-param"><span class="n">nparams</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/eigencurves_starry.html#lnprob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.eigencurves_starry.lnprob" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.eigencurves.lnprob">
+<code class="sig-prename descclassname">eigenspectra.eigencurves.</code><code class="sig-name descname">lnprob</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">yerr</span></em>, <em class="sig-param"><span class="n">elc</span></em>, <em class="sig-param"><span class="n">escore</span></em>, <em class="sig-param"><span class="n">nparams</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/eigencurves.html#lnprob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.eigencurves.lnprob" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.eigencurves_starry.lnlike">
-<code class="sig-prename descclassname">eigenspectra.eigencurves_starry.</code><code class="sig-name descname">lnlike</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">yerr</span></em>, <em class="sig-param"><span class="n">elc</span></em>, <em class="sig-param"><span class="n">escore</span></em>, <em class="sig-param"><span class="n">nparams</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/eigencurves_starry.html#lnlike"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.eigencurves_starry.lnlike" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.eigencurves.lnlike">
+<code class="sig-prename descclassname">eigenspectra.eigencurves.</code><code class="sig-name descname">lnlike</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">yerr</span></em>, <em class="sig-param"><span class="n">elc</span></em>, <em class="sig-param"><span class="n">escore</span></em>, <em class="sig-param"><span class="n">nparams</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/eigencurves.html#lnlike"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.eigencurves.lnlike" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.eigencurves_starry.lnprior">
-<code class="sig-prename descclassname">eigenspectra.eigencurves_starry.</code><code class="sig-name descname">lnprior</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">nparams</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/eigencurves_starry.html#lnprior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.eigencurves_starry.lnprior" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.eigencurves.lnprior">
+<code class="sig-prename descclassname">eigenspectra.eigencurves.</code><code class="sig-name descname">lnprior</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">nparams</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/eigencurves.html#lnprior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.eigencurves.lnprior" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.eigencurves_starry.eigencurves">
-<code class="sig-prename descclassname">eigenspectra.eigencurves_starry.</code><code class="sig-name descname">eigencurves</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dict</span></em>, <em class="sig-param"><span class="n">plot</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">degree</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">afew</span><span class="o">=</span><span class="default_value">5</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/eigencurves_starry.html#eigencurves"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.eigencurves_starry.eigencurves" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.eigencurves.eigencurves">
+<code class="sig-prename descclassname">eigenspectra.eigencurves.</code><code class="sig-name descname">eigencurves</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dict</span></em>, <em class="sig-param"><span class="n">plot</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">degree</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">afew</span><span class="o">=</span><span class="default_value">5</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/eigencurves.html#eigencurves"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.eigencurves.eigencurves" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -231,7 +235,7 @@
         <a href="eigenmaps.html" class="btn btn-neutral float-right" title="Eigenmaps" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="gen_lightcurves.html" class="btn btn-neutral float-left" title="Generate Synthetic Lightcurves" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="noise.html" class="btn btn-neutral float-left" title="Make Noise" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

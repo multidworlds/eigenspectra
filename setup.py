@@ -42,14 +42,15 @@ setup(name='eigenspectra',
                         'emcee',
                         'corner',
                         'healpy',
-                        'starry==1.0.0',
+                        #'starry==1.0.1.dev46+g0b438d2b', # TODO: this includes a custom fix
+                        'starry=0.3.0', # TODO: WARNING THAT THIS WILL install an old version of starry
                         'xarray==0.16.0', # TODO: This is a hack fix b/c 0.16.1 introduced a bug
                         'spiderman-package',
                         'colormath',
                         'colorcet',
                         'sphinx',
                         'sphinx-rtd-theme',
-                        'nbsphinx', 
+                        'nbsphinx',
                         ],
       dependency_links=[],
       scripts=[],

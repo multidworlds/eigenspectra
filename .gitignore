@@ -10,3 +10,7 @@ data/input_lightcurves/*
 *.DS_Store
 plots/eigenmap_and_spec/*.pdf
 plots/original_maps/*.pdf
+
+# Packages/installer info
+*.egg
+*.egg-info

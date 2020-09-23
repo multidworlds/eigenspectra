@@ -1,8 +1,8 @@
 """
-gen_lightcurves.py
-------------------
+Generate Synthetic Lightcurves
+------------------------------
 Methods for generating synthetic multi-wavelength exoplanet
-secondary eclipse lightcurves
+secondary eclipse lightcurves.
 
 Example
 -------
@@ -218,7 +218,7 @@ def prep_map1():
     """
 
     # Load in 3D data from Kat
-    path = os.path.join(HERE, "data/maps/mystery_map1.npz")
+    path = os.path.join(HERE, "../data/maps/mystery_map1.npz")
     file = np.load(path)  # Same file but w/wl included
     spaxels = file["spaxels"]
     lam = file["wl"]
@@ -231,7 +231,7 @@ def prep_map2():
     """
 
     # Load in 3D data from Kat
-    path = os.path.join(HERE, "data/maps/mystery_map2.npz")
+    path = os.path.join(HERE, "../data/maps/mystery_map2.npz")
     file = np.load(path)  # Same file but w/wl included
     spaxels = file["spaxels"]
     lam = file["wl"]
@@ -742,11 +742,12 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
         plt.show()
 
     if save_output:
-        pre = "data/input_lightcurves"
+        pre = os.path.join(HERE, "../data/input_lightcurves")
         fname = os.path.join(pre, save_tag+".npz")
         # Save generated lightcurve
         np.savez(fname, time = time, wl = lamlo,
                                     dwl = dlamlo, lightcurve = lightcurve)
+        print("Saved file with tag = '%s'" %save_tag)
 
 
     return time, lamlo, dlamlo, lightcurve

@@ -40,7 +40,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Eigencurves" href="eigencurves.html" />
+    <link rel="next" title="Make Noise" href="noise.html" />
     <link rel="prev" title="API" href="../api.html" /> 
 </head>
 
@@ -92,11 +92,15 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Generate Synthetic Lightcurves</a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html">Noise</a></li>
 <li class="toctree-l2"><a class="reference internal" href="eigencurves.html">Eigencurves</a></li>
 <li class="toctree-l2"><a class="reference internal" href="eigenmaps.html">Eigenmaps</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kmeans.html">K-Means Clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_utils.html">Plotting Utilities</a></li>
 </ul>
 </li>
 </ul>
@@ -190,7 +194,7 @@
     text-align: unset;
 }
 </style>
-<span class="target" id="module-eigenspectra.gen_lightcurves_new_starry"></span><div class="section" id="generate-synthetic-lightcurves">
+<span class="target" id="module-eigenspectra.gen_lightcurves"></span><div class="section" id="generate-synthetic-lightcurves">
 <h1>Generate Synthetic Lightcurves<a class="headerlink" href="#generate-synthetic-lightcurves" title="Permalink to this headline">¶</a></h1>
 <p>Methods for generating synthetic multi-wavelength exoplanet
 secondary eclipse lightcurves.</p>
@@ -201,14 +205,14 @@ secondary eclipse lightcurves.</p>
 </pre></div>
 </div>
 <dl class="py function">
-<dt id="eigenspectra.gen_lightcurves_new_starry.expand_hp">
-<code class="sig-prename descclassname">eigenspectra.gen_lightcurves_new_starry.</code><code class="sig-name descname">expand_hp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">healpix_map</span></em>, <em class="sig-param"><span class="n">lmax</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves_new_starry.html#expand_hp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves_new_starry.expand_hp" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.gen_lightcurves.expand_hp">
+<code class="sig-prename descclassname">eigenspectra.gen_lightcurves.</code><code class="sig-name descname">expand_hp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">healpix_map</span></em>, <em class="sig-param"><span class="n">lmax</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves.html#expand_hp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves.expand_hp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Expand a Healpix ring-ordered map in spherical harmonics up to degree <cite>lmax</cite>.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.gen_lightcurves_new_starry.downbin_spec">
-<code class="sig-prename descclassname">eigenspectra.gen_lightcurves_new_starry.</code><code class="sig-name descname">downbin_spec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">specHR</span></em>, <em class="sig-param"><span class="n">lamHR</span></em>, <em class="sig-param"><span class="n">lamLR</span></em>, <em class="sig-param"><span class="n">dlam</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves_new_starry.html#downbin_spec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves_new_starry.downbin_spec" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.gen_lightcurves.downbin_spec">
+<code class="sig-prename descclassname">eigenspectra.gen_lightcurves.</code><code class="sig-name descname">downbin_spec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">specHR</span></em>, <em class="sig-param"><span class="n">lamHR</span></em>, <em class="sig-param"><span class="n">lamLR</span></em>, <em class="sig-param"><span class="n">dlam</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves.html#downbin_spec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves.downbin_spec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Re-bin spectum to lower resolution using <code class="xref py py-obj docutils literal notranslate"><span class="pre">scipy.binned_statistic</span></code>
 with <code class="docutils literal notranslate"><span class="pre">statistic</span> <span class="pre">=</span> <span class="pre">'mean'</span></code>. This is a “top-hat” convolution.</p>
 <div class="admonition note">
@@ -235,8 +239,8 @@ developed by J. Lustig-Yaeger.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.gen_lightcurves_new_starry.planck">
-<code class="sig-prename descclassname">eigenspectra.gen_lightcurves_new_starry.</code><code class="sig-name descname">planck</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">temp</span></em>, <em class="sig-param"><span class="n">lam</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves_new_starry.html#planck"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves_new_starry.planck" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.gen_lightcurves.planck">
+<code class="sig-prename descclassname">eigenspectra.gen_lightcurves.</code><code class="sig-name descname">planck</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">temp</span></em>, <em class="sig-param"><span class="n">lam</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves.html#planck"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves.planck" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the Planck blackbody radiance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -259,8 +263,8 @@ developed by J. Lustig-Yaeger.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.gen_lightcurves_new_starry.construct_lam">
-<code class="sig-prename descclassname">eigenspectra.gen_lightcurves_new_starry.</code><code class="sig-name descname">construct_lam</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lammin</span></em>, <em class="sig-param"><span class="n">lammax</span></em>, <em class="sig-param"><span class="n">Res</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dlam</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves_new_starry.html#construct_lam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves_new_starry.construct_lam" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.gen_lightcurves.construct_lam">
+<code class="sig-prename descclassname">eigenspectra.gen_lightcurves.</code><code class="sig-name descname">construct_lam</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lammin</span></em>, <em class="sig-param"><span class="n">lammax</span></em>, <em class="sig-param"><span class="n">Res</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dlam</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves.html#construct_lam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves.construct_lam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct a wavelength grid by specifying either a resolving power (<cite>Res</cite>)
 or a bandwidth (<cite>dlam</cite>)</p>
 <div class="admonition note">
@@ -288,20 +292,20 @@ developed by J. Lustig-Yaeger.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.gen_lightcurves_new_starry.prep_map1">
-<code class="sig-prename descclassname">eigenspectra.gen_lightcurves_new_starry.</code><code class="sig-name descname">prep_map1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves_new_starry.html#prep_map1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves_new_starry.prep_map1" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.gen_lightcurves.prep_map1">
+<code class="sig-prename descclassname">eigenspectra.gen_lightcurves.</code><code class="sig-name descname">prep_map1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves.html#prep_map1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves.prep_map1" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare toy map #1</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.gen_lightcurves_new_starry.prep_map2">
-<code class="sig-prename descclassname">eigenspectra.gen_lightcurves_new_starry.</code><code class="sig-name descname">prep_map2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves_new_starry.html#prep_map2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves_new_starry.prep_map2" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.gen_lightcurves.prep_map2">
+<code class="sig-prename descclassname">eigenspectra.gen_lightcurves.</code><code class="sig-name descname">prep_map2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves.html#prep_map2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves.prep_map2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare toy map #2</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.gen_lightcurves_new_starry.prep_blackbody_hotspot_map">
-<code class="sig-prename descclassname">eigenspectra.gen_lightcurves_new_starry.</code><code class="sig-name descname">prep_blackbody_hotspot_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">phi0</span><span class="o">=</span><span class="default_value">3.141592653589793</span></em>, <em class="sig-param"><span class="n">theta0</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">ds</span><span class="o">=</span><span class="default_value">25.0</span></em>, <em class="sig-param"><span class="n">Tp1</span><span class="o">=</span><span class="default_value">900.0</span></em>, <em class="sig-param"><span class="n">Tp2</span><span class="o">=</span><span class="default_value">1200.0</span></em>, <em class="sig-param"><span class="n">Ts</span><span class="o">=</span><span class="default_value">2550.0</span></em>, <em class="sig-param"><span class="n">RpRs</span><span class="o">=</span><span class="default_value">0.155313</span></em>, <em class="sig-param"><span class="n">lammin</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">lammax</span><span class="o">=</span><span class="default_value">5.0</span></em>, <em class="sig-param"><span class="n">Nlam</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">Nside</span><span class="o">=</span><span class="default_value">16</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves_new_starry.html#prep_blackbody_hotspot_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves_new_starry.prep_blackbody_hotspot_map" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.gen_lightcurves.prep_blackbody_hotspot_map">
+<code class="sig-prename descclassname">eigenspectra.gen_lightcurves.</code><code class="sig-name descname">prep_blackbody_hotspot_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">phi0</span><span class="o">=</span><span class="default_value">3.141592653589793</span></em>, <em class="sig-param"><span class="n">theta0</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">ds</span><span class="o">=</span><span class="default_value">25.0</span></em>, <em class="sig-param"><span class="n">Tp1</span><span class="o">=</span><span class="default_value">900.0</span></em>, <em class="sig-param"><span class="n">Tp2</span><span class="o">=</span><span class="default_value">1200.0</span></em>, <em class="sig-param"><span class="n">Ts</span><span class="o">=</span><span class="default_value">2550.0</span></em>, <em class="sig-param"><span class="n">RpRs</span><span class="o">=</span><span class="default_value">0.155313</span></em>, <em class="sig-param"><span class="n">lammin</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">lammax</span><span class="o">=</span><span class="default_value">5.0</span></em>, <em class="sig-param"><span class="n">Nlam</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">Nside</span><span class="o">=</span><span class="default_value">16</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves.html#prep_blackbody_hotspot_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves.prep_blackbody_hotspot_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a toy spaxel map with a hotspot</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -330,8 +334,8 @@ developed by J. Lustig-Yaeger.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.gen_lightcurves_new_starry.prep_spectral_hotspot_map">
-<code class="sig-prename descclassname">eigenspectra.gen_lightcurves_new_starry.</code><code class="sig-name descname">prep_spectral_hotspot_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">phi0</span><span class="o">=</span><span class="default_value">3.141592653589793</span></em>, <em class="sig-param"><span class="n">theta0</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">ds</span><span class="o">=</span><span class="default_value">25.0</span></em>, <em class="sig-param"><span class="n">Nside</span><span class="o">=</span><span class="default_value">16</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves_new_starry.html#prep_spectral_hotspot_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves_new_starry.prep_spectral_hotspot_map" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.gen_lightcurves.prep_spectral_hotspot_map">
+<code class="sig-prename descclassname">eigenspectra.gen_lightcurves.</code><code class="sig-name descname">prep_spectral_hotspot_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">phi0</span><span class="o">=</span><span class="default_value">3.141592653589793</span></em>, <em class="sig-param"><span class="n">theta0</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">ds</span><span class="o">=</span><span class="default_value">25.0</span></em>, <em class="sig-param"><span class="n">Nside</span><span class="o">=</span><span class="default_value">16</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves.html#prep_spectral_hotspot_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves.prep_spectral_hotspot_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a toy spaxel map with a hotspot</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -356,8 +360,8 @@ developed by J. Lustig-Yaeger.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.gen_lightcurves_new_starry.create_quadrant_map">
-<code class="sig-prename descclassname">eigenspectra.gen_lightcurves_new_starry.</code><code class="sig-name descname">create_quadrant_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f1</span></em>, <em class="sig-param"><span class="n">f2</span></em>, <em class="sig-param"><span class="n">f3</span></em>, <em class="sig-param"><span class="n">f4</span></em>, <em class="sig-param"><span class="n">lat0</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">lon0</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">Nside</span><span class="o">=</span><span class="default_value">16</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves_new_starry.html#create_quadrant_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves_new_starry.create_quadrant_map" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.gen_lightcurves.create_quadrant_map">
+<code class="sig-prename descclassname">eigenspectra.gen_lightcurves.</code><code class="sig-name descname">create_quadrant_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f1</span></em>, <em class="sig-param"><span class="n">f2</span></em>, <em class="sig-param"><span class="n">f3</span></em>, <em class="sig-param"><span class="n">f4</span></em>, <em class="sig-param"><span class="n">lat0</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">lon0</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">Nside</span><span class="o">=</span><span class="default_value">16</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves.html#create_quadrant_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves.create_quadrant_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a quadrant map with different spectra ‘painted on the surface’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -381,8 +385,8 @@ developed by J. Lustig-Yaeger.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.gen_lightcurves_new_starry.spec_flat_with_gaussian">
-<code class="sig-prename descclassname">eigenspectra.gen_lightcurves_new_starry.</code><code class="sig-name descname">spec_flat_with_gaussian</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lamhr</span></em>, <em class="sig-param"><span class="n">A</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">B</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">std</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">xroll</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves_new_starry.html#spec_flat_with_gaussian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves_new_starry.spec_flat_with_gaussian" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.gen_lightcurves.spec_flat_with_gaussian">
+<code class="sig-prename descclassname">eigenspectra.gen_lightcurves.</code><code class="sig-name descname">spec_flat_with_gaussian</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lamhr</span></em>, <em class="sig-param"><span class="n">A</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">B</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">std</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">xroll</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves.html#spec_flat_with_gaussian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves.spec_flat_with_gaussian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a toy flat spectrum with a Gaussian spike.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -407,8 +411,8 @@ while <cite>xroll = -0.25</cite> shifts the spike halfway to the left bound).</p
 </dd></dl>
 
 <dl class="py function">
-<dt id="eigenspectra.gen_lightcurves_new_starry.create_lightcurves_with_starry">
-<code class="sig-prename descclassname">eigenspectra.gen_lightcurves_new_starry.</code><code class="sig-name descname">create_lightcurves_with_starry</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lam</span></em>, <em class="sig-param"><span class="n">spaxels</span></em>, <em class="sig-param"><span class="n">lammin</span><span class="o">=</span><span class="default_value">2.41</span></em>, <em class="sig-param"><span class="n">lammax</span><span class="o">=</span><span class="default_value">3.98</span></em>, <em class="sig-param"><span class="n">dlam</span><span class="o">=</span><span class="default_value">0.18</span></em>, <em class="sig-param"><span class="n">lmax</span><span class="o">=</span><span class="default_value">18</span></em>, <em class="sig-param"><span class="n">plot_input_hp_maps</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">plot_lightcurves</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">plot_points_on_map_spec</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">points_on_map</span><span class="o">=</span><span class="default_value">[- 0.4, 0.4, - 0.4, - 0.4, 0.4, 0.4, 0.4, - 0.4, 0.0, 0.0]</span></em>, <em class="sig-param"><span class="n">plot_diagnostic</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">save_output</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">save_tag</span><span class="o">=</span><span class="default_value">'eclipse_lightcurve_test2'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves_new_starry.html#create_lightcurves_with_starry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves_new_starry.create_lightcurves_with_starry" title="Permalink to this definition">¶</a></dt>
+<dt id="eigenspectra.gen_lightcurves.create_lightcurves_with_starry">
+<code class="sig-prename descclassname">eigenspectra.gen_lightcurves.</code><code class="sig-name descname">create_lightcurves_with_starry</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lam</span></em>, <em class="sig-param"><span class="n">spaxels</span></em>, <em class="sig-param"><span class="n">lammin</span><span class="o">=</span><span class="default_value">2.41</span></em>, <em class="sig-param"><span class="n">lammax</span><span class="o">=</span><span class="default_value">3.98</span></em>, <em class="sig-param"><span class="n">dlam</span><span class="o">=</span><span class="default_value">0.18</span></em>, <em class="sig-param"><span class="n">lmax</span><span class="o">=</span><span class="default_value">18</span></em>, <em class="sig-param"><span class="n">plot_input_hp_maps</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">plot_lightcurves</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">plot_points_on_map_spec</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">points_on_map</span><span class="o">=</span><span class="default_value">[- 0.4, 0.4, - 0.4, - 0.4, 0.4, 0.4, 0.4, - 0.4, 0.0, 0.0]</span></em>, <em class="sig-param"><span class="n">plot_diagnostic</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">save_output</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">save_tag</span><span class="o">=</span><span class="default_value">'eclipse_lightcurve_test2'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/eigenspectra/gen_lightcurves.html#create_lightcurves_with_starry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eigenspectra.gen_lightcurves.create_lightcurves_with_starry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates toy multi-wavelength secondary eclipse lightcurves of HD189733 b</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -457,7 +461,7 @@ shape <code class="docutils literal notranslate"><span class="pre">(len(time),</
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="eigencurves.html" class="btn btn-neutral float-right" title="Eigencurves" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="noise.html" class="btn btn-neutral float-right" title="Make Noise" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../api.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

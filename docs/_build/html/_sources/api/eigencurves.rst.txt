@@ -1,3 +1,3 @@
-.. automodule:: eigenspectra.eigencurves_starry
+.. automodule:: eigenspectra.eigencurves
    :members:
    :undoc-members:

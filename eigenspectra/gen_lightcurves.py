@@ -510,8 +510,8 @@ def spec_flat_with_gaussian(lamhr, A = 0.1, B = 0.1, std = 0.01, xroll = 0.0):
 
     return FpFs
 
-def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
-                                   dlam = 0.18, lmax = 18,
+def create_lightcurves_with_starry(lam, spaxels, planet_params = None, lammin = 2.41, lammax = 3.98,
+                                   dlam = 0.18, Res = None, tstart = 0.1, lmax = 18,
                                    plot_input_hp_maps = False,
                                    plot_lightcurves = True,
                                    plot_points_on_map_spec = False,
@@ -528,12 +528,18 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
         High-res model wavelength grid [microns]
     spaxels : numpy.ndarray
         2D array of HealPix number vs wavelength
+    planet_params : dict
+        Planet parameters dictionary (uses HD189733b's if ``None``)
     lammin : float
         Minimum wavelength
     lammax : float
         Maximum wavelength
     dlam : float
-        Wavelength bin width
+        Wavelength bin width [µm] (cannot be used with ``Res``)
+    Res : float
+        Wavelength Resolving power (cannot be used with ``dlam``)
+    tstart : float
+        Time in days before/after secondary eclipse to begin/end simulated light curves
     lmax : int
         Largest spherical harmonic degree in the surface map
     plot_input_hp_maps : bool
@@ -575,7 +581,7 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
     import starry
 
     # Construct low res wavelength grid
-    lamlo, dlamlo = construct_lam(lammin, lammax, dlam=dlam)
+    lamlo, dlamlo = construct_lam(lammin, lammax, dlam=dlam, Res=Res)
     Nlamlo = len(lamlo)
 
     # Set HealPy pixel numbers
@@ -600,17 +606,30 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
     # Create starry planet
     planet = starry.kepler.Secondary(lmax=lmax, nwav=Nlamlo)
 
-    # HD189 parameters
-    planet.r = 0.155313
-    L = 0.00344
-    planet.L = L * np.ones(Nlamlo)
-    planet.inc = 85.71
-    planet.a = 8.863
-    planet.prot = 2.21857567
-    planet.porb = 2.21857567
-    planet.tref = -2.21857567 / 2.
-    planet.ecc = 0.0
-    planet.w = 90
+    if planet_params is None:
+        # HD189 parameters
+        planet.r = 0.155313
+        L = 0.00344
+        planet.L = L * np.ones(Nlamlo)
+        planet.inc = 85.71
+        planet.a = 8.863
+        planet.prot = 2.21857567
+        planet.porb = 2.21857567
+        planet.tref = -2.21857567 / 2.
+        planet.ecc = 0.0
+        planet.w = 90
+    else:
+        # User provided
+        planet.r = planet_params["Rp/Rs"]
+        L = planet_params["L"]
+        planet.L = L * np.ones(Nlamlo)
+        planet.inc = planet_params["i"]
+        planet.a = planet_params["a/Rs"]
+        planet.prot = planet_params["Porb"]
+        planet.porb = planet_params["Porb"]
+        planet.tref = -0.5*planet_params["Porb"]
+        planet.ecc = planet_params["e"]
+        planet.w = planet_params["w"]
 
     # Calculate disk-integrated Fp/Fs -- This should be the secondary eclipse depth,
     # but it must be consistent with the individual map fluxes
@@ -658,7 +677,7 @@ def create_lightcurves_with_starry(lam, spaxels, lammin = 2.41, lammax = 3.98,
     system = starry.kepler.System(star, planet)
 
     # Create time grid in days (secondary eclipse is at 0.0)
-    time = np.linspace(-0.1, 0.1, 10000)
+    time = np.linspace(-tstart, tstart, 10000)
 
     # Calculate lightcurve in starry
     system.compute(time)
